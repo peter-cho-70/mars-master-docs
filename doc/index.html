@@ -108,7 +108,7 @@
 <body>
 <div class="page">
 
-  <div class="eyebrow">Documentation Hub</div>
+  <div class="eyebrow">Documentation Hub <span id="pageUpdated"></span></div>
   <h1>MARS/Master 문서 모음</h1>
   <p class="lede">뉴스 자동송출 시스템의 기획서·가이드·매뉴얼 통합 인덱스. 문서는 성격별로 <b>spec</b>(기획·설계) / <b>guide</b>(설정·연동) / <b>user-guide</b>(사용자 매뉴얼) / <b>archive</b>(초기 자료)로 나뉩니다.</p>
   <a class="back" href="../index.html">← 앱 런처로 돌아가기</a>
@@ -326,7 +326,6 @@
 
   <footer>
     <span>doc/ 통합 인덱스 · spec(기획) / guide(연동) / archive(보존)</span>
-    <span>정리일 2026-07-11</span>
   </footer>
 
 </div>
@@ -355,6 +354,13 @@
   }
   input.addEventListener('input', apply);
   apply();
+})();
+// 이 허브 페이지 자체의 최종 수정일 — 서버가 보내는 Last-Modified를 그대로 표시(하드코딩 방지).
+(function(){
+  var d = new Date(document.lastModified);
+  if (isNaN(d.getTime())) return;
+  var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  document.getElementById('pageUpdated').textContent = '· 최종 갱신 ' + y + '-' + m + '-' + day;
 })();
 </script>
 </body>

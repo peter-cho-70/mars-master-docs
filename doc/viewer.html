@@ -65,6 +65,10 @@
   .topbar a.back:hover{color:var(--accent);}
   .topbar .sep{color:var(--line-strong);}
   .topbar .path{font-family:var(--mono);font-size:12px;color:var(--ink-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+  .topbar .updated{
+    font-family:var(--mono);font-size:11px;color:var(--accent-ink);white-space:nowrap;flex:none;
+    background:var(--green-bg);padding:3px 9px;border-radius:20px;
+  }
   .topbar .raw{
     font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);text-decoration:none;
     border:1px solid var(--line-strong);border-radius:6px;padding:5px 10px;white-space:nowrap;flex:none;
@@ -138,6 +142,7 @@
   <a class="back" href="index.html">← 문서 모음</a>
   <span class="sep">/</span>
   <span class="path" id="pathLabel">불러오는 중…</span>
+  <span class="updated" id="updatedBadge" style="display:none;"></span>
   <div class="theme-toggle" role="group" aria-label="화면 밝기 선택">
     <button type="button" id="themeLightBtn" onclick="setTheme('light')" title="밝은 화면" aria-label="밝은 화면">☀️</button>
     <button type="button" id="themeDarkBtn" onclick="setTheme('dark')" title="어두운 화면" aria-label="어두운 화면">🌙</button>
@@ -362,6 +367,19 @@ const tocNav = document.getElementById('toc');
 const tocList = document.getElementById('tocList');
 const pageFooter = document.getElementById('pageFooter');
 const footMeta = document.getElementById('footMeta');
+const updatedBadge = document.getElementById('updatedBadge');
+
+// Last-Modified 응답 헤더로 "최종 수정일"을 항상 상단(topbar)에 표시 — 문서 하단까지
+// 스크롤해야 갱신 시점을 알 수 있으면 안 되고, 문서를 열자마자 바로 보여야 한다.
+// 파일에 날짜를 직접 적어두면 고치는 걸 잊기 쉬우니, 서버가 보내는 실제 수정 시각을 그대로 쓴다.
+function showUpdatedDate(headerValue){
+  if (!headerValue) return;
+  const d = new Date(headerValue);
+  if (isNaN(d.getTime())) return;
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  updatedBadge.textContent = `🗓 최종 수정 ${y}-${m}-${day}`;
+  updatedBadge.style.display = '';
+}
 
 if (!file) {
   stateEl.innerHTML = `<div class="big">📄</div><div>보여줄 문서가 지정되지 않았습니다.<br>예: <code>viewer.html?file=spec/login.md</code></div>`;
@@ -369,7 +387,7 @@ if (!file) {
   pathLabel.textContent = file;
   rawLink.href = file;
   fetch(file)
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(r => { if (!r.ok) throw new Error(r.status); showUpdatedDate(r.headers.get('last-modified')); return r.text(); })
     .then(text => {
       const {html, toc} = parseMarkdown(text);
       docEl.innerHTML = html;
