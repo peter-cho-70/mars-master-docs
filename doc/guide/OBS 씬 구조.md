@@ -1,7 +1,7 @@
 # OBS 씬 구조 — 현재 상태 스냅샷
 
 **작성일**: 2026-07-09
-**대상**: `news-broadcast-system-obs.html`(Master OBS판)이 실제로 연동한 OBS 인스턴스(obs-websocket, 이 세션 기준 `192.0.2.10:4455`)
+**대상**: `news-broadcast-system-obs.html`(Master OBS판)이 실제로 연동한 OBS 인스턴스(obs-websocket, 이 세션 기준 `192.0.2.6:4455`)
 **성격**: 특정 시점의 실제 조회 결과를 정리한 스냅샷 — 씬을 추가/삭제하면 이 문서는 오래된 내용이 된다. 필요하면 Master 스위처 탭의 "OBS 씬/소스 목록 → 새로고침"으로 언제든 최신 목록을 다시 확인할 수 있다.
 
 ---
@@ -94,7 +94,7 @@ Master의 데이터 모델(`switcherSources[]`)은 이 둘을 각각 `obsScene`(
 
 ## 4-1. CG 자막용 브라우저 소스 `CG_OVERLAY` (2026-07-09 추가)
 
-위 4장의 매핑 10개 씬(`CAM1_ANCHOR`/`CAM2_ANCHOR`/`CAM3_WIDE`/`CAM4_CLOSEUP`/`SRV1_VCR`/`SRV2_VCR`/`SRV3_VCR`/`CAM1_SRV1_PIP`/`CAM1_SRV2_PIP`/`CAM1_CAM2_2SHOT`) 전부에 **같은 브라우저 소스 하나**(`CG_OVERLAY`, URL `http://192.0.2.10:8080/obs-cg-overlay.html`, 1920×1080)를 공유 참조로 추가했다 — 씬마다 새로 만든 게 아니라 하나의 소스를 여러 씬에 걸쳐 재사용한 것이라, 나중에 URL을 한 번만 바꿔도 전부 적용된다. 각 씬에서 가장 위(맨 앞) 순서로 들어가 있어 카메라/영상 위에 정상적으로 겹쳐 보이는 구조다.
+위 4장의 매핑 10개 씬(`CAM1_ANCHOR`/`CAM2_ANCHOR`/`CAM3_WIDE`/`CAM4_CLOSEUP`/`SRV1_VCR`/`SRV2_VCR`/`SRV3_VCR`/`CAM1_SRV1_PIP`/`CAM1_SRV2_PIP`/`CAM1_CAM2_2SHOT`) 전부에 **같은 브라우저 소스 하나**(`CG_OVERLAY`, URL `http://192.0.2.6:8080/obs-cg-overlay.html`, 1920×1080)를 공유 참조로 추가했다 — 씬마다 새로 만든 게 아니라 하나의 소스를 여러 씬에 걸쳐 재사용한 것이라, 나중에 URL을 한 번만 바꿔도 전부 적용된다. 각 씬에서 가장 위(맨 앞) 순서로 들어가 있어 카메라/영상 위에 정상적으로 겹쳐 보이는 구조다.
 
 ⚠️ **확인 필요**: obs-websocket의 `GetSourceScreenshot`가 이 브라우저 소스만은 캡처를 못 하는 것으로 확인됐다(구조/설정은 전부 정상인데 스크린샷만 계속 빈 화면으로 나옴 — 간단한 빨간 배경 테스트 페이지로도 재현됨, OBS 브라우저 소스의 알려진 스크린샷 API 한계로 추정). 그래서 **API로는 최종 확인이 안 됐고, 실제 OBS 화면에서 직접 눈으로 확인이 필요하다** — 프로그램 모니터에서 위 10개 씬 중 하나를 띄운 상태로 Master의 "▶ 테스트 자막 8종 전송" 버튼을 눌러보고 실제로 보이는지 확인해달라.
 
