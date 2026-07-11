@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전환 효과 설정 가이드 — MARS/Master</title>
+<meta name="description" content="아이템 간 전환과 리포트/단신의 카메라→영상 2단계 전환을 어디서, 어떤 값으로 설정하는지">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<style>
+  :root{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --live:#c0322c; --live-bg:rgba(192,50,44,.10);
+    --ok:#1f9a56; --ok-bg:rgba(31,154,86,.10);
+    --plan:#a06a12; --plan-bg:rgba(160,106,18,.12);
+    --snap:#4a6fa5; --snap-bg:rgba(74,111,165,.12);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+      --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+      --accent:#e2a63d; --accent-ink:#f4c877;
+      --live:#e0453f; --live-bg:rgba(224,69,63,.14);
+      --ok:#3fcf7a; --ok-bg:rgba(63,207,122,.13);
+      --plan:#e2a63d; --plan-bg:rgba(226,166,61,.14);
+      --snap:#7da7dd; --snap-bg:rgba(125,167,221,.14);
+      --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    line-height:1.7; -webkit-font-smoothing:antialiased;
+    padding:0 20px 100px;
+  }
+  ::selection{ background:var(--accent); color:var(--bg-sunk); }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, var(--snap-bg), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 20%, var(--plan-bg), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .page{ position:relative; z-index:1; max-width:760px; margin:0 auto; }
+
+  .backbar{ padding:20px 0 0; }
+  .backbar a{ font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none; }
+  .backbar a:hover{ color:var(--accent); }
+
+  /* ── header ── */
+  header{ padding:36px 0 40px; }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:""; width:7px; height:7px; border-radius:50%;
+    background:var(--accent); box-shadow:0 0 8px var(--accent);
+  }
+  h1{
+    font-size:clamp(26px,4.5vw,38px);
+    font-weight:800; letter-spacing:-.01em; margin:0 0 14px;
+    text-wrap:balance;
+  }
+  .sub{ color:var(--ink-dim); font-size:15.5px; max-width:52ch; margin:0; }
+
+  /* ── section rhythm ── */
+  section{ margin:64px 0; }
+  h2{
+    font-size:21px; font-weight:800; letter-spacing:-.01em;
+    margin:0 0 6px; text-wrap:balance;
+    display:flex; align-items:baseline; gap:12px;
+  }
+  h2 .num{
+    font-family:var(--mono); font-size:13px; color:var(--ink-faint);
+    font-weight:500;
+  }
+  .section-lede{ color:var(--ink-dim); font-size:15px; margin:0 0 28px; max-width:60ch; }
+  p{ font-size:15.5px; color:var(--ink-dim); margin:0 0 16px; max-width:62ch; }
+  strong{ color:var(--ink); font-weight:700; }
+  code{
+    font-family:var(--mono); font-size:.88em;
+    background:var(--bg-sunk); border:1px solid var(--line);
+    padding:1px 6px; border-radius:4px; color:var(--ink);
+  }
+
+  /* ── badges (CUT / MIX) ── */
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--mono); font-size:11.5px; font-weight:700;
+    letter-spacing:.06em; padding:3px 9px; border-radius:5px;
+    border:1px solid transparent; white-space:nowrap;
+  }
+  .badge.cut{ background:var(--snap-bg); color:var(--snap); border-color:var(--snap); }
+  .badge.mix{ background:var(--plan-bg); color:var(--accent); border-color:var(--accent); }
+  .badge.warn{ background:var(--live-bg); color:var(--live); border-color:var(--live); }
+
+  /* ── item-to-item diagram ── */
+  .rundown{
+    display:flex; align-items:stretch; gap:0;
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:28px 24px; overflow-x:auto;
+  }
+  .ritem{
+    flex:1 0 128px; min-width:128px;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    text-align:center;
+  }
+  .ritem .box{
+    width:100%; height:64px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:var(--ink-dim);
+    background:var(--bg-sunk); border:1px solid var(--line);
+  }
+  .ritem.focus .box{ color:var(--ink); border-color:var(--snap); background:linear-gradient(160deg,var(--snap-bg),transparent); }
+  .ritem .cap{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); letter-spacing:.03em; }
+  .redge{
+    flex:0 0 64px; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    align-self:center; height:64px; margin-top:31px;
+  }
+  .redge .cutline{ width:2px; height:44px; background:var(--snap); box-shadow:0 0 6px var(--snap); }
+  .redge .lbl{
+    position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+    font-family:var(--mono); font-size:9.5px; color:var(--snap);
+    letter-spacing:.05em; white-space:nowrap;
+  }
+  .redge.mixedge{
+    width:64px; height:44px; border-radius:4px;
+    background:linear-gradient(90deg, transparent, var(--plan-bg), transparent);
+  }
+  .redge.mixedge .lbl{ color:var(--accent); }
+  .callout-arrow{
+    display:flex; align-items:center; gap:8px; margin-top:16px;
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-dim);
+  }
+
+  .strike-row{
+    display:flex; align-items:center; gap:10px; margin:18px 0 0;
+    padding:12px 16px; border-radius:8px;
+    background:var(--live-bg); border:1px solid var(--live);
+    font-size:13.5px; color:var(--ink-dim);
+  }
+  .strike-row .x{ color:var(--live); font-family:var(--mono); font-size:13px; flex-shrink:0; }
+  .strike-row s{ color:var(--ink-faint); }
+
+  /* ── two-stage timeline diagram ── */
+  .stage-strip{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:34px 26px 28px;
+    overflow-x:auto;
+  }
+  .stage-track{ display:flex; align-items:center; min-width:640px; }
+  .seg{ flex:1 1 0; min-width:140px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .seg .plate{
+    width:100%; height:78px; border-radius:9px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    border:1px solid var(--line); background:var(--bg-sunk);
+  }
+  .seg.prev .plate{ color:var(--ink-faint); font-size:12.5px; }
+  .seg.cam .plate{ border-color:var(--snap); background:linear-gradient(160deg,var(--snap-bg),transparent); }
+  .seg.vid .plate{ border-color:var(--accent); background:linear-gradient(160deg,var(--plan-bg),transparent); }
+  .seg .icon{ font-size:20px; line-height:1; }
+  .seg .name{ font-size:13px; font-weight:700; color:var(--ink); }
+  .seg .tag{ font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); letter-spacing:.04em; }
+
+  .stage-edge{ flex:0 0 96px; display:flex; flex-direction:column; align-items:center; gap:6px; padding-bottom:12px; position:relative; }
+  .stage-edge .glyph{ width:100%; height:36px; display:flex; align-items:center; justify-content:center; }
+  .stage-edge.hard .glyph::after{ content:""; width:2px; height:34px; background:var(--snap); box-shadow:0 0 6px var(--snap); }
+  .stage-edge.soft .glyph{ background:linear-gradient(90deg,transparent,var(--plan-bg),transparent); height:26px; border-radius:4px; }
+  .stage-edge .tlabel{ font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-align:center; }
+  .stage-edge.hard .tlabel{ color:var(--snap); }
+  .stage-edge.soft .tlabel{ color:var(--accent); }
+  .stage-edge .field{ font-family:var(--mono); font-size:9px; color:var(--ink-faint); text-align:center; }
+
+  .trigger{ display:flex; justify-content:center; margin:-6px 0 18px; }
+  .trigger .pill{
+    font-family:var(--mono); font-size:10.5px; color:var(--bg); font-weight:700;
+    background:var(--accent); padding:5px 14px; border-radius:20px; letter-spacing:.03em;
+    box-shadow:var(--shadow);
+  }
+
+  /* ── default table ── */
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  th,td{ text-align:left; padding:13px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  thead th{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); background:var(--bg-raised); font-weight:700;
+  }
+  tbody tr{ background:var(--bg-raised); }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody td:first-child{ font-weight:700; color:var(--ink); }
+  tbody td.desc{ white-space:normal; color:var(--ink-dim); font-size:13px; }
+
+  /* ── config location cards ── */
+  .loc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:640px){ .loc-grid{ grid-template-columns:1fr; } }
+  .loc-card{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:20px 22px;
+  }
+  .loc-card .where{
+    font-family:var(--mono); font-size:10.5px; color:var(--snap); letter-spacing:.06em;
+    text-transform:uppercase; margin-bottom:8px;
+  }
+  .loc-card h3{ font-size:15.5px; margin:0 0 8px; color:var(--ink); }
+  .loc-card p{ font-size:13.5px; margin:0; color:var(--ink-dim); }
+  .mock-select{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:11.5px; color:var(--ink);
+    background:var(--bg-sunk); border:1px solid var(--line); border-radius:5px;
+    padding:4px 10px; margin-top:10px;
+  }
+  .mock-select::after{ content:"▾"; color:var(--ink-faint); font-size:9px; }
+  .preset-row{ display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+  .preset-chip{
+    font-family:var(--mono); font-size:10.5px; font-weight:700; letter-spacing:.03em;
+    padding:5px 11px; border-radius:6px; border:1px solid var(--line); color:var(--ink-dim);
+    background:var(--bg-sunk);
+  }
+  .preset-chip.active{ color:var(--bg); background:var(--snap); border-color:var(--snap); }
+
+  /* ── incident note ── */
+  .incident{
+    border-left:3px solid var(--live);
+    background:linear-gradient(90deg,var(--live-bg),transparent 60%);
+    border-radius:0 10px 10px 0;
+    padding:22px 26px;
+  }
+  .incident .itag{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--live); margin-bottom:10px; display:block;
+  }
+  .incident h3{ font-size:16px; margin:0 0 10px; color:var(--ink); }
+  .incident ul{ margin:12px 0 0; padding-left:20px; }
+  .incident li{ font-size:14px; color:var(--ink-dim); margin-bottom:8px; }
+  .incident li::marker{ color:var(--ink-faint); }
+  .fixmark{ color:var(--snap); font-family:var(--mono); font-size:11px; margin-right:6px; font-weight:700; }
+
+  footer{
+    margin-top:80px; padding-top:24px; border-top:1px solid var(--line);
+    font-family:var(--mono); font-size:11px; color:var(--ink-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<div class="backbar"><a href="../index.html">← 문서 모음</a></div>
+
+<header>
+  <div class="eyebrow">MARS · Master 방송 제어 — 사용 가이드</div>
+  <h1>전환 효과, 어디서 어떻게 설정하나</h1>
+  <p class="sub">아이템과 아이템 사이의 전환, 그리고 리포트/단신 안에서 카메라가 영상으로 넘어가는 전환은 서로 다른 값이 결정합니다. 이 둘을 헷갈리면 "설정했는데 왜 안 먹지" 문제가 생깁니다.</p>
+</header>
+
+<section>
+  <h2><span class="num">01</span> 두 가지 전환, 완전히 다른 자리</h2>
+  <p class="section-lede">큐시트를 진행하다 보면 화면이 바뀌는 순간이 두 종류입니다 — <strong>아이템이 바뀔 때</strong>와, <strong>리포트/단신 안에서 카메라가 영상으로 넘어갈 때</strong>. 이 문서는 각각을 어디서, 어떤 값으로 설정하는지를 다룹니다.</p>
+  <div class="callout-arrow">
+    <span class="badge cut">전환 IN</span> 아이템으로 들어올 때
+    <span style="color:var(--ink-faint);margin:0 4px;">/</span>
+    <span class="badge mix">전환 OUT</span> 리포트·단신에서만 — 카메라 → 영상
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">02</span> 아이템 ↔ 아이템 전환</h2>
+  <p class="section-lede">직전 아이템이 무엇이었든 상관없습니다. <strong>지금 들어오는 아이템 자신의 "전환 In" 값이 항상 그대로 적용</strong>됩니다.</p>
+
+  <div class="rundown">
+    <div class="ritem"><div class="box">CM</div><div class="cap">전환 Out: 참고용</div></div>
+    <div class="redge mixedge"><span class="lbl">이 값 무시됨</span></div>
+    <div class="ritem focus"><div class="box">브리지</div><div class="cap">전환 In: CUT</div></div>
+    <div class="redge"><span class="lbl">전환 IN 적용</span><div class="cutline"></div></div>
+    <div class="ritem"><div class="box">리포트</div><div class="cap">전환 In: CUT</div></div>
+  </div>
+
+  <div class="strike-row">
+    <span class="x">✕</span>
+    <span><s>예전엔 직전 아이템의 "전환 Out"이 우선 적용되던 규칙이 있었습니다</s> — 편집창에서 값을 바꿔도 직전 아이템에 따라 조용히 무시될 수 있어 예측이 안 됐습니다. 지금은 이 로직 자체가 없습니다. <strong>오직 들어오는 아이템 자신의 값만 봅니다.</strong></span>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span> 리포트·단신의 2단계 전환</h2>
+  <p class="section-lede">리포트와 단신은 <strong>카메라(앵커) → 영상</strong>의 2단계로 진행되는 특수 타입이라, 전환이 한 아이템 안에서 두 번 일어납니다.</p>
+
+  <div class="stage-strip">
+    <div class="stage-track">
+      <div class="seg prev"><div class="plate"><span class="icon">◧</span><span class="tag">이전 아이템</span></div></div>
+      <div class="stage-edge hard"><div class="glyph"></div><div class="tlabel">전환 IN</div><div class="field">item.transIn</div></div>
+      <div class="seg cam"><div class="plate"><span class="icon">◉</span><span class="name">카메라(앵커)</span></div></div>
+      <div class="stage-edge soft"><div class="glyph"></div><div class="tlabel">전환 OUT</div><div class="field">item.transOut</div></div>
+      <div class="seg vid"><div class="plate"><span class="icon">▶</span><span class="name">영상 재생</span></div></div>
+    </div>
+    <div class="trigger"><span class="pill">🎬 영상 전환 버튼 클릭 시점</span></div>
+  </div>
+
+  <p style="margin-top:22px;"><strong>전환 In</strong> — 아이템 시작, 카메라로 컷/디졸브 되는 순간. 다른 아이템과 똑같은 규칙입니다.<br>
+  <strong>전환 Out</strong> — 앵커멘트를 읽다가 <code>🎬 영상 전환</code> 버튼을 누르는 그 순간. 완전히 별개의 값, 완전히 다른 시점입니다.</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span> 타입별 기본값</h2>
+  <p class="section-lede">아이템을 새로 만들면 형식(타입)에 따라 아래 값이 자동으로 채워집니다. 편집창에서 언제든 예외로 바꿀 수 있고, 기본값과 다르면 편집창에 안내 문구가 뜹니다.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>형식</th><th>전환 In</th><th>전환 Out</th><th class="desc">의미</th></tr></thead>
+      <tbody>
+        <tr><td>리포트</td><td><span class="badge cut">CUT</span></td><td><span class="badge cut">CUT</span></td><td class="desc">카메라 + 컷 + 영상</td></tr>
+        <tr><td>단신</td><td><span class="badge cut">CUT</span></td><td><span class="badge mix">MIX</span></td><td class="desc">카메라는 컷, 영상은 디졸브</td></tr>
+        <tr><td>CM</td><td><span class="badge mix">MIX</span></td><td><span class="badge mix">MIX</span></td><td class="desc">무조건 앞뒤로 디졸브</td></tr>
+        <tr><td>브리지</td><td><span class="badge cut">CUT</span></td><td><span class="badge mix">MIX</span></td><td class="desc">들어올 땐 컷, 나갈 땐 디졸브</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05</span> 실제로 설정하는 곳</h2>
+  <div class="loc-grid">
+    <div class="loc-card">
+      <div class="where">아이템 편집창</div>
+      <h3>전환 In / 전환 Out</h3>
+      <p>Master는 큐시트 줄의 ✏️, MARS는 아이템 더블클릭으로 엽니다. 이 아이템 하나에만 적용되는 값입니다.</p>
+      <div class="mock-select">전환 In: 디졸브(Mix)</div>
+    </div>
+    <div class="loc-card">
+      <div class="where">Master · 설정 탭</div>
+      <h3>전환효과 설정</h3>
+      <p>CUT/MIX/FADE/WIPE 외에 이름·지속시간(ms)이 다른 효과를 자유롭게 추가·수정할 수 있습니다. <strong>MARS는 이 4개 이름만</strong> 보낼 수 있습니다.</p>
+      <div class="preset-row">
+        <span class="preset-chip active">CUT</span>
+        <span class="preset-chip">MIX</span>
+        <span class="preset-chip">FADE</span>
+        <span class="preset-chip">WIPE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="incident">
+    <span class="itag">실전에서 발견 · 수정됨 — 2026-07-05</span>
+    <h3>단신이 전부 컷으로만 나가던 문제</h3>
+    <p style="margin-bottom:10px;">방송 중 리포트는 정상(컷)인데 단신의 영상 전환이 디졸브가 아니라 전부 컷으로 나가는 문제가 있었습니다. 원인은 타입별 기본값 표가 이미 있는데도, 아이템을 만드는 4곳이 그 표를 안 보고 무조건 <code>'Cut'</code>으로 채우고 있었기 때문입니다.</p>
+    <ul>
+      <li><span class="fixmark">FIX</span>기사매칭으로만 채워진 아이템을 열 때 (MARS)</li>
+      <li><span class="fixmark">FIX</span>템플릿으로 큐시트를 새로 시작할 때 — <strong>전환 Out은 템플릿에 아예 저장되지도 않고 있었습니다</strong></li>
+      <li><span class="fixmark">FIX</span>템플릿을 저장할 때 (근본 원인 — 한 번 나쁜 값으로 저장되면 이후 모든 큐시트에 대물림)</li>
+      <li><span class="fixmark">FIX</span>Master에서 새 아이템을 만들 때</li>
+    </ul>
+    <p style="margin-top:14px;margin-bottom:6px;">리뷰 중 인접한 문제도 하나 더 발견해 같이 고쳤습니다: 설정 탭에서 기본 MIX/FADE/WIPE 프리셋을 지우면, MARS가 그 이름으로 요청해도 <strong>경고 없이 조용히 컷으로 대체</strong>되고 있었습니다. 이제 로그 경고가 남고, 삭제 시 확인창이 한 번 더 뜹니다.</p>
+    <p style="font-size:13px;color:var(--ink-faint);margin-top:14px;">이미 저장된 템플릿·아이템에 박힌 기존 값은 자동으로 고쳐지지 않습니다 — 한 번은 직접 열어 고치고 다시 저장해야 합니다.</p>
+  </div>
+</section>
+
+<footer>
+  <span>news-broadcast-system.html · nps-news-system.html</span>
+  <span>전환 효과 설정 가이드</span>
+</footer>
+
+</div>
+
+</body>
+</html>

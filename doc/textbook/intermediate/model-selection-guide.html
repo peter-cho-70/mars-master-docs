@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>작업 강도별 모델 선택 가이드 — Cursor & Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0D12;
+    --surface: #12161D;
+    --surface-2: #171C24;
+    --line: #232A35;
+    --text: #E7ECF2;
+    --muted: #8993A3;
+    --muted-2: #5D6675;
+
+    --low: #6EE7B7;      /* 가벼운 작업 - 민트 */
+    --low-dim: #6EE7B722;
+    --mid: #F5B94B;      /* 중간 작업 - 앰버 */
+    --mid-dim: #F5B94B22;
+    --high: #F2735C;     /* 무거운 작업 - 코럴 */
+    --high-dim: #F2735C22;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, #1a2130 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #191d16 0%, transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    line-height: 1.6;
+    padding-bottom: 80px;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  ::selection{ background: var(--low-dim); color: var(--text); }
+
+  .wrap{ max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Header ---------- */
+  header.top{ padding: 56px 0 8px; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: .12em;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:''; width:18px; height:1px; background: var(--muted-2); display:inline-block; }
+  h1{
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.15;
+    margin: 18px 0 12px;
+    letter-spacing: -0.01em;
+    font-weight: 800;
+  }
+  h1 span{ color: var(--muted); font-weight: 500; }
+  .lede{ color: var(--muted); font-size: 16.5px; max-width: 640px; margin-bottom: 8px; }
+
+  /* ---------- Gauge legend ---------- */
+  .legend{ display:flex; gap:18px; margin: 28px 0 46px; flex-wrap: wrap; }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono', monospace; font-size: 12.5px; color: var(--muted); }
+  .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dot.low{ background: var(--low); box-shadow: 0 0 10px var(--low-dim); }
+  .dot.mid{ background: var(--mid); box-shadow: 0 0 10px var(--mid-dim); }
+  .dot.high{ background: var(--high); box-shadow: 0 0 10px var(--high-dim); }
+
+  /* ---------- Quiz / Recommender ---------- */
+  .panel{
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px;
+    margin-bottom: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel::before{
+    content:'';
+    position:absolute; top:-40%; right:-10%;
+    width:260px; height:260px; border-radius:50%;
+    background: radial-gradient(circle, #ffffff08 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .panel h2{ font-size: 20px; margin: 0 0 6px; font-weight: 700; }
+  .panel .q-sub{ color: var(--muted); font-size: 14.5px; margin-bottom: 22px; }
+
+  .choices{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (max-width: 560px){ .choices{ grid-template-columns: 1fr; } }
+
+  .choice-btn{
+    text-align:left;
+    background: #0000;
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 15px 16px;
+    cursor: pointer;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    transition: border-color .15s ease, background .15s ease, transform .1s ease;
+    display:flex; align-items:center; gap:10px;
+  }
+  .choice-btn .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    color: var(--muted-2);
+  }
+  .choice-btn:hover{ border-color: #3a4453; background: #ffffff06; transform: translateY(-1px); }
+  .choice-btn.active{ border-color: var(--sel-color, var(--low)); background: var(--sel-dim, var(--low-dim)); }
+
+  .result{
+    margin-top: 24px;
+    border-top: 1px dashed var(--line);
+    padding-top: 24px;
+    display:none;
+  }
+  .result.show{ display:block; animation: rise .35s ease; }
+  @keyframes rise{ from{ opacity:0; transform: translateY(6px);} to{ opacity:1; transform:none;} }
+
+  .result-head{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .result-head .dot{ width:11px; height:11px; }
+  .result-head b{ font-size: 15.5px; }
+  .level-badge{
+    font-family:'JetBrains Mono', monospace; font-size: 11px;
+    padding: 3px 9px; border-radius: 20px; border: 1px solid currentColor;
+  }
+
+  .rec-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 720px){ .rec-grid{ grid-template-columns: 1fr; } }
+  .rec-card{
+    background: #ffffff05;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .rec-card .src{ font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--muted-2); letter-spacing:.06em; text-transform:uppercase; margin-bottom: 8px; }
+  .rec-card .model{ font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .rec-card .why{ font-size: 13.5px; color: var(--muted); }
+  .tip-line{
+    margin-top: 16px; font-size: 13.5px; color: var(--muted);
+    background: #ffffff05; border-left: 2px solid var(--low);
+    padding: 10px 14px; border-radius: 0 8px 8px 0;
+  }
+
+  /* ---------- Section headers ---------- */
+  section{ margin-bottom: 52px; }
+  .sec-num{ font-family:'JetBrains Mono', monospace; color: var(--muted-2); font-size: 12.5px; }
+  h2.sec-title{ font-size: 22px; margin: 6px 0 6px; font-weight: 800; }
+  .sec-desc{ color: var(--muted); font-size: 14.5px; margin-bottom: 22px; max-width: 620px; }
+
+  /* ---------- Table ---------- */
+  table{ width:100%; border-collapse: collapse; font-size: 14px; }
+  thead th{
+    text-align:left; font-family:'JetBrains Mono', monospace; font-weight: 500;
+    font-size: 11.5px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .05em;
+    padding: 10px 14px; border-bottom: 1px solid var(--line);
+  }
+  tbody td{ padding: 16px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:hover{ background: #ffffff04; }
+  td.task{ font-weight: 700; width: 26%; }
+  td.task .dot{ margin-right:7px; }
+  td .model-name{ font-family:'JetBrains Mono', monospace; font-weight: 600; color: var(--text); }
+  td .desc{ color: var(--muted); font-size: 13px; margin-top: 3px; }
+
+  /* ---------- Card list (Claude tiers) ---------- */
+  .tier-list{ display:flex; flex-direction:column; gap: 10px; }
+  .tier{
+    display:grid; grid-template-columns: 130px 1fr; gap: 18px;
+    background: var(--surface); border:1px solid var(--line); border-radius: 12px;
+    padding: 16px 20px; align-items: start;
+  }
+  @media (max-width: 560px){ .tier{ grid-template-columns: 1fr; gap: 6px; } }
+  .tier .name{ font-family:'JetBrains Mono', monospace; font-weight: 700; font-size: 14.5px; display:flex; align-items:center; gap:8px; }
+  .tier .use{ font-size: 13.5px; color: var(--muted); }
+  .tier .use b{ color: var(--text); font-weight:600; }
+
+  /* ---------- Checklist ---------- */
+  .check-list{ display:flex; flex-direction:column; gap:9px; }
+  .check-item{ display:flex; gap:10px; font-size: 14px; color: var(--muted); align-items:flex-start; }
+  .check-item::before{ content:'—'; color: var(--muted-2); flex-shrink:0; }
+  .check-item b{ color: var(--text); }
+
+  /* ---------- Preset code blocks ---------- */
+  .preset{
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    overflow:hidden; margin-bottom: 18px;
+  }
+  .preset-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--surface-2);
+  }
+  .preset-head .name{ font-family:'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+  .preset-head .where{ font-size: 12px; color: var(--muted-2); }
+  .copy-btn{
+    font-family:'JetBrains Mono', monospace; font-size: 11.5px;
+    background: #ffffff08; border:1px solid var(--line); color: var(--muted);
+    padding: 5px 11px; border-radius: 7px; cursor:pointer; transition: all .15s;
+  }
+  .copy-btn:hover{ color: var(--text); border-color:#3a4453; }
+  .copy-btn.copied{ color: var(--low); border-color: var(--low); }
+  pre{
+    margin:0; padding: 18px; font-family:'JetBrains Mono', monospace;
+    font-size: 12.8px; line-height:1.7; color: #C7D1DE; overflow-x:auto; white-space:pre-wrap;
+  }
+
+  footer{ text-align:center; color: var(--muted-2); font-size: 12.5px; margin-top: 60px; font-family:'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">MODEL SELECTION GUIDE</div>
+    <h1>작업 강도에 맞는<br>모델 고르기 <span>— Cursor & Claude</span></h1>
+    <p class="lede">모든 작업에 제일 똑똑한 모델을 쓸 필요는 없습니다. 질문에 답하면 지금 할 일에 맞는 모델을 바로 추천해 드립니다.</p>
+    <div class="legend">
+      <div class="legend-item"><span class="dot low"></span>가벼움 — 빠른 모델로 충분</div>
+      <div class="legend-item"><span class="dot mid"></span>중간 — 균형형 모델 권장</div>
+      <div class="legend-item"><span class="dot high"></span>무거움 — 최상위 추론 모델 필요</div>
+    </div>
+  </header>
+
+  <!-- ================= INTERACTIVE RECOMMENDER ================= -->
+  <div class="panel">
+    <h2>지금 뭘 하려고 하세요?</h2>
+    <p class="q-sub">하나를 고르면 Cursor·Claude 각각의 추천 모델과 이유를 보여드립니다.</p>
+    <div class="choices" id="choiceGrid"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- ================= CURSOR SECTION ================= -->
+  <section id="cursor">
+    <div class="sec-num">01 · CURSOR</div>
+    <h2 class="sec-title">Cursor에서 바이브 코딩할 때</h2>
+    <p class="sec-desc">Cursor 모델 드롭다운(Auto · Composer 2.5 · GPT-5.5 · Opus 4.8 · Gemini 3.1 Pro · Grok 4.3) 기준입니다. 작업 성격에 따라 나눠 쓰면 크레딧과 시간을 크게 아낄 수 있습니다.</p>
+
+    <table>
+      <thead><tr><th>작업</th><th>추천 모델</th><th>이유</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="task"><span class="dot high"></span>PRD · 기획 · 아키텍처 설계</td>
+          <td><span class="model-name">Opus 4.8</span> <span class="desc">(또는 GPT-5.5)</span></td>
+          <td class="desc">Plan Mode(Shift+Tab)에서 초안이 잘못되면 이후 모든 구현이 틀어집니다. 가장 신중한 모델을 여기에 씁니다.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot high"></span>기존 코드 대규모 리팩터링</td>
+          <td><span class="model-name">Opus 4.8</span></td>
+          <td class="desc">여러 파일에 걸친 의존성 추론이 필요한 작업. 속도보다 정확도가 중요합니다.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot mid"></span>새 기능 구현 (바이브 코딩)</td>
+          <td><span class="model-name">Composer 2.5</span></td>
+          <td class="desc">Cursor 자체 모델로 속도가 빨라 플랜을 여러 번 재실행하거나 실험하기 부담이 없습니다. 계획이 이미 서 있다면 여기서부터는 이 모델로 충분합니다.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot mid"></span>버그 수정 · 테스트 작성</td>
+          <td><span class="model-name">Composer 2.5</span></td>
+          <td class="desc">범위가 명확한 작업. Auto 모드로 둬도 대부분 이 정도 모델이 자동 선택됩니다.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot low"></span>간단한 질문 · 코드 설명</td>
+          <td><span class="model-name">Auto</span></td>
+          <td class="desc">"이 함수가 뭐 하는 거야?" 수준의 질답에 프론티어 모델을 수동 지정할 필요 없습니다. Auto가 크레딧을 아껴줍니다.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= CLAUDE CODE CLI IN CURSOR ================= -->
+  <section id="claudecode">
+    <div class="sec-num">02 · CURSOR 안의 CLAUDE CODE</div>
+    <h2 class="sec-title">Cursor 터미널에서 Claude Code CLI 쓸 때</h2>
+    <p class="sec-desc">Cursor의 내장 터미널에서 <code class="mono">claude</code> 명령으로 Claude Code를 그대로 띄울 수 있습니다. 이때는 Cursor의 모델 드롭다운과 별개로, Claude Code 자체의 Opus·Sonnet·Haiku 중에서 골라야 합니다.</p>
+
+    <table>
+      <thead><tr><th>작업</th><th>추천 모델</th><th>이유</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="task"><span class="dot high"></span>아키텍처 설계 · 어려운 디버깅</td>
+          <td><span class="model-name">Opus</span></td>
+          <td class="desc">여러 파일에 걸친 의존성을 한 번에 붙잡고 있어야 하는 작업. 경쟁 레이스 컨디션, 미묘한 상태 관리 버그처럼 원인이 잘 안 보일 때.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot mid"></span>일반적인 기능 구현 · 리팩터</td>
+          <td><span class="model-name">Sonnet</span> <span class="desc">(기본값)</span></td>
+          <td class="desc">전체 작업의 80~90%를 Opus에 준하는 품질로 처리합니다. 특별한 이유가 없다면 항상 이걸로 시작하세요.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot low"></span>단순 반복 작업</td>
+          <td><span class="model-name">Haiku</span></td>
+          <td class="desc">파일 전체에 변수명 바꾸기, 저작권 연도 수정, 로그 문구 정리처럼 기계적인 작업. Sonnet보다 2배가량 빠릅니다.</td>
+        </tr>
+        <tr>
+          <td class="task"><span class="dot mid"></span>계획 → 구현이 이어지는 작업</td>
+          <td><span class="model-name">opusplan</span></td>
+          <td class="desc">계획 단계는 Opus, 구현 단계는 자동으로 Sonnet으로 전환되는 하이브리드 모드. "뭘 바꿔야 할지 파악 → 실제로 바꾸기" 흐름에 딱 맞습니다.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="sec-desc" style="margin-top:22px; margin-bottom:10px;">모델은 세션 중간에도 바꿀 수 있고, 바꿔도 그동안의 대화 맥락은 그대로 유지됩니다.</p>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">터미널 명령어</div><div class="where">Cursor 통합 터미널 안에서 claude 실행 중</div></div>
+        <button class="copy-btn" data-target="cc-model-cmds">복사</button>
+      </div>
+      <pre id="cc-model-cmds">/model              # 현재 모델 확인 + 목록 보기
+/model opus         # Opus로 전환 — 어려운 문제, 설계
+/model sonnet       # Sonnet으로 전환 — 기본 작업
+/model haiku        # Haiku로 전환 — 단순 반복 작업
+/model opusplan     # 계획은 Opus, 구현은 자동으로 Sonnet
+
+# 세션 시작 전에 특정 모델로 바로 켜기
+claude --model opus
+claude --model sonnet
+
+# 매번 켤 때마다 기본 모델을 고정하고 싶다면 (~/.zshrc 또는 ~/.bashrc)
+export ANTHROPIC_MODEL="claude-sonnet-5"</pre>
+    </div>
+    <div class="tip-line">💡 Sonnet으로 시작해서 막히는 지점에서만 <code class="mono">/model opus</code>로 올리고, 정리·포맷 작업은 다시 <code class="mono">/model haiku</code>로 내리는 식으로 세션 하나 안에서 오가는 게 가장 비용 효율적입니다.</div>
+  </section>
+
+  <!-- ================= CLAUDE SECTION ================= -->
+  <section id="claude">
+    <div class="sec-num">03 · CLAUDE.AI</div>
+    <h2 class="sec-title">Claude 모델 등급별 쓰임새</h2>
+    <p class="sec-desc">원리는 Cursor와 같습니다 — 작업 난이도에 모델을 맞추는 것.</p>
+
+    <div class="tier-list">
+      <div class="tier">
+        <div class="name"><span class="dot low"></span>Haiku</div>
+        <div class="use"><b>단순 반복 작업.</b> 요약, 번역, 형식 변환, 분류처럼 복잡한 추론이 필요 없는 일. 가장 빠르고 토큰당 비용이 낮습니다.</div>
+      </div>
+      <div class="tier">
+        <div class="name"><span class="dot mid"></span>Sonnet</div>
+        <div class="use"><b>대부분의 기본 작업.</b> 일상적인 코딩, 글쓰기, 데이터 정리. 특별히 어렵지 않다면 여기서 끝납니다.</div>
+      </div>
+      <div class="tier">
+        <div class="name"><span class="dot high"></span>Opus</div>
+        <div class="use"><b>복잡한 추론이 필요할 때.</b> 아키텍처 설계, 까다로운 디버깅, 다단계 논리. 쉬운 일에 쓰면 비용 낭비, 정말 어려운 일엔 재작업을 줄여줍니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TOKEN SAVING TIPS ================= -->
+  <section id="tips">
+    <div class="sec-num">04 · 토큰 절약</div>
+    <h2 class="sec-title">기능 켜고 끄기 & 실전 습관</h2>
+    <div class="check-list">
+      <div class="check-item"><b>웹 검색·리서치</b>는 최신 정보가 필요할 때만 켭니다. 특히 리서치(Deep Research)는 수십 번 검색을 돌리므로 토큰 소모가 가장 큽니다.</div>
+      <div class="check-item">반복되는 코딩·크롤러 작업은 채팅에 코드를 붙여넣기보다 <b>Claude Code</b>처럼 레포를 직접 다루는 도구가 훨씬 효율적입니다.</div>
+      <div class="check-item">자주 참고하는 자료(사이트 구조, 코딩 규칙 등)는 매번 붙여넣지 말고 <b>프로젝트(Projects)</b>에 한 번만 넣어두세요.</div>
+      <div class="check-item">대화가 길어질수록 매 턴마다 이전 내용을 전부 다시 처리합니다. 주제가 바뀌면 <b>새 대화를 시작</b>하는 것이 가장 큰 절약입니다.</div>
+      <div class="check-item">애매하게 물어 여러 번 되묻는 것보다 <b>프롬프트를 구체적으로</b> 쓰는 편이 왕복 토큰을 줄입니다.</div>
+    </div>
+  </section>
+
+  <!-- ================= SESSION LIMIT SECTION ================= -->
+  <section id="session-limit">
+    <div class="sec-num">05 · 세션 한도 도달했을 때</div>
+    <h2 class="sec-title">진행 중인 작업을 계속하는 방법</h2>
+    <p class="sec-desc">Claude Code의 5시간 롤링 윈도우나 주간 한도에 도달하면 더 이상 Claude API를 부를 수 없습니다. 하지만 진행하던 작업을 저장하고 여러 방법으로 계속할 수 있습니다.</p>
+
+    <div class="tier-list" style="margin-bottom:28px;">
+      <div class="tier">
+        <div class="name">1️⃣ 한도 상태 확인</div>
+        <div class="use">세션이 응답 없어질 때 먼저 해야 할 일. <b>/usage</b> 또는 <b>/cost</b> 명령어를 실행해서 정확한 리셋 시간을 확인하세요.</div>
+      </div>
+    </div>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">한도 확인 명령어</div><div class="where">Claude Code CLI 세션 중</div></div>
+        <button class="copy-btn" data-target="usage-check">복사</button>
+      </div>
+      <pre id="usage-check">/usage          # 구독 플랜: 현재 사용량 + 리셋 시간 표시
+/cost           # API 키: 이번 세션 비용 계산 + 총 지출
+/context        # 현재 컨텍스트 윈도우 사용률 (색상 그리드)</pre>
+    </div>
+
+    <p style="font-size:15px; color:var(--muted); margin:24px 0 18px;">4가지 대처 방법 (우선순위순)</p>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">방법 1: 현재 세션에서 토큰 절약하기 (권장)</div><div class="where">Claude Code CLI</div></div>
+        <button class="copy-btn" data-target="method-compact">복사</button>
+      </div>
+      <pre id="method-compact"># 한도가 될 때까지 시간이 조금 남아 있다면:
+
+/compact              # 대화를 요약으로 압축 (대화 맥락 유지하며 토큰 절약)
+                      # "API Error: Rate limit reached"가 안 나올 때까지 사용 가능
+
+/compact focus on authentication fixes     # 특정 부분만 강조하며 압축
+
+# 여전히 부족하면:
+/model haiku          # 모델을 낮춰서 토큰 소비 줄이기
+                      # 마지막 정리·수정 작업에만 사용</pre>
+    </div>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">방법 2: 작업 저장 후 API 키로 계속하기</div><div class="where">Terminal</div></div>
+        <button class="copy-btn" data-target="method-api-fallback">복사</button>
+      </div>
+      <pre id="method-api-fallback"># 진행 상황을 git에 커밋
+git add .
+git commit -m "WIP: [진행 상황 설명]"
+
+# Anthropic API 키 설정 (없으면 console.anthropic.com에서 생성)
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# 같은 프로젝트에서 새로운 claude 세션 시작
+# (이제 API 크레딧이 별도로 사용됨 — 구독 한도 무관)
+claude</pre>
+    </div>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">방법 3: 기존 세션 다시 불러오기 (나중에 계속)</div><div class="where">Terminal 또는 Claude Code</div></div>
+        <button class="copy-btn" data-target="method-resume">복사</button>
+      </div>
+      <pre id="method-resume"># 리셋 시간이 지난 후, 진행하던 작업으로 바로 돌아가기
+
+# 가장 최근 세션 불러오기
+claude --continue         # (또는 -c)
+
+# 선택지 리스트에서 고르기
+claude --resume           # (또는 -r)
+
+# CLI 안에서:
+/resume                   # 최근 세션 목록 표시</pre>
+    </div>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">방법 4: 완전히 새로 시작 (드물게)</div><div class="where">Claude Code CLI</div></div>
+        <button class="copy-btn" data-target="method-clear">복사</button>
+      </div>
+      <pre id="method-clear"># 진행 상황이 더 이상 필요 없을 때만 사용 (되돌릴 수 없음)
+
+/clear                    # 대화 히스토리 완전 삭제
+                          # (코드 변경사항은 유지됨, CLAUDE.md도 다음 세션에서 로드)
+
+/clear checkpoint-name    # 지금까지의 작업에 라벨을 붙이고 저장한 후 초기화</pre>
+    </div>
+
+    <p style="font-size:14.5px; color:var(--muted); margin:22px 0 16px; font-weight:600;">⏱️ 세션 한도를 애초에 아끼는 법</p>
+
+    <div class="check-list">
+      <div class="check-item"><b>작업을 작은 세션으로 쪼개기:</b> 한 번에 4시간을 쓰는 것보다 1.5시간씩 3번 나눠서 하는 게 낫습니다 (각 세션이 맑음).</div>
+      <div class="check-item"><b>Sonnet으로 기본값 유지:</b> Opus는 진짜 필요할 때만 쓰세요. 일상적인 구현은 Sonnet으로 충분하고 비용이 60% 아닙니다.</div>
+      <div class="check-item"><b>/plan으로 계획 먼저:</b> 막연히 "만들어줘"보다 "뭘 바꿔야 할까"를 먼저 물으면 오류를 줄여 오히려 토큰을 아낍니다.</div>
+      <div class="check-item"><b>CLAUDE.md에 규칙 고정:</b> 매번 "우리 패턴은..."이라 설명하지 말고, CLAUDE.md에 한 번 써두면 모든 세션에서 자동으로 로드됩니다.</div>
+      <div class="check-item"><b>/compact를 습관화:</b> 45분마다, 또는 주요 작업이 끝난 후 한 번씩 /compact를 실행하면 세션이 오래가고 응답 품질이 떨어지지 않습니다.</div>
+    </div>
+
+    <div class="tip-line">💡 한도 도달은 "설계 실패"가 아니라 작업이 깊다는 증거입니다. 처음부터 한도를 염두에 두고 /compact · /clear · 짧은 세션 · CLAUDE.md 등을 조합하면 얼마든지 큰 프로젝트를 진행할 수 있습니다.</div>
+  </section>
+
+  <!-- ================= PRESETS ================= -->
+  <section id="presets">
+    <div class="sec-num">06 · 사전 설정</div>
+    <h2 class="sec-title">매번 물어보지 않게 미리 심어두기</h2>
+    <p class="sec-desc">아래 두 텍스트를 각 도구의 설정에 붙여넣으면, 새 채팅을 열 때마다 이 기준이 자동으로 적용됩니다.</p>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">.cursor/rules/model-guide.mdc</div><div class="where">Cursor → 프로젝트 루트에 저장</div></div>
+        <button class="copy-btn" data-target="cursor-preset">복사</button>
+      </div>
+      <pre id="cursor-preset">작업을 시작하기 전에 항상 작업 성격을 먼저 판단할 것:
+
+- PRD, 기획, 아키텍처 설계, 대규모 리팩터링 → Plan Mode로 전환 제안하고
+  Opus 4.8 또는 GPT-5.5 사용을 권장할 것
+- 기능 구현, 버그 수정, 반복적인 코드 작성 → Composer 2.5 사용을 권장할 것
+- 단순 설명, 코드 질문 → Auto 모드로 충분함을 알릴 것
+
+모델을 직접 전환하지는 못하니, 답변 시작 부분에
+"[권장 모델: ___]" 형식으로 한 줄만 표시할 것.</pre>
+    </div>
+
+    <div class="preset">
+      <div class="preset-head">
+        <div><div class="name">Custom instructions</div><div class="where">Claude → 설정 → 맞춤형 지침 / 프로젝트 지침</div></div>
+        <button class="copy-btn" data-target="claude-preset">복사</button>
+      </div>
+      <pre id="claude-preset">새 대화 초반에 내가 하려는 작업이 불분명하면,
+"간단한 질문 / 계획·기획 / 실제 구현·반복 작업" 중
+어느 쪽에 가까운지 먼저 짧게 물어봐줘.
+
+- 간단한 질문·설명 → Haiku급으로 충분하다고 안내
+- 계획·기획·복잡한 설계 → Opus급을 권장
+- 그 외 일반 작업 → Sonnet 기본 유지
+
+그리고 웹 검색·리서치 같은 토큰 소모가 큰 기능은
+정말 필요한 경우에만 켜라고 먼저 확인해줘.</pre>
+    </div>
+  </section>
+
+  <footer>이 문서는 2026년 7월 기준 정보로 작성되었습니다 · 모델 라인업은 이후 변경될 수 있습니다</footer>
+</div>
+
+<script>
+  const DATA = [
+    {
+      id: 'qa',
+      label: '간단한 질문 / 설명',
+      tag: '예: "이 코드가 뭐하는거야?"',
+      level: 'low',
+      color: 'var(--low)', dim: 'var(--low-dim)',
+      cursor: { model: 'Auto', why: '범위가 명확하고 짧은 질답. Cursor가 알아서 가벼운 모델을 골라 크레딧을 아낍니다.' },
+      claude: { model: 'Haiku', why: '복잡한 추론이 필요 없는 단답형 작업에 가장 빠르고 저렴합니다.' },
+      claudecode: { model: 'Haiku', why: '터미널에서 claude 실행 중이라면 /model haiku 로 내려서 빠르게 답만 받으세요.' },
+      tip: '프론티어 모델을 수동으로 지정하지 마세요 — Auto가 이미 최적입니다.'
+    },
+    {
+      id: 'plan',
+      label: 'PRD · 기획 · 설계',
+      tag: '예: "이 기능 스펙을 정리해줘"',
+      level: 'high',
+      color: 'var(--high)', dim: 'var(--high-dim)',
+      cursor: { model: 'Opus 4.8', why: 'Plan Mode(Shift+Tab)로 진입해 사람이 검토할 계획 문서를 먼저 만드는 것이 핵심입니다.' },
+      claude: { model: 'Opus', why: '초기 설계 실수는 이후 구현 전체에 영향을 줍니다. 가장 신중한 모델을 여기 씁니다.' },
+      claudecode: { model: 'opusplan', why: '계획 단계는 Opus로, 이어지는 구현은 자동으로 Sonnet으로 전환됩니다. /model opusplan.' },
+      tip: '계획 단계에만 투자하고, 구현은 가벼운 모델로 넘기면 전체 비용이 오히려 줄어듭니다.'
+    },
+    {
+      id: 'build',
+      label: '코드 구현 · 바이브 코딩',
+      tag: '예: "이 기능 만들어줘"',
+      level: 'mid',
+      color: 'var(--mid)', dim: 'var(--mid-dim)',
+      cursor: { model: 'Composer 2.5', why: 'Cursor 자체 모델로 속도가 빨라 여러 번 재실행해도 부담이 적습니다. 계획이 이미 있다면 최적입니다.' },
+      claude: { model: 'Sonnet', why: '일상적인 코딩 작업의 기본값. 대부분의 구현 작업을 무리 없이 처리합니다.' },
+      claudecode: { model: 'Sonnet', why: '전체 작업의 80~90%를 Opus에 준하는 품질로 처리합니다. 특별한 이유가 없다면 기본값 그대로 두세요.' },
+      tip: '계획(Plan) 없이 바로 구현부터 시키면 결과가 어긋나 오히려 토큰을 더 쓰게 됩니다.'
+    },
+    {
+      id: 'refactor',
+      label: '대규모 리팩터링 / 복잡한 버그',
+      tag: '예: "여러 파일에 걸친 구조를 바꿔줘"',
+      level: 'high',
+      color: 'var(--high)', dim: 'var(--high-dim)',
+      cursor: { model: 'Opus 4.8', why: '여러 파일의 의존성을 함께 추론해야 하는 작업. 속도보다 정확도가 우선입니다.' },
+      claude: { model: 'Opus', why: '다단계 논리와 넓은 컨텍스트 파악이 필요한 작업에 적합합니다.' },
+      claudecode: { model: 'Opus', why: '레이스 컨디션, 미묘한 상태 관리 버그처럼 원인이 잘 안 보일 때 /model opus 로 올리세요.' },
+      tip: '작업을 작은 단위로 쪼개고, 각 단계마다 결과를 검토한 뒤 다음으로 넘어가세요.'
+    }
+  ];
+
+  const grid = document.getElementById('choiceGrid');
+  const resultEl = document.getElementById('result');
+
+  DATA.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.style.setProperty('--sel-color', item.color);
+    btn.style.setProperty('--sel-dim', item.dim);
+    btn.innerHTML = `<span>${item.label}<br><span class="tag">${item.tag}</span></span>`;
+    btn.addEventListener('click', () => {
+      [...grid.children].forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      render(item);
+    });
+    grid.appendChild(btn);
+  });
+
+  function render(item){
+    const levelLabel = { low: '가벼움', mid: '중간', high: '무거움' }[item.level];
+    resultEl.innerHTML = `
+      <div class="result-head">
+        <span class="dot ${item.level}"></span>
+        <b>${item.label}</b>
+        <span class="level-badge" style="color:${item.color}">${levelLabel} 작업</span>
+      </div>
+      <div class="rec-grid">
+        <div class="rec-card">
+          <div class="src">Cursor</div>
+          <div class="model">${item.cursor.model}</div>
+          <div class="why">${item.cursor.why}</div>
+        </div>
+        <div class="rec-card">
+          <div class="src">Claude Code CLI</div>
+          <div class="model">${item.claudecode.model}</div>
+          <div class="why">${item.claudecode.why}</div>
+        </div>
+        <div class="rec-card">
+          <div class="src">Claude.ai</div>
+          <div class="model">${item.claude.model}</div>
+          <div class="why">${item.claude.why}</div>
+        </div>
+      </div>
+      <div class="tip-line">💡 ${item.tip}</div>
+    `;
+    resultEl.classList.add('show');
+  }
+
+  render(DATA[2]);
+  grid.children[2].classList.add('active');
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const target = document.getElementById(btn.dataset.target);
+      const text = target.textContent;
+      try{
+        await navigator.clipboard.writeText(text);
+      }catch(e){
+        const range = document.createRange();
+        range.selectNode(target);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      }
+      btn.textContent = '복사됨';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 1600);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARS/Master 중간보고서 — 상업화 로드맵</title>
+<meta name="description" content="MARS/Master 중간보고서 — 완료/미착수 현황, 로그인 아키텍처 결정 사항, 상업화 로드맵, 7/17까지 할 일">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+
+<style>
+  :root{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --pgm:#c0322c; --pgm-bg:rgba(192,50,44,.10); --pgm-line:rgba(192,50,44,.35);
+    --pvw:#1f9a56; --pvw-bg:rgba(31,154,86,.10); --pvw-line:rgba(31,154,86,.35);
+    --warn:#a06a12; --warn-bg:rgba(160,106,18,.10); --warn-line:rgba(160,106,18,.35);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+      --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+      --accent:#e2a63d; --accent-ink:#f4c877;
+      --pgm:#e0453f; --pgm-bg:rgba(224,69,63,.14); --pgm-line:rgba(224,69,63,.4);
+      --pvw:#3fcf7a; --pvw-bg:rgba(63,207,122,.13); --pvw-line:rgba(63,207,122,.4);
+      --warn:#e2a63d; --warn-bg:rgba(226,166,61,.13); --warn-line:rgba(226,166,61,.4);
+      --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+    --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+    --accent:#e2a63d; --accent-ink:#f4c877;
+    --pgm:#e0453f; --pgm-bg:rgba(224,69,63,.14); --pgm-line:rgba(224,69,63,.4);
+    --pvw:#3fcf7a; --pvw-bg:rgba(63,207,122,.13); --pvw-line:rgba(63,207,122,.4);
+    --warn:#e2a63d; --warn-bg:rgba(226,166,61,.13); --warn-line:rgba(226,166,61,.4);
+    --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --pgm:#c0322c; --pgm-bg:rgba(192,50,44,.10); --pgm-line:rgba(192,50,44,.35);
+    --pvw:#1f9a56; --pvw-bg:rgba(31,154,86,.10); --pvw-line:rgba(31,154,86,.35);
+    --warn:#a06a12; --warn-bg:rgba(160,106,18,.10); --warn-line:rgba(160,106,18,.35);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.62; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent); color:var(--bg-sunk); }
+
+  .page{ max-width:980px; margin:0 auto; padding:52px 24px 120px; }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink); display:flex; align-items:center; gap:8px; margin:0 0 10px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none; }
+
+  .masthead{
+    border:1px solid var(--line-strong); border-radius:10px; background:var(--bg-raised);
+    box-shadow:var(--shadow); padding:30px 32px; margin-bottom:34px;
+  }
+  h1{ font-size:clamp(24px,3.2vw,32px); line-height:1.28; margin:0 0 8px; font-weight:800; letter-spacing:-.01em; text-wrap:balance; }
+  .masthead .sub{ color:var(--ink-dim); font-size:14.5px; max-width:66ch; margin:0 0 20px; }
+  .meta-row{ display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); }
+  .meta-cell{ padding:14px 18px 2px 18px; border-left:1px solid var(--line); }
+  .meta-cell:first-child{ border-left:none; padding-left:0; }
+  .meta-label{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .meta-value{ font-family:var(--mono); font-size:15px; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .meta-value.warn{ color:var(--warn); font-weight:700; }
+
+  /* ── Executive summary callout ── */
+  .exec{
+    border:1px solid var(--pgm-line); background:var(--pgm-bg); border-radius:10px;
+    padding:22px 26px; margin-bottom:44px;
+  }
+  .exec .eyebrow{ color:var(--pgm); }
+  .exec .eyebrow::before{ background:var(--pgm); }
+  .exec p{ margin:10px 0 0; font-size:14.5px; }
+  .exec p:first-of-type{ margin-top:6px; }
+  .exec b{ font-weight:700; }
+
+  section{ margin:56px 0; }
+  .section-head{ margin-bottom:22px; }
+  h2{ font-size:21px; margin:0 0 8px; font-weight:800; letter-spacing:-.01em; text-wrap:balance; }
+  .section-desc{ color:var(--ink-dim); font-size:14px; max-width:70ch; }
+
+  /* ── status table groups ── */
+  .group{ margin-bottom:28px; }
+  .group-title{
+    font-family:var(--mono); font-size:12px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--ink-faint); margin:0 0 10px; padding-bottom:8px; border-bottom:1px solid var(--line);
+  }
+  .row{
+    display:grid; grid-template-columns:22px 1fr auto; align-items:start; gap:12px;
+    padding:11px 0; border-bottom:1px solid var(--line);
+  }
+  .row:last-child{ border-bottom:none; }
+  .dot{ width:9px; height:9px; border-radius:50%; margin-top:6px; }
+  .dot.done{ background:var(--pvw); }
+  .dot.gap{ background:var(--warn); }
+  .dot.risk{ background:var(--pgm); }
+  .row-body b{ font-size:14px; font-weight:700; display:block; margin-bottom:2px; }
+  .row-body span{ font-size:13.5px; color:var(--ink-dim); }
+  .row-body code{ font-family:var(--mono); font-size:12px; background:var(--bg-sunk); padding:1px 5px; border-radius:4px; color:var(--ink); }
+  .chip{
+    font-family:var(--mono); font-size:10px; letter-spacing:.03em; padding:3px 9px; border-radius:20px;
+    white-space:nowrap; align-self:start; margin-top:2px;
+  }
+  .chip.done{ background:var(--pvw-bg); color:var(--pvw); }
+  .chip.gap{ background:var(--warn-bg); color:var(--warn); }
+  .chip.risk{ background:var(--pgm-bg); color:var(--pgm); }
+
+  /* ── decision cards ── */
+  .decision{
+    border:1px solid var(--pgm-line); border-radius:10px; background:var(--bg-raised);
+    padding:22px 26px; margin-bottom:16px; box-shadow:var(--shadow);
+  }
+  .decision-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .decision-num{ font-family:var(--mono); font-size:12px; color:var(--pgm); }
+  .decision-name{ font-size:16px; font-weight:700; }
+  .decision p{ font-size:14px; color:var(--ink-dim); margin:8px 0; max-width:76ch; }
+  .decision .options{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .opt{ font-size:13.5px; padding:9px 12px; border-radius:7px; background:var(--bg-sunk); border-left:3px solid var(--line-strong); }
+  .opt b{ font-weight:700; }
+  .opt.reco{ border-left-color:var(--pvw); }
+
+  /* ── roadmap ── */
+  .phase{ display:grid; grid-template-columns:64px 1fr; gap:4px 18px; padding:18px 0; border-top:1px solid var(--line); }
+  .phase:last-child{ border-bottom:1px solid var(--line); }
+  .phase-tag{ font-family:var(--mono); font-size:13px; font-weight:700; color:var(--accent); }
+  .phase-title{ font-size:15px; font-weight:700; margin:0 0 5px; grid-column:2; }
+  .phase-body{ font-size:13.5px; color:var(--ink-dim); grid-column:2; max-width:72ch; }
+
+  /* ── task checklist ── */
+  .task-table{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--bg-raised); box-shadow:var(--shadow); }
+  .task{ display:grid; grid-template-columns:26px 1fr 108px; gap:14px; align-items:start; padding:14px 18px; border-bottom:1px solid var(--line); }
+  .task:last-child{ border-bottom:none; }
+  .task:nth-child(odd){ background:var(--bg-sunk); }
+  .task-box{ width:16px; height:16px; border:2px solid var(--line-strong); border-radius:4px; margin-top:2px; }
+  .task-main b{ font-size:13.5px; display:block; margin-bottom:3px; }
+  .task-main span{ font-size:12.5px; color:var(--ink-dim); }
+  .task-due{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-align:right; padding-top:2px; }
+  .task-due b{ color:var(--pgm); display:block; font-size:12px; }
+
+  .closing{
+    border:1px solid var(--line-strong); border-radius:10px; background:var(--bg-raised);
+    padding:22px 26px; box-shadow:var(--shadow);
+  }
+  .closing p{ font-size:14px; color:var(--ink-dim); margin:8px 0 0; }
+
+  footer{
+    margin-top:60px; padding-top:20px; border-top:1px solid var(--line);
+    font-family:var(--mono); font-size:11px; color:var(--ink-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+
+  @media (max-width:640px){
+    .meta-row{ grid-template-columns:1fr 1fr; row-gap:16px; }
+    .meta-cell{ border-left:none; padding-left:0; }
+    .meta-cell:nth-child(2n){ padding-left:18px; border-left:1px solid var(--line); }
+    .masthead{ padding:22px 20px; }
+    .row{ grid-template-columns:18px 1fr; }
+    .chip{ grid-column:2; margin-top:6px; }
+    .task{ grid-template-columns:20px 1fr; }
+    .task-due{ grid-column:2; text-align:left; display:flex; gap:6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="eyebrow">중간보고서 · Interim Status Report</div>
+    <h1>MARS/Master 뉴스 자동송출 시스템 — 개발 현황 및 상업화 로드맵</h1>
+    <p class="sub">2026-06-25 최초 커밋부터 오늘(2026-07-10) <code style="font-family:var(--mono);font-size:12.5px;background:var(--bg-sunk);padding:1px 5px;border-radius:4px;">doc/login.md</code> 추가까지의 개발 현황을 완료/미착수로 구분하고, 상업화를 위해 필요한 다음 단계와 결정 사항을 정리했습니다.</p>
+    <div class="meta-row">
+      <div class="meta-cell">
+        <div class="meta-label">현재 단계</div>
+        <div class="meta-value">Phase 1 (MVP)</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">커밋 수</div>
+        <div class="meta-value">9개</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">로그인 시스템 진행률</div>
+        <div class="meta-value warn">0% (설계 문서만)</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">중간보고 목표일</div>
+        <div class="meta-value warn">2026-07-17 (금)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exec">
+    <div class="eyebrow">핵심 요약</div>
+    <p><b>지금까지 완료된 부분</b>: MARS(제작)·Master(진행) 두 축의 뉴스 큐시트 파이프라인은 vMix·OBS 두 장비 모두에서 실기기 검증까지 마쳤고, Blackmagic Videohub 라우터 연동도 1단계(크로스포인트 전환)까지 실장비로 확인됐습니다. 이 부분은 상업화 논의와 무관하게 <b>제품으로서 이미 동작하는 실체</b>입니다.</p>
+    <p><b>로그인/계정 시스템은 코드가 0%입니다.</b> <code style="font-family:var(--mono);font-size:12px;">doc/login.md</code>는 Next.js + Supabase + Vercel 스택의 구현 가이드이지만, 저장소 어디에도 <code style="font-family:var(--mono);font-size:12px;">package.json</code>·Next.js·Supabase 관련 코드가 존재하지 않습니다 — 계획서만 있고 착수 전입니다.</p>
+    <p><b>더 중요한 문제는, 이 계획서가 기존 PRD와 서로 다른 백엔드 스택을 가정하고 있다는 점입니다.</b> 최초 PRD(<code style="font-family:var(--mono);font-size:12px;">NEWS_BROADCAST_PRD.md</code>)는 Phase 2 백엔드로 Node.js+Express+PostgreSQL+JWT를 이미 예정해뒀는데, 이번 login.md는 완전히 다른 Next.js+Supabase 체계를 전제합니다. 또한 이 제품의 핵심 가치(vMix/OBS/Videohub 같은 LAN 전용 장비의 실시간 제어)는 애초에 클라우드에서 직접 닿을 수 없는 영역이라, "로그인이 붙은 SaaS"가 되더라도 지금의 <code style="font-family:var(--mono);font-size:12px;">server.py</code> 같은 현장 로컬 에이전트는 반드시 남아야 합니다. 이 구조적 결정이 서지 않은 채로 로그인 구현에 먼저 들어가면 다음 주 작업이 되돌아올 위험이 큽니다 — 아래 "결정이 필요한 것" 항목을 먼저 보시길 권합니다.</p>
+  </div>
+
+  <section id="done">
+    <div class="section-head">
+      <div class="eyebrow">Section 1</div>
+      <h2>개발 완료 및 테스트 완료</h2>
+      <p class="section-desc">아래는 전부 <b>실제 vMix·OBS·Videohub 하드웨어</b>로 검증까지 마친 항목입니다. Mock 테스트만 거친 항목은 별도로 "설계 완료·실장비 미검증"으로 구분했습니다.</p>
+    </div>
+
+    <div class="group">
+      <div class="group-title">뉴스 큐시트 핵심 파이프라인 (MARS ↔ Master)</div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>MARS→Master 파일 기반 핸드오프</b><span>JSON export/postMessage 방식, 2회차 이상 연속 핸드오프까지 검증</span></div><span class="chip done">실장비 검증</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>타입별 전환효과 원칙 (REPORT/ANCHOR/CM/BRIDGE)</b><span>Cut/Mix/Wipe/Zoom/Slide/Merge 7종 전부 실vMix로 개별 확인</span></div><span class="chip done">실장비 검증</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>자막(CG) IN/OUT 타이밍 + 8슬롯 오버레이</b><span>드래그 트림, 자동 예약 타이머, GT 필드 매칭까지 실vMix 확인</span></div><span class="chip done">실장비 검증</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>vMix 서버 리스트 재생 (SRV1~3)</b><span>프리롤/조기전환/프레임 트림, SRV 충돌 방지까지 다단계 실측 후 안정화</span></div><span class="chip done">실장비 검증</span></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">장비 어댑터</div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>vMix 어댑터</b><span>스위처(PGM/PVW), 클립, CG, 전환효과, GT 타이틀 전 기능 실장비 검증</span></div><span class="chip done">실장비 검증</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>OBS 어댑터 (병렬 버전)</b><span>씬 전환, 클립 재생, CG 브라우저 오버레이 실OBS 검증, 로케일 버그 등 발견·수정</span></div><span class="chip done">실장비 검증</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>Blackmagic Videohub 라우터 (Phase 1)</b><span>server.py 상시 TCP 클라이언트, 크로스포인트 전환을 실장비+별도 소켓으로 이중 검증</span></div><span class="chip done">실장비 검증</span></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">운영 안전장치 · UX</div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>30개 항목 UX 안전 감사</b><span>fake-success 토스트, 파괴적 동작 confirm() 게이트, undo, 실시간 배지 동기화 등</span></div><span class="chip done">검증 완료</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>단축키/스위처 팝업/리사이즈 패널</b><span>뉴스·라디오 독립 키맵, 팝업 자체 키 입력 처리까지 검증</span></div><span class="chip done">검증 완료</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>Master 일일 비밀번호 잠금</b><span>⚠ 클라이언트 로컬스토리지 기반 간단 잠금 — "진짜 서버 인증 아님"으로 문서에 명시. login.md가 만들 인증과는 별개 시스템</span></div><span class="chip done">검증 완료 (범위 제한적)</span></div>
+      <div class="row"><div class="dot done"></div><div class="row-body"><b>사용자 가이드/매뉴얼 문서화</b><span>기능별 HTML 가이드, 20페이지 전체 매뉴얼, 빌드 스탬프 자동화</span></div><span class="chip done">완료</span></div>
+    </div>
+  </section>
+
+  <section id="gap">
+    <div class="section-head">
+      <div class="eyebrow">Section 2</div>
+      <h2>미착수 · 미완성 개발 항목</h2>
+      <p class="section-desc">코드가 전혀 없거나(설계 문서만 존재), 기존 계획에서 명시적으로 범위 밖으로 미뤄둔 항목입니다.</p>
+    </div>
+
+    <div class="group">
+      <div class="group-title">로그인 / 계정 / 백엔드</div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>로컬 계정 로그인 (login.md 1단계)</b><span>Supabase 프로젝트 자체가 아직 생성되지 않음. 회원가입/로그인/재설정 전부 미구현</span></div><span class="chip gap">0% · 설계만</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>구글·카카오 소셜 로그인 (2단계 A/B)</b><span>OAuth 앱 등록 전 단계, 카카오 이메일 동의 이슈 사전 확인도 미착수</span></div><span class="chip gap">0% · 설계만</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>네이버 로그인 (2단계 C, Custom OAuth)</b><span>Supabase 미지원 provider — 직접 구현 필요, raw API 응답 구조 확인부터 안 됨</span></div><span class="chip gap">0% · 설계만</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>계정 연동/충돌 정책, 보안 체크리스트 (3·6장)</b><span>정책 A/B 중 미결정, RLS/CSRF/재인증 등 항목 미검토</span></div><span class="chip gap">0% · 설계만</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>PRD Phase 2 백엔드 (Node.js+Express+PostgreSQL+JWT+Socket.io)</b><span>최초 PRD에 정의됐으나 착수된 적 없음 — 여전히 Phase 1(JSON 파일 기반)</span></div><span class="chip gap">0% · 미착수</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>멀티유저 권한 체계 (ADMIN/EDITOR 등)</b><span>PRD 3장에 역할 정의는 있으나 실제 인증·권한 검증 로직 없음</span></div><span class="chip gap">0% · 설계만</span></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">장비/제품 확장 (범위 밖으로 명시적으로 미룬 것)</div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>Videohub Phase 2 이후 (VMU/AMU 확장)</b><span>Expansion_PRD/Integration_Guide 문서만 존재</span></div><span class="chip gap">문서만 존재</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>실제 카메라 하드웨어 연동</b><span>여러 세션에 걸쳐 "카메라 미연결, 자리만 매핑된 상태"로 재확인됨 — 아직 실카메라 없음</span></div><span class="chip gap">하드웨어 대기</span></div>
+      <div class="row"><div class="dot gap"></div><div class="row-body"><b>결제/구독/멀티테넌시</b><span>이번 보고서 이전까지 전혀 논의되지 않았던 영역</span></div><span class="chip gap">미논의</span></div>
+    </div>
+  </section>
+
+  <section id="decisions">
+    <div class="section-head">
+      <div class="eyebrow">Section 3 · Critical</div>
+      <h2>로그인 구현 전에 먼저 결정해야 하는 것</h2>
+      <p class="section-desc">아래 두 가지는 코드를 짜기 전에 방향이 서야 하는 사업/아키텍처 결정입니다. 결정 없이 login.md 순서대로 바로 구현에 들어가면, 나중에 사업 모델이 바뀔 때 되돌리는 비용이 큽니다.</p>
+    </div>
+
+    <div class="decision">
+      <div class="decision-head">
+        <span class="decision-num">결정 1</span>
+        <span class="decision-name">상업화 모델: 온프레미스 라이선스 vs 클라우드 SaaS vs 하이브리드</span>
+      </div>
+      <p>현재 제품의 본질은 한 방송사의 로컬 네트워크 안에서 vMix·OBS·Videohub 같은 물리 장비를 직접 제어하는 도구입니다. 이 특성 때문에 "로그인"이 의미하는 바가 사업 모델에 따라 완전히 달라집니다.</p>
+      <div class="options">
+        <div class="opt"><b>A. 온프레미스 라이선스 판매</b> — 방송사마다 독립 설치(지금과 동일한 구조). 로그인은 사실상 "제품 잠금/라이선스 키 검증" 수준이면 충분 — 지금의 일일 비밀번호 잠금을 정식 라이선스 체계로 승격하는 정도. Supabase 멀티프로바이더 소셜 로그인은 과한 투자일 수 있음.</div>
+        <div class="opt"><b>B. 클라우드 SaaS (login.md가 전제하는 모델)</b> — 방송사별 계정, 소셜 로그인, 구독. 다만 LAN 하드웨어 제어는 클라우드에서 직접 닿지 않으므로, 방송 현장엔 지금의 <code style="font-family:var(--mono);">server.py</code> 같은 로컬 에이전트가 그대로 남고 클라우드는 "계정·설정·과금" 계층만 담당하는 하이브리드 구조가 됨.</div>
+        <div class="opt reco"><b>권장: B의 하이브리드 형태로 결정하되, 1단계 로컬 계정만 먼저 검증</b> — 소셜 로그인 3종(구글/카카오/네이버)까지 한 번에 벌이기보다, 로컬 계정으로 "계정이 무엇을 잠그는가"가 실제로 명확해진 뒤 확장하는 편이 login.md 자체의 작성 원칙("1단계를 먼저 완전히 검증한 뒤 2단계로")과도 일치함.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="decision-head">
+        <span class="decision-num">결정 2</span>
+        <span class="decision-name">백엔드 스택 정리: 기존 PRD(Node+Express+PostgreSQL) vs 신규 login.md(Next.js+Supabase)</span>
+      </div>
+      <p>두 문서가 서로 다른 백엔드를 가정한 채 저장소에 함께 존재합니다. 어느 한쪽이 다른 쪽을 대체하는 것인지, 아니면 로그인/계정만 Supabase로 분리하고 큐시트·자막 등 나머지 데이터는 기존 PRD대로 PostgreSQL+Express로 가는 것인지 문서상 명시가 없습니다. 이 정리 없이 진행하면 나중에 두 백엔드가 중복 관리되는 상태로 굳어질 위험이 있습니다.</p>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="section-head">
+      <div class="eyebrow">Section 4</div>
+      <h2>상업화를 위한 다음 단계 로드맵</h2>
+      <p class="section-desc">결정 1·2가 선행된다는 전제로, 이후 단계를 순서대로 정리했습니다.</p>
+    </div>
+
+    <div class="phase">
+      <div class="phase-tag">A</div>
+      <div class="phase-title">사업 모델 확정 + 백엔드 스택 정리</div>
+      <div class="phase-body">위 결정 1·2를 문서로 확정. login.md를 확정된 모델에 맞춰 개정(하이브리드 구조 반영).</div>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">B</div>
+      <div class="phase-title">로컬 계정 로그인 1단계 구현 + 실사용 검증</div>
+      <div class="phase-body">Supabase 프로젝트 생성부터 회원가입~비밀번호 재설정까지 login.md 2장 체크리스트 5개 항목을 실제로 통과. 이 프로젝트의 기존 원칙(실기기 검증 없이 "완료" 선언 금지)을 그대로 적용 — mock 테스트만으로 다음 단계로 넘어가지 않는다.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">C</div>
+      <div class="phase-title">소셜 로그인 단계적 추가 (구글 → 카카오 → 네이버)</div>
+      <div class="phase-body">네이버는 Custom OAuth 직접 구현이라 가장 리스크가 크므로 가장 늦게, raw curl 검증부터 시작.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">D</div>
+      <div class="phase-title">계정 연동 정책 + 보안 점검(login.md 5·6장) 확정</div>
+      <div class="phase-body">RLS, CSRF state 검증, service_role 키 노출 점검까지 배포 전 필수 항목으로 체크.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">E</div>
+      <div class="phase-title">방송사별 데이터 격리 + 과금/구독 설계</div>
+      <div class="phase-body">멀티테넌시 스키마, 요금제별 기능 제한, 결제 연동 — 이번 보고서 기준 전혀 설계되지 않은 영역이라 별도 기획 세션 필요.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">F</div>
+      <div class="phase-title">파일럿 방송사 실운영 + 실카메라 하드웨어 연동</div>
+      <div class="phase-body">현재 무카메라 상태를 실제 방송사 환경에서 검증. 라이선싱/보안 최종 감사.</div>
+    </div>
+  </section>
+
+  <section id="tasks">
+    <div class="section-head">
+      <div class="eyebrow">Section 5</div>
+      <h2>다음주 금요일(2026-07-17)까지 — 중간보고서를 충실히 하기 위한 할 일</h2>
+      <p class="section-desc">이번 주 안에 login.md 전체를 구현하는 것이 목표가 아니라, <b>금요일 중간보고 시점에 "결정된 방향 + 검증된 최소 결과물"을 보여줄 수 있는 상태</b>를 만드는 것이 목표입니다. 우선순위 순으로 정렬했습니다.</p>
+    </div>
+    <div class="task-table">
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>결정 1·2 확정 — 사업 모델 + 백엔드 스택</b><span>편성장/의사결정권자와 온프레미스·SaaS·하이브리드 중 방향 확정, 문서로 기록</span></div>
+        <div class="task-due"><b>월 7/13</b>최우선</div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>login.md를 확정된 방향에 맞춰 개정</b><span>하이브리드 구조라면 "로컬 에이전트 vs 클라우드 계정 계층" 경계를 문서에 명시</span></div>
+        <div class="task-due"><b>월 7/13</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>Supabase 프로젝트 생성 + 환경변수/DB 스키마 준비</b><span>login.md 1.1~1.3, profiles 테이블 + RLS 정책까지</span></div>
+        <div class="task-due"><b>화 7/14</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>Next.js 프로젝트 스캐폴딩 + 이 저장소와의 관계 정리</b><span>같은 repo인지 별도 repo인지, 정적 HTML(MARS/Master)과 공존 방식 결정</span></div>
+        <div class="task-due"><b>화 7/14</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>로컬 계정 회원가입~로그인 최소 구현</b><span>login.md 2.3 순서(가입→인증메일→로그인→로그아웃→비번재설정)</span></div>
+        <div class="task-due"><b>수 7/15</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>1단계 완료 체크리스트 5개 항목 수동 테스트</b><span>login.md 2.5 — mock 아닌 실제 가입/로그인 플로우로 직접 확인</span></div>
+        <div class="task-due"><b>수 7/15</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>구글 OAuth 앱 등록 신청 (콘솔 심사 대기시간 고려해 최대한 먼저)</b><span>login.md 3.2 — 동의화면 게시 전환은 시간이 걸릴 수 있어 선착수</span></div>
+        <div class="task-due"><b>수 7/15</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>카카오 비즈니스 앱 전환 여부 사전 확인</b><span>이메일 동의 이슈를 구현 전에 먼저 차단 — login.md가 이미 경고한 리스크</span></div>
+        <div class="task-due"><b>목 7/16</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>네이버 개발자센터 앱 등록 + raw curl로 인가/토큰/프로필 API 구조 선확인</b><span>login.md 4.4 원칙 — 코드 작성 전에 실제 응답 구조부터 확인 (이번 프로젝트가 Videohub를 nc로 먼저 찔러본 것과 동일한 방식)</span></div>
+        <div class="task-due"><b>목 7/16</b></div>
+      </div>
+      <div class="task">
+        <div class="task-box"></div>
+        <div class="task-main"><b>중간보고서 초안에 이번 주 실제 진행 결과 반영해 최종화</b><span>결정 사항, 완료된 체크리스트, 남은 리스크를 이 보고서에 업데이트</span></div>
+        <div class="task-due"><b>금 7/17</b>보고일</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="eyebrow">Note</div>
+    <p><b>범위에 대한 제안</b>: 이번 주에 구글·카카오·네이버 3개 provider를 전부 동작시키는 것은 현실적으로 빠듯합니다. login.md 자체도 "1단계를 완전히 검증한 뒤 2단계로"를 작성 원칙으로 명시하고 있으므로, 금요일 중간보고의 핵심은 <b>"로컬 계정 1단계가 실제로 동작함을 보여주는 것" + "결정 1·2가 문서로 확정된 것"</b> 두 가지면 충분합니다. 소셜 로그인 3종은 다음 스프린트로 넘겨도 되는 항목입니다.</p>
+  </section>
+
+  <footer>
+    <span>작성 기준: git log 9 commits · 세션 메모리 30건 · doc/login.md, doc/NEWS_BROADCAST_PRD.md, doc/system-architecture.md 대조</span>
+    <span>작성일 2026-07-10 (금) · 보고 목표일 2026-07-17 (금)</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

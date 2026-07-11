@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바이브 코딩 교재 — 비기너 · 중급자 트랙 안내</title>
+<style>
+  :root{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --green:#1f9a56; --green-bg:rgba(31,154,86,.09);
+    --blue:#4a6fa5; --blue-bg:rgba(74,111,165,.09);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+    --mono: ui-monospace, "SF Mono", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+      --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+      --accent:#e2a63d; --accent-ink:#f4c877;
+      --green:#3fcf7a; --green-bg:rgba(63,207,122,.11);
+      --blue:#7da7dd; --blue-bg:rgba(125,167,221,.11);
+      --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .page{max-width:940px;margin:0 auto;padding:48px 22px 100px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);display:flex;align-items:center;gap:8px;margin:0 0 10px;}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;}
+  h1{font-size:clamp(24px,3.2vw,32px);margin:0 0 8px;font-weight:800;letter-spacing:-.01em;}
+  .lede{color:var(--ink-dim);font-size:14.5px;max-width:66ch;}
+  .back{font-size:12.5px;color:var(--ink-faint);text-decoration:none;}
+  .back:hover{color:var(--accent);}
+
+  .tracks{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0;}
+  .track{border-radius:12px;padding:26px 28px;border:1px solid var(--line-strong);background:var(--bg-raised);box-shadow:var(--shadow);display:flex;flex-direction:column;}
+  .track.beginner{border-top:4px solid var(--green);}
+  .track.inter{border-top:4px solid var(--blue);}
+  .t-level{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
+  .track.beginner .t-level{color:var(--green);}
+  .track.inter .t-level{color:var(--blue);}
+  .t-title{font-size:19px;font-weight:800;margin:6px 0 4px;}
+  .t-tagline{font-size:13px;color:var(--ink-dim);margin-bottom:14px;}
+  .t-for{font-size:12.5px;background:var(--bg-sunk);border-radius:7px;padding:9px 12px;margin-bottom:14px;}
+  .t-for b{font-size:11px;font-family:var(--mono);letter-spacing:.05em;color:var(--ink-faint);display:block;margin-bottom:3px;}
+  .t-chapters{font-size:13px;margin:0;padding-left:20px;color:var(--ink-dim);flex:1;}
+  .t-chapters li{margin:4px 0;}
+  .t-chapters .star{color:var(--accent);font-weight:700;}
+  .t-cta{display:block;text-align:center;margin-top:18px;padding:11px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;}
+  .track.beginner .t-cta{background:var(--green-bg);color:var(--green);border:1px solid var(--green);}
+  .track.inter .t-cta{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);}
+  .t-extra{margin-top:12px;font-size:12px;color:var(--ink-faint);}
+  .t-extra a{color:var(--ink-dim);}
+
+  .opinion{border:1px solid var(--accent);background:var(--bg-raised);border-radius:10px;padding:20px 24px;margin:34px 0;box-shadow:var(--shadow);}
+  .opinion .op-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  .opinion p{font-size:14px;margin:8px 0;max-width:76ch;}
+
+  .divider-q{text-align:center;font-size:14px;color:var(--ink-dim);margin:6px 0 0;}
+  .divider-q b{color:var(--ink);}
+
+  .archive-note{font-size:12.5px;color:var(--ink-faint);border:1px dashed var(--line-strong);border-radius:8px;padding:12px 16px;margin-top:30px;}
+  .archive-note a{color:var(--ink-dim);}
+
+  footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  @media (max-width:700px){ .tracks{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">Vibe Coding Curriculum</div>
+  <h1>바이브 코딩 교재 — 트랙 안내</h1>
+  <p class="lede">한 권에 섞여 있던 내용을 <b>비기너</b>와 <b>중급자</b> 두 트랙으로 나눴습니다. 아래 질문 하나로 자신의 트랙을 고르세요.</p>
+  <p class="divider-q">🧭 <b>"내가 만든 프로그램을 Git으로 관리하며 웹에 배포해 본 적이 있는가?"</b> — 아니오 → 비기너 / 예 → 중급자</p>
+  <a class="back" href="../index.html">← 문서 모음으로 돌아가기</a>
+
+  <div class="tracks">
+    <div class="track beginner">
+      <div class="t-level">Track 1 · Beginner</div>
+      <div class="t-title">비기너 교재 — 6단계</div>
+      <div class="t-tagline">코드를 몰라도, 말로 만드는 나의 첫 프로그램</div>
+      <div class="t-for"><b>이런 분을 위한 트랙</b>프로그래밍 경험이 없거나, AI 코딩 도구를 처음 설치하는 분. "아이디어는 있는데 어디서 시작할지 모르겠다"는 분.</div>
+      <ol class="t-chapters">
+        <li>환경 구축 — 설치와 도구 선택</li>
+        <li>PRD 작성 → AI 코딩 → 로컬 테스트</li>
+        <li>Git·GitHub — 버전 관리와 협업</li>
+        <li>웹 배포 — Vercel·GitHub Pages</li>
+        <li>데이터 저장 — localStorage vs 실제 DB(Supabase)</li>
+        <li>중급자로 가는 길 — 로드맵과 학습 자원</li>
+      </ol>
+      <a class="t-cta" href="beginner/바이브코딩-비기너-교재-6단계.html">비기너 교재 열기 →</a>
+    </div>
+
+    <div class="track inter">
+      <div class="t-level">Track 2 · Intermediate</div>
+      <div class="t-title">중급자 교재 — 5장</div>
+      <div class="t-tagline">"만들 수 있다"에서, "팔 수 있다"로</div>
+      <div class="t-for"><b>이런 분을 위한 트랙</b>비기너 6단계를 마친 분. 만들 수는 있는데 자꾸 되돌아오는 버그, 늘어나는 반복 작업, "이걸 진짜 서비스로 내도 되나"라는 고민이 시작된 분.</div>
+      <ol class="t-chapters">
+        <li>작업 강도별 모델·도구 운용</li>
+        <li>클로드 200% — 스킬·확장 기능·워크플로우</li>
+        <li><span class="star">★</span> 실전 사례 연구 — 방송 자동화 3주의 기록 (실패 패턴 6가지)</li>
+        <li>프로덕션 하드닝 — 보안·성능·안정성·유지보수</li>
+        <li>AI 에이전트 스택으로 확장</li>
+      </ol>
+      <a class="t-cta" href="intermediate/바이브코딩-중급자-교재.html">중급자 교재 열기 →</a>
+      <div class="t-extra">딸림 문서: <a href="intermediate/model-selection-guide.html">모델 선택 가이드</a> · <a href="intermediate/바이브코딩_AI에이전트_스택_설명서.html">AI 에이전트 스택 설명서</a></div>
+    </div>
+  </div>
+
+  <div class="opinion">
+    <div class="op-tag">💡 편집 의견 — 왜 이렇게 나눴는가</div>
+    <p><b>나눈 기준은 "지식의 양"이 아니라 "질문의 종류"입니다.</b> 비기너의 질문은 "어떻게 만들죠?"이고, 중급자의 질문은 "그게 정말 되는지 어떻게 알죠?"입니다. 기존 통합본(1~8장)은 이 두 질문이 한 권에 섞여 있어서, 비기너에겐 7~8장이 벽이 되고 중급자에겐 1~6장이 소음이 됩니다.</p>
+    <p><b>중급자 교재의 척추는 3장(실전 사례 연구)으로 삼았습니다.</b> 통합본 7~8장(클로드 활용, 상용화)은 좋은 '기능 설명'이지만, 중급자를 실제로 성장시키는 건 기능 목록이 아니라 실패의 패턴 인식입니다. 그래서 이 저장소에서 실제로 진행한 방송 자동화 프로젝트 3주의 기록 — mock 통과가 완료가 아니었던 6가지 사례, 같은 증상 뒤의 다른 원인 3개, 8곳에 흩어진 조용한 폴백 — 을 새 장으로 집필해 넣었습니다. <b>교재 자체가 이 저장소의 산출물이라는 것이 이 커리큘럼의 가장 큰 차별점입니다.</b></p>
+    <p><b>딸림 문서 2권(모델 선택·에이전트 스택)은 중급자 트랙에 배속했습니다.</b> 모델을 골라 쓰는 고민과 24시간 에이전트는 비기너에게는 아직 없는 문제이기 때문입니다. 통합본 원본(1~8장)은 archive에 보존되어 있고, 중급자 교재의 2·4장에서 상세가 필요할 때 링크로 되돌아갑니다.</p>
+  </div>
+
+  <div class="archive-note">
+    📦 <b>판본 이력 (확정)</b> — 계보: 비기너 v1.0(5단계) → 통합본 v1.1(6단계) → <b>통합본 v1.2(1~8장, 상용화 추가)</b> → <b>2026-07-10 분권</b>: 비기너 교재 <b>v2.0</b>(통합본 1~6장 승계) + 중급자 교재 <b>v1.0</b>(신규 집필).<br>
+    분권 이후 두 권은 각자 독립적으로 버전이 올라가며, <b>통합본 v1.2는 동결(더 이상 갱신하지 않음)</b> — 원본 전체가 <b>archive/</b>에 보존돼 있고("분권 전 원본" 표기), 내용이 겹칠 때는 이 페이지가 안내하는 현행판이 항상 우선입니다.
+  </div>
+
+  <footer>
+    <span>바이브 코딩 교재 트랙 · beginner / intermediate / archive</span>
+    <span>개편일 2026-07-10</span>
+  </footer>
+
+</div>
+</body>
+</html>

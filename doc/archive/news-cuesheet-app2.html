@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뉴스 큐시트 진행 시스템 v0.3</title>
+<style>
+:root{
+  --bg:#0d0f14;--s1:#161921;--s2:#1e2230;--s3:#252a3a;
+  --b1:#2e3448;--b2:#3a4060;
+  --red:#e8364a;--blue:#3d8ef0;--green:#2ec97a;--amber:#f5a623;--purple:#9b6dff;--orange:#ff6b35;--teal:#1ac9c9;
+  --text:#e8eaf0;--t2:#9aa0b8;--t3:#5c6480;
+  --cam1:#e8364a;--cam2:#3d8ef0;--cam3:#2ec97a;--cam4:#f5a623;
+  --srv1:#ff6b35;--srv2:#9b6dff;--srv3:#5c7080;
+  --mono:'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── 헤더 ── */
+#hdr{background:var(--s1);border-bottom:1px solid var(--b1);height:46px;display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;}
+.logo{font-size:13px;font-weight:700;color:var(--red);letter-spacing:-.5px;white-space:nowrap;}
+.prog-info{flex:1;min-width:0;}
+.prog-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog-meta{font-size:10px;color:var(--t2);}
+.live-badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:1px;animation:blink 1.4s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+#clock{font-family:var(--mono);font-size:10px;color:var(--t3);flex-shrink:0;}
+.elapsed{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber);letter-spacing:2px;flex-shrink:0;}
+.tab-bar{display:flex;gap:2px;margin-left:6px;flex-shrink:0;}
+.tab{padding:4px 12px;border-radius:3px;cursor:pointer;font-size:11px;color:var(--t2);border:1px solid transparent;transition:all .15s;}
+.tab.active{background:var(--s3);border-color:var(--b2);color:var(--text);}
+.tab:hover:not(.active){color:var(--text);background:var(--s2);}
+
+/* ── 메인 ── */
+#main{display:flex;flex:1;overflow:hidden;}
+
+/* ── 큐시트 패널 ── */
+#cue-panel{width:600px;flex-shrink:0;border-right:1px solid var(--b1);display:flex;flex-direction:column;}
+#cue-toolbar{background:var(--s1);border-bottom:1px solid var(--b1);padding:6px 10px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+.btn{padding:4px 9px;border-radius:3px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:10px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.btn:hover{background:var(--s3);}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff;}
+.btn.primary:hover{background:#c42a3c;}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff;}
+.btn.blue:hover{opacity:.85;}
+.btn.green{background:var(--green);border-color:var(--green);color:#000;font-weight:700;}
+.btn-sep{width:1px;height:16px;background:var(--b1);flex-shrink:0;}
+.total-t{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--t2);}
+
+/* 큐시트 테이블 */
+#cue-list{flex:1;overflow-y:auto;}
+#cue-list::-webkit-scrollbar{width:3px;}
+#cue-list::-webkit-scrollbar-thumb{background:var(--b2);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--s2);color:var(--t3);font-size:9px;font-weight:600;padding:5px 5px;text-align:left;border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:2;}
+tbody tr{border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s;}
+tbody tr:hover{background:var(--s2);}
+tbody tr.current{background:rgba(232,54,74,.1);border-left:3px solid var(--red);}
+tbody tr.done{opacity:.35;}
+tbody tr.divrow{background:var(--s2);pointer-events:none;}
+td{padding:5px 5px;vertical-align:middle;}
+
+.no-cell{font-family:var(--mono);font-size:9px;color:var(--t3);}
+
+/* 타입 뱃지 */
+.tbadge{display:inline-flex;align-items:center;justify-content:center;padding:1px 5px;border-radius:2px;font-size:8px;font-weight:700;border:1px solid;white-space:nowrap;}
+.t-TITLE{color:#d0a0ff;border-color:#d0a0ff;background:rgba(208,160,255,.12);}
+.t-CM{color:var(--t3);border-color:var(--t3);background:rgba(92,100,128,.12);}
+.t-OPEN{color:var(--amber);border-color:var(--amber);background:rgba(245,166,35,.12);}
+.t-ANCHOR{color:var(--cam1);border-color:var(--cam1);background:rgba(232,54,74,.12);}
+.t-BRIDGE{color:var(--teal);border-color:var(--teal);background:rgba(26,201,201,.12);}
+.t-REPORT{color:var(--green);border-color:var(--green);background:rgba(46,201,122,.12);}
+.t-NT{color:var(--orange);border-color:var(--orange);background:rgba(255,107,53,.12);}
+.t-LIVE{color:var(--red);border-color:var(--red);background:rgba(232,54,74,.2);}
+.t-WEATHER{color:var(--cam2);border-color:var(--cam2);background:rgba(61,142,240,.12);}
+.t-STOCK{color:var(--purple);border-color:var(--purple);background:rgba(155,109,255,.12);}
+.t-CLOSING{color:var(--amber);border-color:var(--amber);background:rgba(245,166,35,.12);}
+
+.item-name{font-size:11px;line-height:1.3;}
+.reporter-cell{font-size:10px;color:var(--blue);}
+.dur-cell{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.total-cell{font-family:var(--mono);font-size:9px;color:var(--t3);}
+.subtitle-cell{font-size:10px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* 소스 뱃지 */
+.src-badges{display:flex;gap:2px;flex-wrap:wrap;}
+.sb{font-size:7px;padding:1px 3px;border-radius:2px;border:1px solid;font-weight:700;}
+.sb-cam1{color:var(--cam1);border-color:var(--cam1);background:rgba(232,54,74,.1);}
+.sb-cam2{color:var(--cam2);border-color:var(--cam2);background:rgba(61,142,240,.1);}
+.sb-cam3{color:var(--cam3);border-color:var(--cam3);background:rgba(46,201,122,.1);}
+.sb-cam4{color:var(--cam4);border-color:var(--cam4);background:rgba(245,166,35,.1);}
+.sb-srv1{color:var(--srv1);border-color:var(--srv1);background:rgba(255,107,53,.1);}
+.sb-srv2{color:var(--srv2);border-color:var(--srv2);background:rgba(155,109,255,.1);}
+.sb-srv3{color:var(--srv3);border-color:var(--srv3);background:rgba(92,112,128,.12);}
+
+/* 전환 뱃지 */
+.trans-badge{font-size:7px;padding:1px 4px;border-radius:2px;border:1px solid var(--b2);color:var(--t3);}
+.trans-CUT{color:var(--red);border-color:var(--red);}
+.trans-DISSOLVE{color:var(--blue);border-color:var(--blue);}
+.trans-FADE{color:var(--purple);border-color:var(--purple);}
+
+.warn-flag{color:var(--amber);font-size:9px;margin-left:2px;}
+.divider-label{font-size:9px;color:var(--t3);font-weight:600;text-align:center;padding:2px 0;}
+
+/* ── 우측 패널 ── */
+#ctrl-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* 스위처 */
+#switcher{background:var(--s1);border-bottom:1px solid var(--b1);padding:8px 10px;flex-shrink:0;}
+.sw-title{font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.sw-row{display:flex;gap:4px;margin-bottom:4px;align-items:center;}
+.sw-lbl{font-size:8px;width:32px;flex-shrink:0;font-weight:700;}
+.sw-lbl.pgm{color:var(--red);}
+.sw-lbl.pvw{color:var(--green);}
+.src-btn{flex:1;padding:6px 2px;border-radius:3px;border:1px solid var(--b2);background:var(--s2);color:var(--t3);font-size:9px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2;}
+.src-btn:hover{background:var(--s3);color:var(--text);}
+.src-btn .sub{font-size:6px;font-weight:400;color:var(--t3);}
+.src-btn.pgm-cam1{background:rgba(232,54,74,.2);border-color:var(--cam1);color:var(--cam1);}
+.src-btn.pgm-cam2{background:rgba(61,142,240,.2);border-color:var(--cam2);color:var(--cam2);}
+.src-btn.pgm-cam3{background:rgba(46,201,122,.2);border-color:var(--cam3);color:var(--cam3);}
+.src-btn.pgm-cam4{background:rgba(245,166,35,.2);border-color:var(--cam4);color:var(--cam4);}
+.src-btn.pgm-srv1{background:rgba(255,107,53,.2);border-color:var(--srv1);color:var(--srv1);}
+.src-btn.pgm-srv2{background:rgba(155,109,255,.2);border-color:var(--srv2);color:var(--srv2);}
+.src-btn.pgm-srv3{background:rgba(92,112,128,.2);border-color:var(--srv3);color:#8090a0;}
+.src-btn.pvw-on{background:rgba(46,201,122,.12);border-color:var(--green);color:var(--green);}
+.tr-row{display:flex;gap:4px;align-items:center;margin-top:4px;}
+.tr-lbl{font-size:8px;color:var(--t3);width:32px;}
+.tr-btn{padding:3px 7px;border-radius:3px;border:1px solid var(--b2);background:var(--s2);color:var(--t3);font-size:9px;cursor:pointer;}
+.tr-btn:hover{background:var(--s3);}
+.tr-btn.active{background:var(--s3);border-color:var(--t2);color:var(--text);}
+.do-cut{padding:4px 12px;border-radius:3px;border:1px solid var(--red);background:var(--red);color:#fff;font-size:10px;font-weight:700;cursor:pointer;margin-left:auto;}
+.do-cut:hover{background:#c42a3c;}
+.do-auto{padding:4px 12px;border-radius:3px;border:1px solid var(--green);background:rgba(46,201,122,.15);color:var(--green);font-size:10px;font-weight:700;cursor:pointer;}
+.do-auto:hover{background:rgba(46,201,122,.3);}
+
+/* 서버 카드 */
+#srv-row{display:flex;gap:5px;padding:6px 10px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.srv-card{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:5px 7px;transition:all .2s;}
+.srv-card.on{border-color:var(--srv1);background:rgba(255,107,53,.07);}
+.srv-card.stby{border-color:var(--srv2);background:rgba(155,109,255,.07);}
+.srv-card.spare{opacity:.55;}
+.sc-title{font-size:8px;font-weight:700;margin-bottom:2px;}
+.sc-t1{color:var(--srv1);}.sc-t2{color:var(--srv2);}.sc-t3{color:var(--srv3);}
+.sc-info{font-size:9px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.sc-clip{font-size:8px;color:var(--t3);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-st{font-size:7px;padding:1px 4px;border-radius:2px;display:inline-block;}
+.st-on{background:rgba(255,107,53,.2);color:var(--srv1);border:1px solid var(--srv1);}
+.st-stby{background:rgba(155,109,255,.2);color:var(--srv2);border:1px solid var(--srv2);}
+.st-spare{background:var(--s3);color:var(--t3);border:1px solid var(--b1);}
+.sc-btns{display:flex;gap:3px;margin-top:3px;}
+.sc-btn{flex:1;padding:2px;border-radius:2px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-size:8px;cursor:pointer;}
+.sc-btn:hover{background:var(--s3);color:var(--text);}
+
+/* 현재 아이템 모니터 */
+#now-monitor{background:var(--s1);border-bottom:1px solid var(--b1);padding:8px 10px;flex-shrink:0;}
+.mon-label{font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.now-row{display:flex;align-items:baseline;gap:6px;margin-bottom:2px;flex-wrap:wrap;}
+.now-no{font-size:9px;color:var(--red);font-weight:700;}
+.now-type{margin-right:2px;}
+.now-item{font-size:14px;font-weight:700;color:var(--text);line-height:1.2;}
+.now-rep{font-size:10px;color:var(--blue);}
+.now-rule{font-size:9px;color:var(--t3);background:var(--s2);border-radius:3px;padding:3px 6px;margin:3px 0;display:flex;gap:8px;flex-wrap:wrap;}
+.nr-item{display:flex;gap:3px;align-items:center;}
+.nr-key{color:var(--t3);}
+.nr-val{color:var(--amber);}
+.now-sub{font-size:11px;color:var(--t2);background:var(--s2);border-radius:3px;padding:5px 8px;margin:4px 0;border-left:2px solid var(--orange);min-height:26px;}
+
+/* 클립 리스트 */
+.clip-list{display:flex;flex-direction:column;gap:2px;margin:3px 0;}
+.clip-item{display:flex;align-items:center;gap:5px;padding:3px 6px;background:var(--s2);border-radius:3px;border:1px solid var(--b1);font-size:9px;}
+.clip-num{color:var(--t3);font-family:var(--mono);width:14px;}
+.clip-name{flex:1;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.clip-srv{font-size:7px;padding:1px 4px;border-radius:2px;font-weight:700;}
+.clip-srv.s1{color:var(--srv1);border:1px solid var(--srv1);background:rgba(255,107,53,.1);}
+.clip-srv.s2{color:var(--srv2);border:1px solid var(--srv2);background:rgba(155,109,255,.1);}
+
+/* 타이머 */
+#timer-wrap{display:flex;align-items:center;gap:10px;margin:4px 0;}
+#timer-disp{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--amber);letter-spacing:2px;}
+#timer-disp.warn{color:var(--red);animation:blink 1s infinite;}
+.timer-bar-w{flex:1;}
+.timer-lbl{font-size:8px;color:var(--t3);margin-bottom:2px;}
+#tbar-bg{background:var(--s3);border-radius:2px;height:4px;}
+#tbar{background:var(--amber);height:4px;border-radius:2px;transition:width .5s linear,background .3s;}
+#tbar.warn{background:var(--red);}
+
+/* 네비게이션 */
+#nav-btns{display:flex;gap:5px;margin:5px 0;}
+.nav-btn{flex:1;padding:7px;border-radius:3px;border:1px solid var(--b2);background:var(--s2);color:var(--text);font-size:11px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:4px;}
+.nav-btn:hover{background:var(--s3);}
+.nav-btn.go{background:var(--red);border-color:var(--red);color:#fff;font-weight:700;}
+.nav-btn.go:hover{background:#c42a3c;}
+
+/* CG 자막 */
+#cg-sec{border-top:1px solid var(--b1);padding-top:7px;}
+.sec-lbl{font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+#cg-input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:3px;color:var(--text);font-size:12px;padding:5px 8px;font-family:inherit;margin-bottom:4px;}
+#cg-input:focus{outline:none;border-color:var(--blue);}
+.cg-btns{display:flex;gap:4px;flex-wrap:wrap;}
+
+/* OBS 상태바 */
+#obs-bar{background:var(--s1);border-top:1px solid var(--b1);padding:5px 10px;flex-shrink:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.obs-item{display:flex;align-items:center;gap:4px;}
+.obs-dot{width:6px;height:6px;border-radius:50%;background:var(--t3);}
+.obs-dot.ok{background:var(--green);box-shadow:0 0 4px var(--green);}
+.obs-dot.err{background:var(--red);}
+.obs-dot.connecting{background:var(--amber);animation:blink .8s infinite;}
+.obs-name{font-size:9px;color:var(--t2);}
+.obs-scene{font-size:9px;color:var(--blue);font-family:var(--mono);}
+.obs-sep{width:1px;height:12px;background:var(--b1);}
+.obs-conn-btn{margin-left:auto;padding:2px 7px;border-radius:2px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-size:9px;cursor:pointer;}
+
+/* ── 편집 패널 ── */
+#edit-panel{flex:1;overflow-y:auto;padding:10px;display:none;flex-direction:column;gap:8px;}
+#edit-panel.active{display:flex;}
+#edit-panel::-webkit-scrollbar{width:3px;}
+.fcard{background:var(--s1);border-radius:4px;border:1px solid var(--b1);overflow:hidden;}
+.fhdr{background:var(--s2);padding:7px 10px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:6px;}
+.fhdr-title{font-size:11px;font-weight:600;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;}
+.fg1{display:grid;grid-template-columns:1fr;gap:8px;padding:10px;}
+.fgrp{display:flex;flex-direction:column;gap:3px;}
+.flbl{font-size:8px;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;}
+.finp,.fsel,.fta{background:var(--s2);border:1px solid var(--b2);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:inherit;transition:border-color .12s;width:100%;}
+.finp:focus,.fsel:focus,.fta:focus{outline:none;border-color:var(--blue);}
+.fta{resize:vertical;height:44px;}
+.fsel option{background:var(--s2);}
+.facts{padding:7px 10px;border-top:1px solid var(--b1);display:flex;gap:5px;flex-wrap:wrap;}
+
+/* 영상 클립 편집 */
+.clip-editor{padding:8px 10px;}
+.clip-row{display:flex;gap:5px;align-items:center;margin-bottom:4px;}
+.clip-input{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:3px;color:var(--text);font-size:10px;padding:4px 6px;font-family:var(--mono);}
+.clip-input:focus{outline:none;border-color:var(--blue);}
+.clip-del{padding:2px 6px;border-radius:2px;border:1px solid var(--b2);background:transparent;color:var(--t3);font-size:10px;cursor:pointer;}
+.clip-del:hover{color:var(--red);border-color:var(--red);}
+.add-clip-btn{padding:4px 10px;border-radius:3px;border:1px solid var(--green);background:rgba(46,201,122,.1);color:var(--green);font-size:10px;cursor:pointer;}
+
+/* 소스 체크 */
+.src-checks{display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px;}
+.schk{display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;}
+.schk input{accent-color:var(--blue);}
+
+/* CG 자막 에디터 */
+.cg-editor{padding:8px 10px;}
+.cg-row{display:flex;gap:5px;align-items:center;margin-bottom:4px;}
+.cg-type-sel{background:var(--s2);border:1px solid var(--b2);border-radius:3px;color:var(--t2);font-size:9px;padding:3px 5px;}
+.cg-text-input{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:3px;color:var(--text);font-size:10px;padding:4px 6px;font-family:inherit;}
+.cg-text-input:focus{outline:none;border-color:var(--blue);}
+
+/* 편집 테이블 */
+.etbl-wrap{background:var(--s1);border-radius:4px;border:1px solid var(--b1);overflow:hidden;}
+#etbl{width:100%;border-collapse:collapse;}
+#etbl thead th{background:var(--s2);padding:5px 7px;text-align:left;font-size:8px;color:var(--t3);font-weight:600;border-bottom:1px solid var(--b1);}
+#etbl tbody tr{border-bottom:1px solid var(--b1);cursor:pointer;}
+#etbl tbody tr:hover{background:var(--s2);}
+#etbl tbody tr.selected{background:rgba(61,142,240,.08);}
+#etbl td{padding:5px 7px;font-size:10px;}
+
+/* 미니 카드 뷰 */
+#next-card{background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:5px 8px;margin:3px 0;font-size:9px;}
+.nxt-lbl{font-size:7px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.nxt-type{display:inline-block;margin-right:4px;}
+.nxt-name{color:var(--t2);}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div id="hdr">
+  <div class="logo">NEWS CUE v0.3</div>
+  <div class="prog-info">
+    <div class="prog-title" id="prog-title">MBC 12뉴스 : 평일-특집_21분간</div>
+    <div class="prog-meta" id="prog-meta">ANC: 차예린 | PD: 김현 | 2026-06-04</div>
+  </div>
+  <div class="live-badge">LIVE</div>
+  <div id="clock"></div>
+  <div class="elapsed" id="elapsed">00:00</div>
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('run')">진행</div>
+    <div class="tab" onclick="switchTab('edit')">편집</div>
+  </div>
+</div>
+
+<div id="main">
+
+<!-- ── 좌측: 큐시트 ── -->
+<div id="cue-panel">
+  <div id="cue-toolbar">
+    <button class="btn" onclick="resetAll()">▶ 처음</button>
+    <div class="btn-sep"></div>
+    <button class="btn" onclick="markDone()">✓ 완료</button>
+    <button class="btn" onclick="jumpToCurrent()">◎ 현재위치</button>
+    <div class="btn-sep"></div>
+    <button class="btn blue" onclick="exportJSON()">JSON 저장</button>
+    <span class="total-t" id="total-t">총 —</span>
+  </div>
+  <div id="cue-list">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:26px;">NO</th>
+          <th style="width:52px;">타입</th>
+          <th style="width:110px;">아이템</th>
+          <th style="width:44px;">담당</th>
+          <th style="width:42px;">시간</th>
+          <th style="width:42px;">합계</th>
+          <th>제목/자막</th>
+          <th style="width:80px;">소스</th>
+          <th style="width:50px;">전환</th>
+          <th style="width:32px;"></th>
+        </tr>
+      </thead>
+      <tbody id="cue-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 우측: 컨트롤 ── -->
+<div id="ctrl-panel">
+
+  <!-- 스위처 -->
+  <div id="switcher">
+    <div class="sw-title">비디오 스위처</div>
+    <div class="sw-row">
+      <div class="sw-lbl pgm">PGM<br><span style="font-size:6px;">온에어</span></div>
+      <button class="src-btn" id="pgm-cam1" onclick="setPGM('cam1')">CAM1<span class="sub">메인</span></button>
+      <button class="src-btn" id="pgm-cam2" onclick="setPGM('cam2')">CAM2<span class="sub">서브</span></button>
+      <button class="src-btn" id="pgm-cam3" onclick="setPGM('cam3')">CAM3<span class="sub">와이드</span></button>
+      <button class="src-btn" id="pgm-cam4" onclick="setPGM('cam4')">CAM4<span class="sub">클로즈</span></button>
+      <button class="src-btn" id="pgm-srv1" onclick="setPGM('srv1')">SRV1<span class="sub">온에어</span></button>
+      <button class="src-btn" id="pgm-srv2" onclick="setPGM('srv2')">SRV2<span class="sub">대기</span></button>
+      <button class="src-btn" id="pgm-srv3" onclick="setPGM('srv3')">SRV3<span class="sub">예비</span></button>
+    </div>
+    <div class="sw-row">
+      <div class="sw-lbl pvw">PVW<br><span style="font-size:6px;">프리뷰</span></div>
+      <button class="src-btn" id="pvw-cam1" onclick="setPVW('cam1')">CAM1<span class="sub">메인</span></button>
+      <button class="src-btn" id="pvw-cam2" onclick="setPVW('cam2')">CAM2<span class="sub">서브</span></button>
+      <button class="src-btn" id="pvw-cam3" onclick="setPVW('cam3')">CAM3<span class="sub">와이드</span></button>
+      <button class="src-btn" id="pvw-cam4" onclick="setPVW('cam4')">CAM4<span class="sub">클로즈</span></button>
+      <button class="src-btn" id="pvw-srv1" onclick="setPVW('srv1')">SRV1<span class="sub">온에어</span></button>
+      <button class="src-btn" id="pvw-srv2" onclick="setPVW('srv2')">SRV2<span class="sub">대기</span></button>
+      <button class="src-btn" id="pvw-srv3" onclick="setPVW('srv3')">SRV3<span class="sub">예비</span></button>
+    </div>
+    <div class="tr-row">
+      <div class="tr-lbl">전환</div>
+      <button class="tr-btn active" id="tr-CUT" onclick="setTrans('CUT')">CUT</button>
+      <button class="tr-btn" id="tr-DISSOLVE" onclick="setTrans('DISSOLVE')">DISSOLVE</button>
+      <button class="tr-btn" id="tr-FADE" onclick="setTrans('FADE')">FADE</button>
+      <button class="do-auto" onclick="doAuto()">AUTO</button>
+      <button class="do-cut" onclick="doCut()">CUT</button>
+    </div>
+  </div>
+
+  <!-- 서버 카드 -->
+  <div id="srv-row">
+    <div class="srv-card on" id="sc1">
+      <div class="sc-title sc-t1">● SRV1 온에어</div>
+      <div class="sc-info" id="sc1-info">—</div>
+      <div class="sc-clip" id="sc1-clip">—</div>
+      <span class="sc-st st-on" id="sc1-st">ON AIR</span>
+      <div class="sc-btns">
+        <button class="sc-btn" onclick="mediaCtrl('SERVER1','play')">▶</button>
+        <button class="sc-btn" onclick="mediaCtrl('SERVER1','stop')">⏹</button>
+        <button class="sc-btn" onclick="mediaCtrl('SERVER1','restart')">↺</button>
+      </div>
+    </div>
+    <div class="srv-card stby" id="sc2">
+      <div class="sc-title sc-t2">◎ SRV2 대기</div>
+      <div class="sc-info" id="sc2-info">—</div>
+      <div class="sc-clip" id="sc2-clip">—</div>
+      <span class="sc-st st-stby" id="sc2-st">STANDBY</span>
+      <div class="sc-btns">
+        <button class="sc-btn" onclick="mediaCtrl('SERVER2','play')">▶</button>
+        <button class="sc-btn" onclick="mediaCtrl('SERVER2','stop')">⏹</button>
+        <button class="sc-btn" onclick="mediaCtrl('SERVER2','restart')">↺</button>
+      </div>
+    </div>
+    <div class="srv-card spare" id="sc3">
+      <div class="sc-title sc-t3">○ SRV3 예비</div>
+      <div class="sc-info" id="sc3-info">예비</div>
+      <div class="sc-clip" id="sc3-clip">—</div>
+      <span class="sc-st st-spare" id="sc3-st">SPARE</span>
+      <div class="sc-btns">
+        <button class="sc-btn" style="color:var(--red);border-color:var(--red);" onclick="emergencySRV3()">⚠ 긴급</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 현재 아이템 모니터 -->
+  <div id="now-monitor">
+    <div class="mon-label">현재 진행 중</div>
+    <div class="now-row">
+      <span class="now-no" id="now-no">—</span>
+      <span class="now-type" id="now-type"></span>
+      <span class="now-item" id="now-item">방송 시작 전</span>
+      <span class="now-rep" id="now-rep"></span>
+    </div>
+    <!-- 자동 규칙 표시 -->
+    <div class="now-rule" id="now-rule">
+      <span class="nr-item"><span class="nr-key">카메라:</span><span class="nr-val" id="nr-cam">—</span></span>
+      <span class="nr-item"><span class="nr-key">서버:</span><span class="nr-val" id="nr-srv">—</span></span>
+      <span class="nr-item"><span class="nr-key">전환IN:</span><span class="nr-val" id="nr-in">—</span></span>
+      <span class="nr-item"><span class="nr-key">전환OUT:</span><span class="nr-val" id="nr-out">—</span></span>
+      <span class="nr-item"><span class="nr-key">OBS씬:</span><span class="nr-val" id="nr-scene">—</span></span>
+    </div>
+    <div class="now-sub" id="now-sub">큐 아이템을 선택하세요</div>
+    <!-- 영상 클립 -->
+    <div class="clip-list" id="now-clips"></div>
+    <!-- 다음 아이템 미리보기 -->
+    <div id="next-card">
+      <div class="nxt-lbl">다음 아이템</div>
+      <span class="nxt-type" id="nxt-type"></span>
+      <span class="nxt-name" id="nxt-name">—</span>
+    </div>
+
+    <div id="timer-wrap">
+      <div id="timer-disp">00:00</div>
+      <div class="timer-bar-w">
+        <div class="timer-lbl" id="timer-lbl">잔여 시간</div>
+        <div id="tbar-bg"><div id="tbar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div id="nav-btns">
+      <button class="nav-btn" onclick="prevCue()">◀ 이전</button>
+      <button class="nav-btn go" onclick="startCurrent()">▶ 시작</button>
+      <button class="nav-btn" onclick="nextCue()">다음 ▶</button>
+    </div>
+    <div id="cg-sec">
+      <div class="sec-lbl">CG 자막</div>
+      <input id="cg-input" placeholder="자막 텍스트 입력...">
+      <div class="cg-btns">
+        <button class="btn blue" onclick="sendCG()">OBS 전송</button>
+        <button class="btn" onclick="clearCG()">자막 해제</button>
+        <button class="btn" onclick="fillCGfromCue()">큐에서 가져오기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBS 상태바 -->
+  <div id="obs-bar">
+    <div class="obs-item"><div class="obs-dot" id="obs-dot"></div><span class="obs-name">OBS</span><span class="obs-scene" id="obs-pgm-disp">미연결</span></div>
+    <div class="obs-sep"></div>
+    <div class="obs-item"><div class="obs-dot" style="background:var(--amber);" id="s1-dot"></div><span class="obs-name" style="color:var(--srv1);">SRV1</span></div>
+    <div class="obs-item"><div class="obs-dot" id="s2-dot"></div><span class="obs-name" style="color:var(--srv2);">SRV2</span></div>
+    <div class="obs-item"><div class="obs-dot" id="s3-dot"></div><span class="obs-name" style="color:var(--srv3);">SRV3</span></div>
+    <button class="obs-conn-btn" onclick="showConnSetup()">연결 설정</button>
+  </div>
+
+  <!-- 편집 패널 -->
+  <div id="edit-panel">
+    <!-- 프로그램 정보 -->
+    <div class="fcard">
+      <div class="fhdr"><span class="fhdr-title">프로그램 정보</span></div>
+      <div class="fg3">
+        <div class="fgrp"><div class="flbl">프로그램명</div><input class="finp" id="ep-title" value="MBC 12뉴스 : 평일-특집_21분간"></div>
+        <div class="fgrp"><div class="flbl">앵커 (ANC)</div><input class="finp" id="ep-anc" value="차예린"></div>
+        <div class="fgrp"><div class="flbl">PD</div><input class="finp" id="ep-pd" value="김현"></div>
+      </div>
+    </div>
+
+    <!-- 아이템 편집 -->
+    <div class="fcard">
+      <div class="fhdr"><span class="fhdr-title" id="form-mode-lbl">새 아이템</span><button class="btn" style="margin-left:auto;" onclick="cancelEdit()">취소</button></div>
+      <div class="fg3">
+        <div class="fgrp"><div class="flbl">아이템명</div><input class="finp" id="f-item" placeholder="[12시] 6.3 결과"></div>
+        <div class="fgrp"><div class="flbl">담당 기자</div><input class="finp" id="f-reporter" placeholder="이문현"></div>
+        <div class="fgrp">
+          <div class="flbl">아이템 타입</div>
+          <select class="fsel" id="f-type" onchange="onTypeChange()">
+            <option value="TITLE">TITLE — 타이틀</option>
+            <option value="CM">CM — 광고</option>
+            <option value="OPEN">OPEN — 오프닝</option>
+            <option value="ANCHOR">ANCHOR — 단신</option>
+            <option value="BRIDGE">BRIDGE — 브리지</option>
+            <option value="REPORT" selected>REPORT — 리포트</option>
+            <option value="NT">NT — 뉴스탑</option>
+            <option value="LIVE">LIVE — 중계</option>
+            <option value="WEATHER">WEATHER — 날씨</option>
+            <option value="STOCK">STOCK — 증권</option>
+            <option value="CLOSING">CLOSING — 클로징</option>
+          </select>
+        </div>
+        <div class="fgrp"><div class="flbl">시간 (MM:SS)</div><input class="finp" id="f-dur" placeholder="02:00"></div>
+        <div class="fgrp"><div class="flbl">OBS 씬명 (자동)</div><input class="finp" id="f-scene" placeholder="자동 생성됨"></div>
+        <div class="fgrp">
+          <div class="flbl">전환 IN</div>
+          <select class="fsel" id="f-trans-in">
+            <option value="CUT">CUT</option><option value="DISSOLVE">DISSOLVE</option><option value="FADE">FADE</option>
+          </select>
+        </div>
+      </div>
+      <!-- 소스 배정 -->
+      <div class="flbl" style="padding:0 10px 3px;">카메라 / 서버</div>
+      <div class="src-checks">
+        <label class="schk"><input type="checkbox" id="fc-cam1"> <span style="color:var(--cam1);font-weight:700;">CAM1</span></label>
+        <label class="schk"><input type="checkbox" id="fc-cam2"> <span style="color:var(--cam2);font-weight:700;">CAM2</span></label>
+        <label class="schk"><input type="checkbox" id="fc-cam3"> <span style="color:var(--cam3);font-weight:700;">CAM3</span></label>
+        <label class="schk"><input type="checkbox" id="fc-cam4"> <span style="color:var(--cam4);font-weight:700;">CAM4</span></label>
+        <label class="schk"><input type="checkbox" id="fc-srv1"> <span style="color:var(--srv1);font-weight:700;">SRV1</span></label>
+        <label class="schk"><input type="checkbox" id="fc-srv2"> <span style="color:var(--srv2);font-weight:700;">SRV2</span></label>
+        <label class="schk"><input type="checkbox" id="fc-srv3"> <span style="color:var(--srv3);font-weight:700;">SRV3</span></label>
+      </div>
+      <!-- 영상 클립 목록 -->
+      <div class="flbl" style="padding:6px 10px 3px;">영상 클립 (서버 재생 순서)</div>
+      <div class="clip-editor" id="clip-editor"></div>
+      <div style="padding:0 10px 6px;"><button class="add-clip-btn" onclick="addClipField()">+ 클립 추가</button></div>
+      <!-- CG 자막 항목 -->
+      <div class="flbl" style="padding:0 10px 3px;">CG 자막 항목</div>
+      <div class="cg-editor" id="cg-editor"></div>
+      <div style="padding:0 10px 6px;"><button class="add-clip-btn" onclick="addCGField()">+ 자막 추가</button></div>
+      <!-- 제목/비고 -->
+      <div class="fg2" style="padding-top:0;">
+        <div class="fgrp"><div class="flbl">기본 자막 텍스트</div><input class="finp" id="f-subtitle" placeholder="오세훈 '대역전'‥ …"></div>
+        <div class="fgrp"><div class="flbl">비고</div><textarea class="fta" id="f-note" placeholder="앵멘 확인 필요..."></textarea></div>
+      </div>
+      <div class="facts">
+        <button class="btn primary" onclick="saveItem()">저장</button>
+        <button class="btn" onclick="deleteSelected()">삭제</button>
+        <button class="btn" onclick="addDivider()">구분선</button>
+      </div>
+    </div>
+
+    <!-- 편집 테이블 -->
+    <div class="etbl-wrap">
+      <table id="etbl">
+        <thead><tr><th>NO</th><th>타입</th><th>아이템</th><th>담당</th><th>시간</th><th>소스</th><th>전환IN</th><th>클립수</th><th>자막</th></tr></thead>
+        <tbody id="etbl-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /ctrl-panel -->
+</div><!-- /main -->
+
+<script>
+// ── 타입별 자동 규칙 정의 ──
+const TYPE_RULES = {
+  TITLE:   { cams:[], srvs:[], transIn:'FADE',     transOut:'CUT',       cgAutoOff:0,  scenePattern:'TITLE',         srvAuto:false },
+  CM:      { cams:[], srvs:[], transIn:'CUT',      transOut:'CUT',       cgAutoOff:0,  scenePattern:'CM_PRE',        srvAuto:false },
+  OPEN:    { cams:['cam1'],    srvs:[], transIn:'CUT', transOut:'CUT',   cgAutoOff:8,  scenePattern:'CAM1_ANCHOR',   srvAuto:false },
+  ANCHOR:  { cams:['cam1'],    srvs:[], transIn:'CUT', transOut:'CUT',   cgAutoOff:0,  scenePattern:'CAM1_ANCHOR',   srvAuto:false },
+  BRIDGE:  { cams:['cam1'],    srvs:[], transIn:'CUT', transOut:'CUT',   cgAutoOff:0,  scenePattern:'CAM1_ANCHOR',   srvAuto:false },
+  REPORT:  { cams:[], srvs:['auto'], transIn:'CUT', transOut:'CUT',     cgAutoOff:5,  scenePattern:'SRV{N}_VCR',    srvAuto:true  },
+  NT:      { cams:['cam1'],    srvs:['auto'], transIn:'CUT', transOut:'CUT', cgAutoOff:0, scenePattern:'CAM1_SRV{N}_PIP', srvAuto:true },
+  LIVE:    { cams:[], srvs:[], transIn:'CUT',      transOut:'CUT',       cgAutoOff:0,  scenePattern:'LIVE_EXT',      srvAuto:false },
+  WEATHER: { cams:['cam4'],    srvs:[], transIn:'DISSOLVE', transOut:'DISSOLVE', cgAutoOff:3, scenePattern:'WEATHER', srvAuto:false },
+  STOCK:   { cams:[], srvs:[], transIn:'DISSOLVE', transOut:'DISSOLVE',  cgAutoOff:0,  scenePattern:'LIVE_STOCK',    srvAuto:false },
+  CLOSING: { cams:['cam1','cam2'], srvs:[], transIn:'DISSOLVE', transOut:'FADE', cgAutoOff:0, scenePattern:'CLOSING', srvAuto:false },
+};
+
+// ── 데이터 ──
+const cueData = {
+  title:'MBC 12뉴스 : 평일-특집_21분간', anc:'차예린', pd:'김현', date:'2026-06-04',
+  items:[
+    { id:1,  no:'※', type:'TITLE',   item:'타이틀',                    reporter:'',     dur:'00:10', sources:['cam1'], transIn:'FADE',     subtitle:'',                    clips:[], cg:[], note:'' },
+    { id:2,  no:'※', type:'CM',      item:'전 CM — 쏘팔코사놀',         reporter:'',     dur:'01:00', sources:[],      transIn:'CUT',      subtitle:'상시',                clips:[], cg:[], note:'' },
+    { id:3,  no:'※', type:'OPEN',    item:'오프닝 : 앵커 (줌인→)',      reporter:'차예린', dur:'00:10', sources:['cam1','cam2'], transIn:'CUT', subtitle:'차예린 김유미',   clips:[], cg:[{type:'이름자막',text:'차예린 앵커'}], note:'' },
+    { id:4,  no:'1',  type:'REPORT', item:'[12시] 6.3 결과',            reporter:'이문현', dur:'02:00', sources:['srv1'], transIn:'CUT',     subtitle:'오세훈 \'대역전\'…', clips:['/clips/vcr_01a.mp4'], cg:[{type:'제목자막',text:'오세훈 \'대역전\'…'},{type:'이름자막',text:'이문현 기자'}], note:'' },
+    { id:5,  no:'2',  type:'REPORT', item:'[12시] 여야',                reporter:'김상훈', dur:'02:00', sources:['srv2'], transIn:'CUT',     subtitle:'"서울 탈환 못해…', clips:['/clips/vcr_02a.mp4'], cg:[{type:'제목자막',text:'"서울 탈환 못해…'},{type:'이름자막',text:'김상훈 기자'}], note:'' },
+    { id:6,  no:'3',  type:'REPORT', item:'[:]재보궐 결과 종합',        reporter:'이재욱', dur:'02:05', sources:['srv1'], transIn:'CUT',     subtitle:'재보선 민주 9곳·…', clips:['/clips/vcr_03a.mp4','/clips/vcr_03b.mp4'], cg:[{type:'제목자막',text:'재보선 민주 9곳…'}], note:'' },
+    { id:7,  no:'4',  type:'REPORT', item:'[:]부산 북갑 재보궐',        reporter:'장예지', dur:'01:20', sources:['srv2'], transIn:'CUT',     subtitle:'부산 북구갑 한동…', clips:['/clips/vcr_04.mp4'], cg:[{type:'제목자막',text:'부산 북구갑 한동…'},{type:'이름자막',text:'장예지 기자'}], note:'' },
+    { id:8,  no:'5',  type:'REPORT', item:'[:]수도권 재보궐 결과',      reporter:'김현지', dur:'02:08', sources:['srv1'], transIn:'CUT',     subtitle:'경기 평택을 \'박빙…', clips:['/clips/vcr_05.mp4'], cg:[{type:'제목자막',text:'경기 평택을 박빙…'}], note:'' },
+    { id:9,  no:'6',  type:'NT',     item:'[NT/교육감 종합]',           reporter:'차현진', dur:'02:00', sources:['cam1','srv2'], transIn:'CUT', subtitle:'서울 정근식·경기…', clips:['/clips/nt_06.mp4'], cg:[{type:'제목자막',text:'서울 정근식·경기…'}], note:'' },
+    { id:10, no:'7',  type:'REPORT', item:'***앵멘확인[:]투표용지',     reporter:'송정훈', dur:'02:04', sources:['srv1'], transIn:'CUT',     subtitle:'투표함 못 옮긴…',   clips:['/clips/vcr_07.mp4'], cg:[{type:'제목자막',text:'투표함 못 옮긴…'}], note:'⚠ 앵멘 확인 필요' },
+    { id:11, no:'8',  type:'REPORT', item:'**앵멘확인요[1:49]선관위',  reporter:'김민찬', dur:'02:10', sources:['srv2'], transIn:'CUT',     subtitle:'선관위 사과‥ "재…', clips:['/clips/vcr_08.mp4'], cg:[{type:'제목자막',text:'선관위 사과…'}], note:'⚠ 앵멘 확인 요청' },
+    { id:12, no:'9',  type:'REPORT', item:'[12시] 환율+구윤철+코스피', reporter:'이경미', dur:'02:00', sources:['srv1'], transIn:'CUT',     subtitle:'',                    clips:['/clips/vcr_09.mp4'], cg:[], note:'' },
+    { id:13, no:'10', type:'WEATHER',item:'날씨',                       reporter:'',     dur:'00:30', sources:['cam4'], transIn:'DISSOLVE',subtitle:'',                    clips:[], cg:[{type:'코너자막',text:'날씨'}], note:'' },
+    { id:14, no:'※', type:'STOCK',  item:'이 시각 증권 (삼성증권 LIVE)', reporter:'정다인', dur:'01:25', sources:['cam1'], transIn:'DISSOLVE',subtitle:'정다인',             clips:[], cg:[{type:'이름자막',text:'정다인 앵커'}], note:'' },
+    { id:15, no:'※', type:'CLOSING',item:'클로징 / 아이엠뉴스 / 끝',   reporter:'',     dur:'00:10', sources:['cam1','cam2'], transIn:'DISSOLVE', subtitle:'끝',            clips:[], cg:[], note:'' },
+    { id:-1, no:'',   type:'divider',item:'뉴스휘',reporter:'',dur:'',sources:[],transIn:'',subtitle:'',clips:[],cg:[],note:'' },
+    { id:16, no:'16', type:'REPORT', item:'[NT/오세훈승리확정시]',      reporter:'정상빈', dur:'02:05', sources:['srv2'], transIn:'CUT',     subtitle:'서울 오세훈 역전…', clips:['/clips/vcr_16.mp4'], cg:[{type:'제목자막',text:'서울 오세훈 역전…'}], note:'' },
+  ]
+};
+
+// ── 상태 ──
+let currentIdx = -1;
+let pgmSrc = 'cam1', pvwSrc = 'cam2';
+let transMode = 'CUT';
+let serverTurn = 0; // 짝수→srv1, 홀수→srv2
+let timerInterval = null;
+let timerRem = 0, timerTotal = 0;
+let elapsedTotal = 0;
+let doneSet = new Set();
+let selEditIdx = -1, editingId = null;
+let clipFields = [], cgFields = [];
+
+// ── 유틸 ──
+const parseDur = s => { if(!s)return 0; const p=s.split(':').map(Number); return p.length===2?p[0]*60+p[1]:0; };
+const fmtTime = s => { s=Math.max(0,Math.floor(s)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+
+function typeBadge(t) {
+  const labels = {TITLE:'타이틀',CM:'CM',OPEN:'오프닝',ANCHOR:'단신',BRIDGE:'브리지',REPORT:'리포트',NT:'뉴스탑',LIVE:'중계',WEATHER:'날씨',STOCK:'증권',CLOSING:'클로징'};
+  return `<span class="tbadge t-${t}">${labels[t]||t}</span>`;
+}
+function srcBadges(sources) {
+  if(!sources||!sources.length) return '';
+  const labels={cam1:'C1',cam2:'C2',cam3:'C3',cam4:'C4',srv1:'S1',srv2:'S2',srv3:'S3'};
+  return '<div class="src-badges">'+sources.map(s=>`<span class="sb sb-${s}">${labels[s]||s}</span>`).join('')+'</div>';
+}
+function transBadge(t) {
+  if(!t) return '';
+  return `<span class="trans-badge trans-${t}">${t}</span>`;
+}
+
+// ── 타입 기반 규칙 적용 ──
+function applyTypeRules(item) {
+  const rule = TYPE_RULES[item.type] || {};
+  let sceneName = rule.scenePattern || item.type;
+  // 서버 자동 교대
+  if (rule.srvAuto) {
+    const n = (serverTurn % 2 === 0) ? 1 : 2;
+    sceneName = sceneName.replace('{N}', n);
+    // 소스 자동 배정
+    if (!item.sources || !item.sources.find(s=>s.startsWith('srv'))) {
+      item._autoSrv = 'srv'+n;
+    } else {
+      item._autoSrv = item.sources.find(s=>s.startsWith('srv')) || 'srv'+n;
+    }
+  } else {
+    item._autoSrv = null;
+  }
+  item._autoScene = item.scene || sceneName;
+  item._autoTransIn = item.transIn || rule.transIn || 'CUT';
+  item._autoTransOut = rule.transOut || 'CUT';
+  item._autoCam = rule.cams || [];
+  return item;
+}
+
+// ── 큐시트 렌더 ──
+function renderCuesheet() {
+  const tbody = document.getElementById('cue-tbody');
+  let cum = 0;
+  tbody.innerHTML = '';
+  cueData.items.forEach((item, idx) => {
+    if (item.type === 'divider') {
+      const tr = document.createElement('tr');
+      tr.className = 'divrow';
+      tr.innerHTML = `<td colspan="10"><div class="divider-label">── ${item.item||'구분'} ──</div></td>`;
+      tbody.appendChild(tr); return;
+    }
+    applyTypeRules(item);
+    const dur = parseDur(item.dur);
+    if(dur>0) cum+=dur;
+    const tr = document.createElement('tr');
+    if(doneSet.has(idx)) tr.classList.add('done');
+    if(idx===currentIdx) tr.classList.add('current');
+    const warnFlag = item.note ? `<span class="warn-flag" title="${item.note}">⚠</span>` : '';
+    const clipCount = item.clips&&item.clips.length ? `<span style="font-size:8px;color:var(--srv1);">▶${item.clips.length}</span>` : '';
+    tr.innerHTML = `
+      <td class="no-cell">${item.no}</td>
+      <td>${typeBadge(item.type)}</td>
+      <td><div class="item-name">${item.item||'—'}${warnFlag} ${clipCount}</div></td>
+      <td class="reporter-cell">${item.reporter||''}</td>
+      <td class="dur-cell">${item.dur||''}</td>
+      <td class="total-cell">${dur>0?fmtTime(cum):''}</td>
+      <td class="subtitle-cell">${item.subtitle||''}</td>
+      <td>${srcBadges(item.sources)}</td>
+      <td>${transBadge(item._autoTransIn)}</td>
+      <td><button class="btn" style="padding:2px 4px;font-size:8px;" onclick="goToItem(${idx})">GO</button></td>`;
+    tr.onclick = e => { if(!e.target.classList.contains('btn')) selectItem(idx); };
+    tbody.appendChild(tr);
+  });
+  document.getElementById('total-t').textContent = '총 ' + fmtTime(cum);
+}
+
+function selectItem(idx) { currentIdx=idx; renderCuesheet(); updateMonitor(); }
+function goToItem(idx) { selectItem(idx); startCurrent(); }
+
+// ── 모니터 업데이트 ──
+function updateMonitor() {
+  const item = cueData.items[currentIdx];
+  if(!item||item.type==='divider') return;
+  applyTypeRules(item);
+
+  document.getElementById('now-no').textContent = item.no ? 'No.'+item.no : '—';
+  document.getElementById('now-type').innerHTML = typeBadge(item.type);
+  document.getElementById('now-item').textContent = item.item||'—';
+  document.getElementById('now-rep').textContent = item.reporter ? '  '+item.reporter : '';
+  document.getElementById('now-sub').textContent = item.subtitle||'(자막 없음)';
+  document.getElementById('cg-input').value = item.subtitle||'';
+
+  // 자동 규칙 표시
+  const camLabel = item._autoCam.length ? item._autoCam.join(', ') : (item.sources.filter(s=>s.startsWith('cam')).join(', ')||'—');
+  const srvLabel = item._autoSrv || item.sources.filter(s=>s.startsWith('srv')).join(', ')||'—';
+  document.getElementById('nr-cam').textContent = camLabel;
+  document.getElementById('nr-srv').textContent = srvLabel;
+  document.getElementById('nr-in').textContent = item._autoTransIn;
+  document.getElementById('nr-out').textContent = item._autoTransOut;
+  document.getElementById('nr-scene').textContent = item._autoScene;
+
+  // 영상 클립
+  const clipDiv = document.getElementById('now-clips');
+  if(item.clips&&item.clips.length) {
+    const srvTurn = (serverTurn%2===0)?1:2;
+    clipDiv.innerHTML = item.clips.map((c,i) => {
+      const fname = c.split('/').pop();
+      const sn = (i===0) ? srvTurn : (srvTurn===1?2:1);
+      return `<div class="clip-item"><span class="clip-num">${i+1}</span><span class="clip-name" title="${c}">${fname}</span><span class="clip-srv s${sn}">SRV${sn}</span></div>`;
+    }).join('');
+  } else {
+    clipDiv.innerHTML = '';
+  }
+
+  // PVW/PGM 자동 세팅
+  const autoSrc = item._autoSrv || (item.sources.find(s=>s.startsWith('cam'))) || 'cam1';
+  pvwSrc = autoSrc;
+  refreshSwitcher();
+  updateServerCards(item);
+
+  // 다음 아이템
+  const next = getNextItem(currentIdx);
+  if(next) {
+    document.getElementById('nxt-type').innerHTML = typeBadge(next.type);
+    document.getElementById('nxt-name').textContent = next.item||'—';
+  } else {
+    document.getElementById('nxt-type').innerHTML = '';
+    document.getElementById('nxt-name').textContent = '(마지막 아이템)';
+  }
+
+  timerTotal = parseDur(item.dur);
+  timerRem = timerTotal;
+  updateTimer();
+}
+
+function getNextItem(fromIdx) {
+  for(let i=fromIdx+1;i<cueData.items.length;i++) {
+    if(cueData.items[i].type!=='divider') return cueData.items[i];
+  }
+  return null;
+}
+
+function updateServerCards(item) {
+  if(!item) return;
+  const srvSrc = item._autoSrv || item.sources.find(s=>s.startsWith('srv'));
+  if(!srvSrc) return;
+  const n = srvSrc.replace('srv','');
+  // 온에어 서버 카드
+  [1,2,3].forEach(i => {
+    const card = document.getElementById('sc'+i);
+    const stEl = document.getElementById('sc'+i+'-st');
+    const infoEl = document.getElementById('sc'+i+'-info');
+    if(String(i)===n) {
+      card.className='srv-card on';
+      stEl.className='sc-st st-on'; stEl.textContent='ON AIR';
+      if(item.item) infoEl.textContent=(item.item||'')+(item.reporter?' ('+item.reporter+')':'');
+    } else if(i<3) {
+      card.className='srv-card stby';
+      stEl.className='sc-st st-stby'; stEl.textContent='STANDBY';
+    }
+  });
+  // 다음 아이템 클립을 대기 서버에 예고
+  const nextItem = getNextItem(currentIdx);
+  if(nextItem&&nextItem.clips&&nextItem.clips.length) {
+    const nextSrv = (Number(n)===1)?2:1;
+    document.getElementById('sc'+nextSrv+'-clip').textContent = '준비: '+nextItem.clips[0].split('/').pop();
+  }
+}
+
+// ── 스위처 ──
+function setPGM(src) { pgmSrc=src; refreshSwitcher(); showToast('PGM → '+src.toUpperCase()); }
+function setPVW(src) { pvwSrc=src; refreshSwitcher(); showToast('PVW → '+src.toUpperCase()); }
+function setTrans(t) {
+  transMode=t;
+  ['CUT','DISSOLVE','FADE'].forEach(x => { const b=document.getElementById('tr-'+x); if(b) b.className='tr-btn'+(x===t?' active':''); });
+}
+function doCut() { const tmp=pgmSrc; pgmSrc=pvwSrc; pvwSrc=tmp; refreshSwitcher(); showToast('CUT: '+pgmSrc.toUpperCase()+' ON AIR'); }
+function doAuto() { const tmp=pgmSrc; pgmSrc=pvwSrc; pvwSrc=tmp; refreshSwitcher(); showToast('AUTO ['+transMode+']: '+pgmSrc.toUpperCase()+' ON AIR'); }
+
+function refreshSwitcher() {
+  const keys=['cam1','cam2','cam3','cam4','srv1','srv2','srv3'];
+  keys.forEach(k => {
+    const pb=document.getElementById('pgm-'+k);
+    const vb=document.getElementById('pvw-'+k);
+    if(pb) pb.className='src-btn';
+    if(vb) vb.className='src-btn';
+  });
+  const pgmBtn=document.getElementById('pgm-'+pgmSrc);
+  const pvwBtn=document.getElementById('pvw-'+pvwSrc);
+  if(pgmBtn) pgmBtn.classList.add('pgm-'+pgmSrc);
+  if(pvwBtn) pvwBtn.classList.add('pvw-on');
+  document.getElementById('obs-pgm-disp').textContent = pgmSrc.toUpperCase();
+}
+
+function emergencySRV3() {
+  if(!confirm('⚠ SRV3 예비 서버를 긴급 투입합니다.\n서버 교대 카운터가 리셋됩니다.')) return;
+  serverTurn=0; pgmSrc='srv3'; refreshSwitcher();
+  showToast('⚠ SRV3 긴급 투입', 'warn');
+  document.getElementById('sc3').className='srv-card on';
+  document.getElementById('sc3-st').textContent='⚠ EMERGENCY';
+}
+
+function mediaCtrl(src, action) { showToast(src+': '+action.toUpperCase()); }
+
+// ── 타이머 ──
+function startCurrent() {
+  if(currentIdx<0) return;
+  const item=cueData.items[currentIdx];
+  if(!item||item.type==='divider'){nextCue();return;}
+  stopTimer();
+  // 서버 교대 카운터 증가 (REPORT, NT 타입일 때)
+  if(item.type==='REPORT'||item.type==='NT') serverTurn++;
+  timerTotal=parseDur(item.dur); timerRem=timerTotal;
+  if(!timerTotal) return;
+  timerInterval=setInterval(()=>{ timerRem--; updateTimer(); if(timerRem<=0) stopTimer(); },1000);
+}
+function stopTimer() { clearInterval(timerInterval); timerInterval=null; }
+function updateTimer() {
+  const el=document.getElementById('timer-disp');
+  const bar=document.getElementById('tbar');
+  el.textContent=fmtTime(timerRem);
+  const pct=timerTotal>0?(timerRem/timerTotal)*100:100;
+  bar.style.width=pct+'%';
+  const warn=timerRem<=10&&timerRem>0;
+  el.className=warn?'warn':''; bar.className=warn?'warn':'';
+  document.getElementById('timer-lbl').textContent=`잔여 ${fmtTime(timerRem)} / 총 ${fmtTime(timerTotal)}`;
+}
+
+// ── 네비게이션 ──
+function nextCue() {
+  doneSet.add(currentIdx);
+  let next=currentIdx+1;
+  while(next<cueData.items.length&&cueData.items[next].type==='divider') next++;
+  if(next<cueData.items.length){ stopTimer(); selectItem(next); startCurrent(); }
+  renderCuesheet();
+}
+function prevCue() {
+  let prev=currentIdx-1;
+  while(prev>=0&&cueData.items[prev].type==='divider') prev--;
+  if(prev>=0){ stopTimer(); doneSet.delete(prev); selectItem(prev); }
+}
+function markDone() { if(currentIdx>=0){ doneSet.add(currentIdx); renderCuesheet(); } }
+function resetAll() {
+  stopTimer(); doneSet.clear(); currentIdx=-1; serverTurn=0;
+  pgmSrc='cam1'; pvwSrc='cam2'; transMode='CUT';
+  refreshSwitcher(); renderCuesheet();
+  document.getElementById('now-no').textContent='—';
+  document.getElementById('now-item').textContent='방송 시작 전';
+  document.getElementById('now-sub').textContent='큐 아이템을 선택하세요';
+  document.getElementById('now-clips').innerHTML='';
+  timerRem=0;timerTotal=0;updateTimer();
+}
+function jumpToCurrent() {
+  const rows=document.querySelectorAll('#cue-tbody tr');
+  let ri=0;
+  for(let i=0;i<cueData.items.length;i++){
+    if(i===currentIdx){ rows[ri]?.scrollIntoView({block:'center'}); break; }
+    ri++;
+  }
+}
+
+// ── CG ──
+function sendCG() { const t=document.getElementById('cg-input').value; showToast('자막 전송: "'+t.slice(0,20)+'"'); }
+function clearCG() { document.getElementById('cg-input').value=''; showToast('자막 해제'); }
+function fillCGfromCue() { if(currentIdx<0)return; document.getElementById('cg-input').value=cueData.items[currentIdx].subtitle||''; }
+
+function showConnSetup() { showToast('OBS 연결: obs-news-control.html 열기'); }
+
+// ── 탭 전환 ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='run'?0:1)));
+  const nowM=document.getElementById('now-monitor');
+  const swEl=document.getElementById('switcher');
+  const srvR=document.getElementById('srv-row');
+  const obsB=document.getElementById('obs-bar');
+  const editP=document.getElementById('edit-panel');
+  if(tab==='run') {
+    nowM.style.display=''; swEl.style.display=''; srvR.style.display=''; obsB.style.display='';
+    editP.style.display='none'; editP.classList.remove('active');
+  } else {
+    nowM.style.display='none'; swEl.style.display='none'; srvR.style.display='none'; obsB.style.display='none';
+    editP.style.display='flex'; editP.classList.add('active');
+    renderEditTable();
+  }
+}
+
+// ── 편집 ──
+function onTypeChange() {
+  const type=document.getElementById('f-type').value;
+  const rule=TYPE_RULES[type]||{};
+  // 전환 자동 설정
+  document.getElementById('f-trans-in').value=rule.transIn||'CUT';
+  // OBS 씬 패턴 자동 표시
+  document.getElementById('f-scene').value=rule.scenePattern||type;
+  // 소스 체크박스 자동 체크
+  ['cam1','cam2','cam3','cam4','srv1','srv2','srv3'].forEach(k=>{ document.getElementById('fc-'+k).checked=false; });
+  (rule.cams||[]).forEach(c=>{ const el=document.getElementById('fc-'+c); if(el) el.checked=true; });
+}
+
+function addClipField(val='') {
+  const idx=clipFields.length;
+  clipFields.push(val);
+  renderClipEditor();
+}
+function renderClipEditor() {
+  const wrap=document.getElementById('clip-editor');
+  wrap.innerHTML=clipFields.map((v,i)=>`
+    <div class="clip-row">
+      <span style="font-size:9px;color:var(--t3);width:14px;">${i+1}</span>
+      <input class="clip-input" value="${v}" placeholder="/path/to/clip${i+1}.mp4" onchange="clipFields[${i}]=this.value">
+      <button class="clip-del" onclick="removeClip(${i})">✕</button>
+    </div>`).join('');
+}
+function removeClip(i) { clipFields.splice(i,1); renderClipEditor(); }
+
+function addCGField(type='제목자막',text='') {
+  cgFields.push({type,text});
+  renderCGEditor();
+}
+function renderCGEditor() {
+  const wrap=document.getElementById('cg-editor');
+  wrap.innerHTML=cgFields.map((c,i)=>`
+    <div class="cg-row">
+      <select class="cg-type-sel" onchange="cgFields[${i}].type=this.value">
+        ${['제목자막','이름자막','위치자막','코너자막','긴급자막'].map(t=>`<option${c.type===t?' selected':''}>${t}</option>`).join('')}
+      </select>
+      <input class="cg-text-input" value="${c.text}" placeholder="자막 텍스트" onchange="cgFields[${i}].text=this.value">
+      <button class="clip-del" onclick="removeCG(${i})">✕</button>
+    </div>`).join('');
+}
+function removeCG(i) { cgFields.splice(i,1); renderCGEditor(); }
+
+function selectForEdit(idx) {
+  selEditIdx=idx; editingId=cueData.items[idx].id;
+  const item=cueData.items[idx];
+  document.getElementById('f-item').value=item.item||'';
+  document.getElementById('f-reporter').value=item.reporter||'';
+  document.getElementById('f-type').value=item.type||'REPORT';
+  document.getElementById('f-dur').value=item.dur||'';
+  document.getElementById('f-scene').value=item.scene||'';
+  document.getElementById('f-trans-in').value=item.transIn||'CUT';
+  document.getElementById('f-subtitle').value=item.subtitle||'';
+  document.getElementById('f-note').value=item.note||'';
+  ['cam1','cam2','cam3','cam4','srv1','srv2','srv3'].forEach(k=>{ document.getElementById('fc-'+k).checked=(item.sources||[]).includes(k); });
+  clipFields=[...(item.clips||[])]; renderClipEditor();
+  cgFields=(item.cg||[]).map(c=>({...c})); renderCGEditor();
+  document.getElementById('form-mode-lbl').textContent=`편집 (No.${item.no})`;
+  renderEditTable();
+}
+
+function cancelEdit() {
+  selEditIdx=-1; editingId=null; clipFields=[]; cgFields=[];
+  document.getElementById('form-mode-lbl').textContent='새 아이템';
+  ['f-item','f-reporter','f-dur','f-scene','f-subtitle','f-note'].forEach(id=>document.getElementById(id).value='');
+  ['cam1','cam2','cam3','cam4','srv1','srv2','srv3'].forEach(k=>document.getElementById('fc-'+k).checked=false);
+  renderClipEditor(); renderCGEditor(); renderEditTable();
+}
+
+function saveItem() {
+  const srcs=['cam1','cam2','cam3','cam4','srv1','srv2','srv3'].filter(k=>document.getElementById('fc-'+k).checked);
+  const newItem={
+    id:editingId||Date.now(),
+    no:selEditIdx>=0?cueData.items[selEditIdx].no:String(cueData.items.filter(i=>i.type!=='divider').length+1),
+    type:document.getElementById('f-type').value,
+    item:document.getElementById('f-item').value,
+    reporter:document.getElementById('f-reporter').value,
+    dur:document.getElementById('f-dur').value,
+    scene:document.getElementById('f-scene').value,
+    transIn:document.getElementById('f-trans-in').value,
+    sources:srcs,
+    clips:[...clipFields],
+    cg:cgFields.map(c=>({...c})),
+    subtitle:document.getElementById('f-subtitle').value,
+    note:document.getElementById('f-note').value,
+  };
+  if(editingId&&selEditIdx>=0){ cueData.items[selEditIdx]=newItem; showToast('수정 완료'); }
+  else{ cueData.items.push(newItem); showToast('추가 완료'); }
+  cancelEdit(); renderEditTable(); renderCuesheet();
+}
+
+function deleteSelected() {
+  if(selEditIdx<0){showToast('선택 후 삭제');return;}
+  cueData.items.splice(selEditIdx,1); cancelEdit(); renderEditTable(); renderCuesheet(); showToast('삭제됨');
+}
+function addDivider() {
+  const at=selEditIdx>=0?selEditIdx+1:cueData.items.length;
+  cueData.items.splice(at,0,{id:Date.now(),no:'',type:'divider',item:'구분',reporter:'',dur:'',sources:[],transIn:'',subtitle:'',clips:[],cg:[],note:''});
+  renderEditTable(); renderCuesheet(); showToast('구분선 삽입');
+}
+
+function renderEditTable() {
+  const tbody=document.getElementById('etbl-tbody');
+  tbody.innerHTML='';
+  cueData.items.forEach((item,idx)=>{
+    if(item.type==='divider'){
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td colspan="9" style="text-align:center;color:var(--t3);font-size:9px;">── ${item.item||'구분선'} ──</td>`;
+      tbody.appendChild(tr); return;
+    }
+    const tr=document.createElement('tr');
+    if(idx===selEditIdx) tr.classList.add('selected');
+    tr.innerHTML=`
+      <td style="font-family:var(--mono);color:var(--t3);">${item.no}</td>
+      <td>${typeBadge(item.type)}</td>
+      <td>${item.item||'—'}</td>
+      <td style="color:var(--blue);">${item.reporter||''}</td>
+      <td style="font-family:var(--mono);">${item.dur||''}</td>
+      <td>${srcBadges(item.sources)}</td>
+      <td>${transBadge(item.transIn)}</td>
+      <td style="color:var(--srv1);">${item.clips&&item.clips.length?'▶'+item.clips.length:''}</td>
+      <td style="color:var(--t2);font-size:9px;">${item.subtitle||''}</td>`;
+    tr.onclick=()=>selectForEdit(idx);
+    tbody.appendChild(tr);
+  });
+}
+
+function exportJSON() {
+  const blob=new Blob([JSON.stringify(cueData,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`cuesheet_${cueData.date}.json`; a.click(); showToast('JSON 저장됨');
+}
+
+// ── 시계 / 경과 ──
+function updateClock() {
+  const n=new Date();
+  document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock,1000); updateClock();
+setInterval(()=>{ if(timerInterval){ elapsedTotal++; document.getElementById('elapsed').textContent=fmtTime(elapsedTotal); } },1000);
+
+// ── 토스트 ──
+function showToast(msg, type='ok') {
+  let t=document.getElementById('toast-el');
+  if(!t){ t=document.createElement('div'); t.id='toast-el'; t.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:6px 14px;border-radius:3px;font-size:11px;font-weight:700;z-index:9999;transition:opacity .3s;pointer-events:none;'; document.body.appendChild(t); }
+  const colors={ok:'#2ec97a',err:'#e8364a',warn:'#f5a623'};
+  t.style.background=colors[type]||colors.ok; t.style.color=type==='warn'?'#000':'#fff';
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity='0',2000);
+}
+
+// ── 초기화 ──
+renderCuesheet(); refreshSwitcher();
+</script>
+</body>
+</html>
