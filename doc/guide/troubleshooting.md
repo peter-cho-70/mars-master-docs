@@ -83,7 +83,7 @@ vMix 리스트는 소재가 끝나면 **유예시간 0으로 즉시** 다음 항
 
 ---
 
-## 5. OBS 버전 (news-broadcast-system-obs.html)
+## 5. OBS 버전 (obs/news-broadcast-system-obs.html)
 
 ### CUT을 눌렀는데 디졸브로 나감
 **한국어 OBS**에서는 전환 이름이 "자르기"/"서서히 사라지기"라서 영문 'Cut' 매칭이 실패했던 사례. `transitionKind` 기반으로 수정됨(2026-07-09). 새 OBS 설치에서 재발하면 그 인스턴스의 전환 목록(`GetSceneTransitionList`)에 cut_transition이 존재하는지 확인.
