@@ -49,6 +49,7 @@
 | [Integration_Guide.md](guide/Integration_Guide.md) | v1.0 · 07-10 | 진행 중 | 장비 연동 단계별 작업 순서서 (Expansion_PRD의 실행 문서) |
 | [OBS 씬 구조.md](guide/OBS%20씬%20구조.md) | 07-09 기준 | 스냅샷 | 실제 OBS 씬 20개·소스 19개 구조와 추천 매핑 (시점 기록물) |
 | [OBS_SETUP_GUIDE.html](guide/OBS_SETUP_GUIDE.html) | 06-23 | 초기 버전 | OBS 설치·websocket 초기 설정 — 최신 씬 구조는 위 문서 우선 |
+| [네트워크 구성도.html](guide/네트워크%20구성도.html) | 07-16 | 스냅샷 | vMix·Master·Blackmagic Videohub 실장비 IP·포트 구성도 — server-config.json 기준 |
 
 ## 🎓 바이브 코딩 교재 (`doc/textbook/`)
 
