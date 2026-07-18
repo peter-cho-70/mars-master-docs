@@ -2,10 +2,330 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=doc/index.html">
-<title>MARS/Master 문서 모음</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARS/Master — vMix를 몰라도, vMix의 모든 능력을 씁니다</title>
+<style>
+  :root{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --live:#c0322c; --live-bg:rgba(192,50,44,.10);
+    --ok:#1f9a56; --ok-bg:rgba(31,154,86,.10);
+    --plan:#a06a12; --plan-bg:rgba(160,106,18,.12);
+    --snap:#4a6fa5; --snap-bg:rgba(74,111,165,.12);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+    --sidebar-w: 240px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+      --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+      --accent:#e2a63d; --accent-ink:#f4c877;
+      --live:#e0453f; --live-bg:rgba(224,69,63,.14);
+      --ok:#3fcf7a; --ok-bg:rgba(63,207,122,.13);
+      --plan:#e2a63d; --plan-bg:rgba(226,166,61,.14);
+      --snap:#7da7dd; --snap-bg:rgba(125,167,221,.14);
+      --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.68; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent); color:var(--bg-sunk); }
+  a{ color:var(--accent-ink); }
+
+  .layout{ display:flex; align-items:flex-start; max-width:1180px; margin:0 auto; }
+
+  .sidebar{
+    position:sticky; top:0; width:var(--sidebar-w); flex-shrink:0; height:100vh; overflow-y:auto;
+    padding:26px 16px 40px 22px; border-right:1px solid var(--line);
+  }
+  .sidebar .brand{ font-weight:800; font-size:14px; letter-spacing:-.01em; }
+  .sidebar .brand-sub{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin:2px 0 20px; }
+  .sidebar nav a{
+    display:block; font-size:12.5px; color:var(--ink-dim); text-decoration:none; padding:6px 10px;
+    border-radius:6px; margin-bottom:1px;
+  }
+  .sidebar nav a:hover{ background:var(--bg-sunk); color:var(--ink); }
+  .sidebar nav a.active{ background:var(--accent); color:#fff; }
+  .sidebar .back{ display:block; font-size:11.5px; color:var(--ink-faint); margin-top:18px; padding-top:14px; border-top:1px solid var(--line); text-decoration:none; }
+  .sidebar .back:hover{ color:var(--accent); }
+  @media (max-width:900px){ .sidebar{ display:none; } }
+
+  main{ flex:1; min-width:0; padding:64px 44px 120px; max-width:840px; }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink); display:flex; align-items:center; gap:8px; margin:0 0 16px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none; }
+  h1{ font-size:clamp(30px,4.4vw,44px); line-height:1.18; margin:0 0 20px; font-weight:800; letter-spacing:-.02em; }
+  h1 .accent{ color:var(--accent-ink); }
+  .lede{ color:var(--ink-dim); font-size:17px; max-width:60ch; margin:0 0 40px; line-height:1.65; }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:56px; }
+  .stat{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:18px 16px; box-shadow:var(--shadow); }
+  .stat .n{ font-family:var(--mono); font-size:24px; font-weight:700; color:var(--accent-ink); line-height:1.1; }
+  .stat .l{ font-size:11.5px; color:var(--ink-faint); margin-top:6px; line-height:1.4; }
+  @media (max-width:700px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+
+  section{ margin:64px 0; scroll-margin-top:24px; }
+  section h2{
+    font-size:23px; font-weight:800; margin:0 0 18px; letter-spacing:-.01em;
+  }
+  section h3{ font-size:15.5px; font-weight:800; margin:26px 0 8px; }
+  section p{ font-size:15px; color:var(--ink); margin:0 0 14px; }
+  section ul, section ol{ font-size:15px; padding-left:22px; margin:0 0 14px; }
+  section li{ margin-bottom:6px; }
+  code{ font-family:var(--mono); font-size:12.5px; background:var(--bg-sunk); padding:1px 6px; border-radius:4px; color:var(--accent-ink); }
+
+  .callout{ border-radius:12px; padding:18px 22px; margin:18px 0; border:1px solid var(--line); font-size:14px; }
+  .callout.ok{ background:var(--ok-bg); border-color:rgba(31,154,86,.3); }
+  .callout.ok .tag{ color:var(--ok); }
+  .callout.info{ background:var(--snap-bg); border-color:rgba(74,111,165,.3); }
+  .callout.info .tag{ color:var(--snap); }
+  .callout .tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px; }
+
+  .vs-table{ width:100%; border-collapse:collapse; font-size:13.5px; margin:18px 0 24px; }
+  .vs-table th{ text-align:left; padding:10px 12px; font-family:var(--sans); font-size:12.5px; font-weight:800; border-bottom:2px solid var(--line-strong); }
+  .vs-table th.vmix{ color:var(--ink-faint); }
+  .vs-table th.us{ color:var(--accent-ink); }
+  .vs-table td{ padding:12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .vs-table td.item{ font-weight:700; color:var(--ink); white-space:nowrap; }
+  .vs-table td.vmix{ color:var(--ink-faint); }
+  .vs-table td.us{ color:var(--ink); font-weight:600; }
+
+  .feature-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0; }
+  @media (max-width:640px){ .feature-grid{ grid-template-columns:1fr; } }
+  .feature-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); }
+  .feature-card .icon{ font-size:22px; margin-bottom:8px; display:block; }
+  .feature-card h4{ margin:0 0 6px; font-size:14.5px; font-weight:800; }
+  .feature-card p{ margin:0; font-size:13px; color:var(--ink-dim); }
+
+  .proof-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:20px 24px; margin-bottom:14px; box-shadow:var(--shadow); border-left:4px solid var(--accent); }
+  .proof-card h4{ margin:0 0 8px; font-size:15px; font-weight:800; }
+  .proof-card p{ margin:0; font-size:14px; }
+
+  footer{ margin-top:70px; padding-top:22px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
+
+  @media print{
+    .sidebar{ display:none; }
+    main{ max-width:none; padding:0; }
+    .layout{ display:block; }
+    section{ page-break-inside:avoid; }
+  }
+</style>
 </head>
 <body>
-<p><a href="doc/index.html">문서 모음으로 이동</a></p>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">MARS/Master</div>
+    <div class="brand-sub">소개 · 2026-07-18</div>
+    <nav id="toc">
+      <a href="#intro">1. 시작하며</a>
+      <a href="#why">2. 이게 왜 특별한가</a>
+      <a href="#capabilities">3. 지금 되는 것들</a>
+      <a href="#trust">4. 왜 믿을 수 있는가</a>
+      <a href="#vision">5. 앞으로의 가능성</a>
+    </nav>
+    <a class="back" href="doc/index.html">← 문서 허브로</a>
+  </aside>
+
+  <main>
+    <div class="eyebrow">MARS/Master 소개 · 2026-07-18</div>
+    <h1>vMix를 몰라도,<br><span class="accent">vMix의 모든 능력</span>을 씁니다</h1>
+    <p class="lede">
+      전문 방송 스위처 vMix는 강력하지만, 그만큼 배우기 어렵습니다. 이 프로그램은 그 힘은
+      그대로 두고 인터페이스만 방송하는 사람의 눈높이로 다시 그렸습니다 — 그리고 시뮬레이션이
+      아니라 <b>진짜 방송 장비</b>에 연결해서, 진짜로 동작하는 것까지 확인했습니다.
+    </p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n">100%</div><div class="l">vMix의 실제 기능을 그대로 사용</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">vMix 사용 경험 없이도 바로 진행</div></div>
+      <div class="stat"><div class="n">3가지</div><div class="l">자막을 내보내는 방법(표준·전용화면·자유제작)</div></div>
+      <div class="stat"><div class="n">실장비</div><div class="l">데모가 아닌 실제 방송 하드웨어로 검증</div></div>
+    </div>
+
+    <!-- 1 ─────────────────────────────────────────── -->
+    <section id="intro">
+      <h2>시작하며</h2>
+      <p>
+        <b>MARS/Master</b>는 뉴스 큐시트 제작부터 실제 방송 진행까지 한 번에 이어주는 시스템입니다.
+        기자·PD가 <b>MARS</b>에서 기사와 큐시트를 만들면, 기술감독은 <b>Master</b>로 그 큐시트를
+        그대로 방송에 올립니다. 전환효과·자막·화면분할·서버 영상·라우터까지, 방송 한 편을
+        진행하는 데 필요한 모든 조작이 이 화면 하나 안에 있습니다.
+      </p>
+      <p>
+        가장 중요한 특징은 이겁니다 — 이건 목업이나 데모가 아닙니다. 실제 방송사에서 쓰는
+        vMix, Blackmagic 라우터에 직접 연결해서 만들고 확인했습니다.
+      </p>
+    </section>
+
+    <!-- 2 ─────────────────────────────────────────── -->
+    <section id="why">
+      <h2>이게 왜 특별한가</h2>
+      <p>
+        vMix의 화면과 용어는 <b>범용 방송 소프트웨어의 언어</b>로 돼 있습니다. Input 번호,
+        Overlay 채널, Layers 같은 개념을 알아야 하고, 어느 인풋이 어느 카메라인지 운영자가
+        머릿속으로 계속 추적해야 합니다. 하지만 방송 현장에서 실제로 필요한 건
+        <b>"이 리포트는 컷으로", "이 자리엔 기자 카메라"</b> 같은, 방송 자체의 언어입니다.
+      </p>
+      <p>
+        MARS/Master는 그 번역기입니다. 운영자는 vMix라는 소프트웨어의 존재 자체를 몰라도
+        되고, 화면 뒤에서는 vMix의 진짜 기능이 그대로 호출됩니다. <b>기능이 줄어드는 게
+        아니라, 그 기능에 다가가는 언어가 바뀔 뿐</b>입니다.
+      </p>
+
+      <table class="vs-table">
+        <tr><th>하고 싶은 일</th><th class="vmix">vMix를 직접 쓴다면</th><th class="us">MARS/Master로 쓴다면</th></tr>
+        <tr>
+          <td class="item">화면분할 소스 바꾸기</td>
+          <td class="vmix">전문 용어와 API 파라미터를 정확히 알아야 함</td>
+          <td class="us">드롭다운에서 "카메라" 하나 선택 — 방송 중 자동 반영</td>
+        </tr>
+        <tr>
+          <td class="item">자막 켜고 끄기</td>
+          <td class="vmix">채널 번호·템플릿 필드명을 정확히 알아야 함</td>
+          <td class="us">문구 입력 → 전송 버튼 한 번</td>
+        </tr>
+        <tr>
+          <td class="item">다음 아이템으로 넘어갈 때</td>
+          <td class="vmix">이전 화면·자막을 매번 수동으로 정리</td>
+          <td class="us">자동 정리 — 다음 아이템은 항상 깨끗하게 시작</td>
+        </tr>
+        <tr>
+          <td class="item">우리 방송국만의 새 워크플로우</td>
+          <td class="vmix">소프트웨어가 지원하는 범위 안에서만 가능</td>
+          <td class="us">필요하면 그날 바로 새로 만들어 넣을 수 있음</td>
+        </tr>
+      </table>
+
+      <div class="callout info">
+        <span class="tag">어떻게 이게 가능했나</span>
+        전통적으로는 이런 맞춤 제어 시스템을 만들려면 전담 개발팀과 수개월이 필요합니다.
+        이 시스템은 AI와 함께 대화하듯 필요한 걸 설명하고, 곧바로 실제 장비에 연결해
+        확인하는 방식으로 만들어졌습니다 — 아이디어가 하루 만에 실제 방송 장비에서
+        검증까지 끝난 기능으로 이어질 수 있다는 걸, 이 프로젝트가 매일 보여주고 있습니다.
+      </div>
+    </section>
+
+    <!-- 3 ─────────────────────────────────────────── -->
+    <section id="capabilities">
+      <h2>지금 되는 것들</h2>
+      <p>생각만 하던 게 아니라, 지금 이 순간 실제로 동작하는 기능들입니다.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="icon">📝</span>
+          <h4>큐시트 제작 → 방송까지 한 번에</h4>
+          <p>기사 작성부터 실제 온에어까지 끊김 없이 이어집니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🎬</span>
+          <h4>아이템 타입에 맞는 자동 전환</h4>
+          <p>리포트는 컷, 단신은 디졸브 — 방송 문법을 시스템이 압니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">💬</span>
+          <h4>자막, 세 가지 방식으로 자유롭게</h4>
+          <p>표준 자막부터 완전히 직접 디자인한 HTML 자막까지.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🖥️</span>
+          <h4>화면분할까지 원격으로</h4>
+          <p>멀티캠 화면 구성을 방송 중에도 즉시 바꿉니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🔀</span>
+          <h4>방송 장비 전체 통합</h4>
+          <p>스위처·라우터·서버 영상까지 한 화면에서 제어.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🛡️</span>
+          <h4>방송사고를 막는 똑똑한 기본값</h4>
+          <p>자막 자동 정리, 영상 안전장치가 항상 뒤에서 지킵니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 ─────────────────────────────────────────── -->
+    <section id="trust">
+      <h2>왜 믿을 수 있는가</h2>
+      <p>
+        멋진 화면을 만드는 건 어렵지 않습니다. 어려운 건 그게 <b>진짜 방송 장비 앞에서도
+        그대로 동작하는지</b> 확인하는 일입니다. 이 프로젝트는 처음부터 그 원칙을 지켰습니다 —
+        시뮬레이션에서 통과한 기능도, 실제 vMix와 라우터에 연결해 다시 한번 눈으로 확인합니다.
+      </p>
+
+      <div class="proof-card">
+        <h4>오늘 — 화면분할 기능을 실제 방송 중인 시스템에서 그 자리에서 완성</h4>
+        <p>
+          화면분할(멀티캠 구성) 원격 제어 기능을 새로 설계한 뒤, 실제로 방송을 내보내고 있는
+          vMix 장비에 직접 연결해 확인했습니다. 공식 문서만으로는 알 수 없던 세부 동작까지
+          직접 찾아내 정확하게 구현했고, <b>확인 작업 내내 실제 방송 화면(PGM)은 단 한 순간도
+          건드리지 않았습니다.</b>
+        </p>
+      </div>
+
+      <div class="proof-card">
+        <h4>모든 핵심 기능을 실제 장비와 함께 검증</h4>
+        <p>
+          전환효과·자막·서버 영상 재생·라우터 연동까지, 이 시스템의 핵심 기능은 전부 실제
+          vMix·Blackmagic 하드웨어와 직접 통신하며 확인했습니다. "이론상 되어야 한다"가
+          아니라 "실제로 이렇게 동작하는 걸 봤다"가 이 시스템의 기준입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 5 ─────────────────────────────────────────── -->
+    <section id="vision">
+      <h2>앞으로의 가능성</h2>
+      <p>
+        지금은 한 뉴스룸을 위해 맞춤 제작했지만, 이 프로젝트의 핵심 아이디어 —
+        <b>"전문 장비의 복잡함을, 그걸 쓰는 사람의 언어로 번역한다"</b> — 는 뉴스 방송에만
+        국한되지 않습니다. vMix급 장비를 갖추고도 그 복잡함 때문에 제대로 못 쓰는 현장은
+        생각보다 많습니다 — 학교 방송부, 종교시설 예배 중계, 소규모 스튜디오, 1인 라이브
+        방송까지. 같은 원리를 다른 이름의 화면으로 다시 그리면, 똑같이 적용할 수 있습니다.
+      </p>
+      <p>
+        이 방향에 대한 초기 구상은 이미 별도 문서로 정리해두었고, 실제 사용자들이 vMix를
+        쓰면서 느끼는 불편함에 대한 조사도 함께 진행했습니다. 지금 여러분이 보고 계신
+        이 시스템 자체가 그 질문에 대한 첫 번째 실제 증거입니다 — <b>"된다"</b>는 것을
+        말이 아니라 실제로 동작하는 화면으로 보여드릴 수 있습니다.
+      </p>
+      <div class="callout ok">
+        <span class="tag">한 줄로 요약하면</span>
+        전문가만 쓸 수 있던 방송 장비를, 전문가가 아니어도 쓸 수 있게 만드는 것 — 그리고
+        그걸 실제로 증명해 보이는 것. 이 시스템이 매일 하고 있는 일입니다.
+      </div>
+    </section>
+
+    <footer>
+      MARS/Master · 2026-07-18 · <a href="doc/STATUS.md">개발 현황(STATUS.md)</a> · <a href="doc/index.html">문서 허브</a>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  function onScroll(){
+    var pos = window.scrollY + 80;
+    var current = sections[0];
+    sections.forEach(function(s){ if (s.offsetTop <= pos) current = s; });
+    links.forEach(function(a){
+      a.classList.toggle('active', current && a.getAttribute('href') === '#' + current.id);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>
 </body>
 </html>

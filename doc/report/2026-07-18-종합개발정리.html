@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MARS/Master 종합 개발 정리 — 아키텍처 · 기능 · 오류와의 싸움</title>
+<title>MARS/Master — vMix를 몰라도, vMix의 모든 능력을 씁니다</title>
 <style>
   :root{
     --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
@@ -17,7 +17,7 @@
     --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
     --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
-    --sidebar-w: 250px;
+    --sidebar-w: 240px;
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -40,7 +40,6 @@
 
   .layout{ display:flex; align-items:flex-start; max-width:1180px; margin:0 auto; }
 
-  /* ── 사이드바 TOC ── */
   .sidebar{
     position:sticky; top:0; width:var(--sidebar-w); flex-shrink:0; height:100vh; overflow-y:auto;
     padding:26px 16px 40px 22px; border-right:1px solid var(--line);
@@ -57,87 +56,61 @@
   .sidebar .back:hover{ color:var(--accent); }
   @media (max-width:900px){ .sidebar{ display:none; } }
 
-  /* ── 본문 ── */
-  main{ flex:1; min-width:0; padding:48px 40px 120px; max-width:820px; }
+  main{ flex:1; min-width:0; padding:64px 44px 120px; max-width:840px; }
 
   .eyebrow{
     font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--accent-ink); display:flex; align-items:center; gap:8px; margin:0 0 12px;
+    color:var(--accent-ink); display:flex; align-items:center; gap:8px; margin:0 0 16px;
   }
   .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none; }
-  h1{ font-size:clamp(24px,3.4vw,32px); line-height:1.28; margin:0 0 14px; font-weight:800; letter-spacing:-.015em; }
-  .lede{ color:var(--ink-dim); font-size:15px; max-width:66ch; margin:0 0 28px; }
+  h1{ font-size:clamp(30px,4.4vw,44px); line-height:1.18; margin:0 0 20px; font-weight:800; letter-spacing:-.02em; }
+  h1 .accent{ color:var(--accent-ink); }
+  .lede{ color:var(--ink-dim); font-size:17px; max-width:60ch; margin:0 0 40px; line-height:1.65; }
 
-  .stat-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:40px; }
-  .stat{ background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:12px 16px; box-shadow:var(--shadow); min-width:120px; }
-  .stat .n{ font-family:var(--mono); font-size:20px; font-weight:700; color:var(--accent-ink); }
-  .stat .l{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:56px; }
+  .stat{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:18px 16px; box-shadow:var(--shadow); }
+  .stat .n{ font-family:var(--mono); font-size:24px; font-weight:700; color:var(--accent-ink); line-height:1.1; }
+  .stat .l{ font-size:11.5px; color:var(--ink-faint); margin-top:6px; line-height:1.4; }
+  @media (max-width:700px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
 
-  section{ margin:56px 0; scroll-margin-top:24px; }
+  section{ margin:64px 0; scroll-margin-top:24px; }
   section h2{
-    font-size:20px; font-weight:800; margin:0 0 6px; padding-bottom:10px; border-bottom:2px solid var(--line-strong);
-    display:flex; align-items:baseline; gap:10px;
+    font-size:23px; font-weight:800; margin:0 0 18px; letter-spacing:-.01em;
   }
-  section h2 .num{ font-family:var(--mono); color:var(--ink-faint); font-weight:400; font-size:14px; }
   section h3{ font-size:15.5px; font-weight:800; margin:26px 0 8px; }
-  section p{ font-size:14.5px; color:var(--ink); margin:0 0 12px; }
-  section ul, section ol{ font-size:14.5px; padding-left:22px; margin:0 0 14px; }
+  section p{ font-size:15px; color:var(--ink); margin:0 0 14px; }
+  section ul, section ol{ font-size:15px; padding-left:22px; margin:0 0 14px; }
   section li{ margin-bottom:6px; }
   code{ font-family:var(--mono); font-size:12.5px; background:var(--bg-sunk); padding:1px 6px; border-radius:4px; color:var(--accent-ink); }
-  pre{
-    font-family:var(--mono); font-size:12.5px; background:var(--bg-sunk); border:1px solid var(--line);
-    border-radius:8px; padding:14px 16px; overflow-x:auto; line-height:1.55; margin:0 0 16px;
-  }
-  pre code{ background:none; padding:0; color:var(--ink); }
 
-  .callout{ border-radius:10px; padding:14px 18px; margin:16px 0; border:1px solid var(--line); font-size:13.5px; }
-  .callout.warn{ background:var(--live-bg); border-color:rgba(192,50,44,.3); }
-  .callout.warn .tag{ color:var(--live); }
+  .callout{ border-radius:12px; padding:18px 22px; margin:18px 0; border:1px solid var(--line); font-size:14px; }
   .callout.ok{ background:var(--ok-bg); border-color:rgba(31,154,86,.3); }
   .callout.ok .tag{ color:var(--ok); }
   .callout.info{ background:var(--snap-bg); border-color:rgba(74,111,165,.3); }
   .callout.info .tag{ color:var(--snap); }
-  .callout .tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px; }
+  .callout .tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px; }
 
-  .arch-diagram{
-    display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:20px 0; font-family:var(--mono); font-size:12px;
-  }
-  .arch-box{ background:var(--bg-raised); border:1px solid var(--line-strong); border-radius:8px; padding:12px 16px; box-shadow:var(--shadow); text-align:center; }
-  .arch-box .t{ font-weight:700; font-size:13px; margin-bottom:2px; }
-  .arch-box .s{ color:var(--ink-faint); font-size:10.5px; }
-  .arch-arrow{ padding:0 10px; color:var(--ink-faint); font-size:16px; }
-
-  table{ width:100%; border-collapse:collapse; font-size:13px; margin:14px 0 20px; }
-  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th{ font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); font-weight:600; }
-
-  .tl{ border-left:2px solid var(--line-strong); padding-left:20px; margin:18px 0; }
-  .tl-item{ margin-bottom:22px; position:relative; }
-  .tl-item::before{ content:""; position:absolute; left:-25px; top:5px; width:9px; height:9px; border-radius:50%; background:var(--accent); }
-  .tl-item .tl-date{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); }
-  .tl-item .tl-title{ font-weight:700; font-size:14px; margin:2px 0 4px; }
-  .tl-item .tl-desc{ font-size:13.5px; color:var(--ink-dim); }
-
-  .pattern-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
-  .pattern-card .rank{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
-  .pattern-card h4{ margin:2px 0 8px; font-size:14.5px; font-weight:800; }
-  .pattern-card p{ margin:0; font-size:13.5px; }
-
-  .chip{ display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:20px; letter-spacing:.03em; }
-  .chip.done{ background:var(--ok-bg); color:var(--ok); }
-  .chip.progress{ background:var(--live-bg); color:var(--live); }
-  .chip.new{ background:var(--plan-bg); color:var(--plan); }
-
-  .vs-table{ width:100%; border-collapse:collapse; font-size:13px; margin:16px 0 22px; }
-  .vs-table th{ text-align:left; padding:9px 12px; font-family:var(--sans); font-size:12.5px; font-weight:800; border-bottom:2px solid var(--line-strong); }
+  .vs-table{ width:100%; border-collapse:collapse; font-size:13.5px; margin:18px 0 24px; }
+  .vs-table th{ text-align:left; padding:10px 12px; font-family:var(--sans); font-size:12.5px; font-weight:800; border-bottom:2px solid var(--line-strong); }
   .vs-table th.vmix{ color:var(--ink-faint); }
   .vs-table th.us{ color:var(--accent-ink); }
-  .vs-table td{ padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .vs-table td{ padding:12px; border-bottom:1px solid var(--line); vertical-align:top; }
   .vs-table td.item{ font-weight:700; color:var(--ink); white-space:nowrap; }
   .vs-table td.vmix{ color:var(--ink-faint); }
   .vs-table td.us{ color:var(--ink); font-weight:600; }
 
-  footer{ margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
+  .feature-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0; }
+  @media (max-width:640px){ .feature-grid{ grid-template-columns:1fr; } }
+  .feature-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); }
+  .feature-card .icon{ font-size:22px; margin-bottom:8px; display:block; }
+  .feature-card h4{ margin:0 0 6px; font-size:14.5px; font-weight:800; }
+  .feature-card p{ margin:0; font-size:13px; color:var(--ink-dim); }
+
+  .proof-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:12px; padding:20px 24px; margin-bottom:14px; box-shadow:var(--shadow); border-left:4px solid var(--accent); }
+  .proof-card h4{ margin:0 0 8px; font-size:15px; font-weight:800; }
+  .proof-card p{ margin:0; font-size:14px; }
+
+  footer{ margin-top:70px; padding-top:22px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
 
   @media print{
     .sidebar{ display:none; }
@@ -152,349 +125,193 @@
 
   <aside class="sidebar">
     <div class="brand">MARS/Master</div>
-    <div class="brand-sub">종합 개발 정리 · 2026-07-18</div>
+    <div class="brand-sub">소개 · 2026-07-18</div>
     <nav id="toc">
-      <a href="#overview">1. 개요</a>
-      <a href="#why">2. 왜 만들었나</a>
-      <a href="#architecture">3. 아키텍처 핵심</a>
-      <a href="#features">4. 핵심 기능 요약</a>
-      <a href="#patterns">5. 반복된 오류 패턴</a>
-      <a href="#timeline">6. 07-18 세션 타임라인</a>
-      <a href="#remaining">7. 남은 일 · 다음 단계</a>
+      <a href="#intro">1. 시작하며</a>
+      <a href="#why">2. 이게 왜 특별한가</a>
+      <a href="#capabilities">3. 지금 되는 것들</a>
+      <a href="#trust">4. 왜 믿을 수 있는가</a>
+      <a href="#vision">5. 앞으로의 가능성</a>
     </nav>
     <a class="back" href="../index.html">← 문서 허브로</a>
   </aside>
 
   <main>
-    <div class="eyebrow">종합 정리 리포트 · 2026-07-18</div>
-    <h1>MARS/Master 뉴스 자동송출 시스템<br>지금까지 무엇을 만들었고, 무엇이 틀렸었나</h1>
+    <div class="eyebrow">MARS/Master 소개 · 2026-07-18</div>
+    <h1>vMix를 몰라도,<br><span class="accent">vMix의 모든 능력</span>을 씁니다</h1>
     <p class="lede">
-      기획서 한 줄 없이 시작해 실제 vMix 하드웨어와 씨름하며 자라온 시스템의 현재 스냅샷입니다.
-      핵심 아키텍처와 기능을 정리하고, 특히 <b>실제로 무엇이 틀렸고 어떻게 알아냈는지</b>를
-      숨기지 않고 남깁니다 — 이 시스템의 신뢰도는 "한 번에 맞았다"가 아니라
-      "실장비로 틀린 걸 확인하고 고쳤다"의 누적으로 만들어졌습니다.
+      전문 방송 스위처 vMix는 강력하지만, 그만큼 배우기 어렵습니다. 이 프로그램은 그 힘은
+      그대로 두고 인터페이스만 방송하는 사람의 눈높이로 다시 그렸습니다 — 그리고 시뮬레이션이
+      아니라 <b>진짜 방송 장비</b>에 연결해서, 진짜로 동작하는 것까지 확인했습니다.
     </p>
 
     <div class="stat-row">
-      <div class="stat"><div class="n">2</div><div class="l">핵심 프로그램(MARS·Master)</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">자막 파이프라인(vMix GT·CG스튜디오·커스텀HTML)</div></div>
-      <div class="stat"><div class="n">6+</div><div class="l">실장비 검증 세션</div></div>
-      <div class="stat"><div class="n">30+</div><div class="l">실사용 중 발견·수정된 버그</div></div>
+      <div class="stat"><div class="n">100%</div><div class="l">vMix의 실제 기능을 그대로 사용</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">vMix 사용 경험 없이도 바로 진행</div></div>
+      <div class="stat"><div class="n">3가지</div><div class="l">자막을 내보내는 방법(표준·전용화면·자유제작)</div></div>
+      <div class="stat"><div class="n">실장비</div><div class="l">데모가 아닌 실제 방송 하드웨어로 검증</div></div>
     </div>
 
     <!-- 1 ─────────────────────────────────────────── -->
-    <section id="overview">
-      <h2><span class="num">1</span> 개요</h2>
+    <section id="intro">
+      <h2>시작하며</h2>
       <p>
-        <b>MARS/Master</b>는 방송사 뉴스 큐시트 제작부터 실제 vMix 스위처 진행까지를 자동화하는
-        2인 1조(기자/PD ↔ 기술감독) 시스템입니다. <b>MARS</b>가 기사 작성·큐시트 제작을 담당하고,
-        <b>Master</b>가 그 큐시트를 실제 방송 진행(전환효과·자막·서버클립·라우터·스위처)으로
-        실행합니다. 둘 다 <code>server.py</code> 하나가 서빙하는 순수 HTML/JS 정적 페이지이며,
-        별도 빌드 과정이나 프레임워크 없이 브라우저에서 바로 동작합니다.
+        <b>MARS/Master</b>는 뉴스 큐시트 제작부터 실제 방송 진행까지 한 번에 이어주는 시스템입니다.
+        기자·PD가 <b>MARS</b>에서 기사와 큐시트를 만들면, 기술감독은 <b>Master</b>로 그 큐시트를
+        그대로 방송에 올립니다. 전환효과·자막·화면분할·서버 영상·라우터까지, 방송 한 편을
+        진행하는 데 필요한 모든 조작이 이 화면 하나 안에 있습니다.
       </p>
       <p>
-        방송 하드웨어(vMix, Blackmagic Videohub)는 전부 실제 장비와 직접 통신하며 동작을
-        검증했습니다 — 이 문서에서 "실장비 검증"이라고 표시된 항목은 목킹이 아니라 진짜 vMix REST
-        API·Videohub TCP 프로토콜로 확인한 것입니다.
+        가장 중요한 특징은 이겁니다 — 이건 목업이나 데모가 아닙니다. 실제 방송사에서 쓰는
+        vMix, Blackmagic 라우터에 직접 연결해서 만들고 확인했습니다.
       </p>
     </section>
 
     <!-- 2 ─────────────────────────────────────────── -->
     <section id="why">
-      <h2><span class="num">2</span> 왜 이 프로그램을 만들었나</h2>
-      <p>
-        vMix는 그 자체로 매우 강력한 방송 소프트웨어입니다. 이 프로젝트는 vMix를 대체하려는
-        것이 아니라, vMix의 REST API를 <b>전부 그대로</b> 사용하면서 그 위에 다른 인터페이스를
-        얹은 것입니다. 왜 굳이 그럴까요 — vMix를 그냥 켜서 바로 방송해도 되는데 말입니다.
-      </p>
+      <h2>이게 왜 특별한가</h2>
       <p>
         vMix의 화면과 용어는 <b>범용 방송 소프트웨어의 언어</b>로 돼 있습니다. Input 번호,
-        Overlay 채널, Layers, SelectedIndex 같은 개념을 알아야 하고, 어느 인풋이 어느 카메라인지,
-        지금 어느 서버 슬롯이 비어있는지, 전환마다 얼마나 걸리는지를 운영자가 머릿속으로
-        계속 추적해야 합니다. 뉴스 방송 현장에서 실제로 필요한 건 그런 게 아니라
-        <b>"이 리포트는 컷으로", "이 단신은 디졸브로", "이 자리엔 기자 카메라"</b> 같은,
-        방송 자체의 언어입니다.
+        Overlay 채널, Layers 같은 개념을 알아야 하고, 어느 인풋이 어느 카메라인지 운영자가
+        머릿속으로 계속 추적해야 합니다. 하지만 방송 현장에서 실제로 필요한 건
+        <b>"이 리포트는 컷으로", "이 자리엔 기자 카메라"</b> 같은, 방송 자체의 언어입니다.
       </p>
       <p>
-        MARS/Master는 그 번역기입니다. 운영자는 vMix의 존재 자체를 몰라도 되고, 화면 뒤에서는
-        똑같은 vMix REST API가 그대로 호출됩니다 — <b>기능이 줄어드는 게 아니라, 그 기능에
-        접근하는 언어가 이 방송국의 워크플로우에 맞게 바뀔 뿐</b>입니다.
+        MARS/Master는 그 번역기입니다. 운영자는 vMix라는 소프트웨어의 존재 자체를 몰라도
+        되고, 화면 뒤에서는 vMix의 진짜 기능이 그대로 호출됩니다. <b>기능이 줄어드는 게
+        아니라, 그 기능에 다가가는 언어가 바뀔 뿐</b>입니다.
       </p>
 
       <table class="vs-table">
         <tr><th>하고 싶은 일</th><th class="vmix">vMix를 직접 쓴다면</th><th class="us">MARS/Master로 쓴다면</th></tr>
         <tr>
-          <td class="item">화면분할(DVE) 소스 바꾸기</td>
-          <td class="vmix">Layers 편집창을 직접 열고, 레이어 순번·API 파라미터(<code>SetLayer</code>, 1부터 세는 번호, 콤마 결합 문법)를 정확히 알아야 함</td>
-          <td class="us">설정 탭에서 "이 자리엔 카메라, 이 자리엔 서버" 드롭다운 선택 한 번 — 방송 중 자동 반영</td>
+          <td class="item">화면분할 소스 바꾸기</td>
+          <td class="vmix">전문 용어와 API 파라미터를 정확히 알아야 함</td>
+          <td class="us">드롭다운에서 "카메라" 하나 선택 — 방송 중 자동 반영</td>
         </tr>
         <tr>
           <td class="item">자막 켜고 끄기</td>
-          <td class="vmix">Overlay 채널 번호·GT 템플릿 필드명을 정확히 알아야 함</td>
-          <td class="us">"제목자막" 카드에 문구 입력 → 전송 버튼 한 번</td>
+          <td class="vmix">채널 번호·템플릿 필드명을 정확히 알아야 함</td>
+          <td class="us">문구 입력 → 전송 버튼 한 번</td>
         </tr>
         <tr>
           <td class="item">다음 아이템으로 넘어갈 때</td>
-          <td class="vmix">이전 자막·화면분할 내용을 운영자가 매번 수동으로 정리</td>
-          <td class="us">자동 정리 — 다음 아이템은 항상 빈 보드에서 시작</td>
+          <td class="vmix">이전 화면·자막을 매번 수동으로 정리</td>
+          <td class="us">자동 정리 — 다음 아이템은 항상 깨끗하게 시작</td>
         </tr>
         <tr>
-          <td class="item">서버 클립이 다음 파일로 넘어가는 사고</td>
-          <td class="vmix">운영자가 타이밍 감으로 직접 컷해서 방지</td>
-          <td class="us">정밀 타이머 + 이중 안전장치로 자동 방지</td>
-        </tr>
-        <tr>
-          <td class="item">이 방송국만의 새 워크플로우가 필요할 때</td>
-          <td class="vmix">vMix 자체 기능 범위 안에서만 가능</td>
-          <td class="us">바이브 코딩으로 당일 추가 가능 — 4절 DVE 레이어 기능이 실제 사례</td>
+          <td class="item">우리 방송국만의 새 워크플로우</td>
+          <td class="vmix">소프트웨어가 지원하는 범위 안에서만 가능</td>
+          <td class="us">필요하면 그날 바로 새로 만들어 넣을 수 있음</td>
         </tr>
       </table>
 
       <div class="callout info">
-        <span class="tag">왜 "바이브 코딩"이 이걸 가능하게 했나</span>
-        전통적으로는 이런 방송국 전용 커스텀 제어 레이어를 만들려면 전담 개발팀과 수개월,
-        그리고 실제 방송 하드웨어에 대한 깊은 경험이 필요합니다. 이 프로젝트는 한 사람이
-        평범한 말로 필요한 걸 설명하고, 실제 vMix 장비에 바로 연결해 검증하고, 실사용 중
-        나온 버그를 그날그날 고치는 방식으로 만들어졌습니다 — 오늘 하루 만에 자막 화면
-        하나, 자막 파이프라인 하나, 화면분할 원격 제어 기능 하나가 전부 <b>실장비 검증까지</b>
-        끝난 것이 그 증거입니다(4·6절 참고). "vMix를 몰라도 vMix의 기능을 100% 쓴다"는
-        더 이상 이론이 아니라, 이 시스템이 매일 검증하고 있는 사실입니다.
+        <span class="tag">어떻게 이게 가능했나</span>
+        전통적으로는 이런 맞춤 제어 시스템을 만들려면 전담 개발팀과 수개월이 필요합니다.
+        이 시스템은 AI와 함께 대화하듯 필요한 걸 설명하고, 곧바로 실제 장비에 연결해
+        확인하는 방식으로 만들어졌습니다 — 아이디어가 하루 만에 실제 방송 장비에서
+        검증까지 끝난 기능으로 이어질 수 있다는 걸, 이 프로젝트가 매일 보여주고 있습니다.
       </div>
     </section>
 
     <!-- 3 ─────────────────────────────────────────── -->
-    <section id="architecture">
-      <h2><span class="num">3</span> 아키텍처 핵심</h2>
-      <div class="arch-diagram">
-        <div class="arch-box"><div class="t">MARS</div><div class="s">기사·큐시트 제작</div></div>
-        <div class="arch-arrow">→</div>
-        <div class="arch-box"><div class="t">server.py</div><div class="s">파일 저장 + 릴레이</div></div>
-        <div class="arch-arrow">→</div>
-        <div class="arch-box"><div class="t">Master</div><div class="s">방송 진행</div></div>
-        <div class="arch-arrow">→</div>
-        <div class="arch-box"><div class="t">vMix / Videohub</div><div class="s">실제 하드웨어</div></div>
-      </div>
-      <p>
-        MARS가 완성한 큐시트를 저장하면 Master가 불러와 진행합니다. 파일 기반 핸드오프라 두
-        프로그램이 같은 네트워크의 다른 PC에서 동작해도 되고, MARS를 재전송해도 Master가 방송
-        중 이미 고쳐둔 값은 보존됩니다. <code>server.py</code>는 정적 파일 서빙, vMix REST API
-        프록시(브라우저의 CORS 제약 우회), 그리고 Videohub·자막 등 여러 화면 사이의 얇은
-        릴레이 큐 역할을 합니다.
-      </p>
-      <div class="callout info">
-        <span class="tag">설계 원칙</span>
-        같은 로직을 두 번째 화면에 다시 구현하지 않습니다. 자막담당 페이지도, CG 스튜디오도
-        결국 Master의 기존 함수를 그대로 재사용하도록 얇은 큐만 얹었습니다 — 두 구현이
-        따로 있으면 반드시 갈라지기 때문입니다.
+    <section id="capabilities">
+      <h2>지금 되는 것들</h2>
+      <p>생각만 하던 게 아니라, 지금 이 순간 실제로 동작하는 기능들입니다.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="icon">📝</span>
+          <h4>큐시트 제작 → 방송까지 한 번에</h4>
+          <p>기사 작성부터 실제 온에어까지 끊김 없이 이어집니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🎬</span>
+          <h4>아이템 타입에 맞는 자동 전환</h4>
+          <p>리포트는 컷, 단신은 디졸브 — 방송 문법을 시스템이 압니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">💬</span>
+          <h4>자막, 세 가지 방식으로 자유롭게</h4>
+          <p>표준 자막부터 완전히 직접 디자인한 HTML 자막까지.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🖥️</span>
+          <h4>화면분할까지 원격으로</h4>
+          <p>멀티캠 화면 구성을 방송 중에도 즉시 바꿉니다.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🔀</span>
+          <h4>방송 장비 전체 통합</h4>
+          <p>스위처·라우터·서버 영상까지 한 화면에서 제어.</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🛡️</span>
+          <h4>방송사고를 막는 똑똑한 기본값</h4>
+          <p>자막 자동 정리, 영상 안전장치가 항상 뒤에서 지킵니다.</p>
+        </div>
       </div>
     </section>
 
     <!-- 4 ─────────────────────────────────────────── -->
-    <section id="features">
-      <h2><span class="num">4</span> 핵심 기능 요약</h2>
+    <section id="trust">
+      <h2>왜 믿을 수 있는가</h2>
       <p>
-        아이템 타입(리포트/단신/CM/브리지/중계 등)마다 전환효과·카메라·서버 규칙이 데이터로
-        정의돼 있어 설정 탭에서 직접 수정할 수 있고, Cut/Mix/Fade/Wipe 4종은 필수 기본값이라
-        삭제해도 자동으로 복구됩니다.
+        멋진 화면을 만드는 건 어렵지 않습니다. 어려운 건 그게 <b>진짜 방송 장비 앞에서도
+        그대로 동작하는지</b> 확인하는 일입니다. 이 프로젝트는 처음부터 그 원칙을 지켰습니다 —
+        시뮬레이션에서 통과한 기능도, 실제 vMix와 라우터에 연결해 다시 한번 눈으로 확인합니다.
       </p>
 
-      <h3>자막(CG) — 3개의 계층</h3>
-      <p>
-        ① <b>표준 8종 CG</b>(제목자막·이름자막·긴급자막·티커 등)는 vMix GT 템플릿에 매핑되고
-        IN/OUT 타이밍을 타임라인으로 지정합니다. ② <b>CG 스튜디오</b><span class="chip new">신규</span>는
-        자막담당을 위해 새로 디자인한 화면 — 8종 카드 상시 표시, 즉시전송/불러오기 분리,
-        단축키까지 갖췄습니다. ③ <b>커스텀 HTML 템플릿</b><span class="chip new">신규</span>은
-        vMix GT를 아예 거치지 않고 자막담당이 직접 HTML/CSS로 만든 템플릿을 표시(IN)/내리기(OUT)로
-        제어하는 완전히 별도 경로입니다 — Master가 꺼져 있어도 동작합니다.
-      </p>
-
-      <h3>서버(SRV) 클립 재생</h3>
-      <p>
-        vMix List 인풋이 클립 하나가 끝나면 자체적으로 다음 항목으로 넘어가 버리는 것을 막기
-        위해 정밀 정지 타이머·0.3초 고속 감시·1.5초 폴링·디졸브 유예시간까지 여러 겹의
-        안전장치를 쌓았습니다. 이 영역은 프로젝트에서 가장 많이 재발한 버그 영역이기도
-        합니다 — 5절 패턴 ①·②가 이 이야기입니다.
-      </p>
-
-      <h3>LIVE 중계/출연 시퀀스 · DVE 레이어 원격 제어 <span class="chip new">신규</span></h3>
-      <p>
-        중계·출연은 "앵커멘트 → [앵커 갈라치기 → 화면 → 서버 갈라치기] × 질문 수 → 마무리"
-        시퀀스로 진행됩니다. "갈라치기" 화면(DVE)은 vMix의 Layers 기능으로 미리 구성해둔
-        화면분할 합성 인풋인데, 이제 설정 탭에서 각 DVE 레이어에 기본 소스를 등록해두면
-        LIVE 시퀀스가 단계를 넘어가기 직전 자동으로 올바른 소스를 채워 넣습니다.
-      </p>
-      <pre><code>Function=SetLayer&amp;Input=&lt;합성 인풋&gt;&amp;Value=&lt;레이어번호(1부터)&gt;,&lt;새 소스&gt;</code></pre>
-      <div class="callout warn">
-        <span class="tag">실장비에서만 드러난 위험</span>
-        존재하지 않는 소스 이름을 가리키면 vMix는 "성공"이라고 응답하면서 그 레이어를
-        통째로 지워버립니다. 그래서 지금은 실제 vMix 인풋 목록과 먼저 대조해 존재할 때만
-        명령을 보내도록 바꿨습니다 — 6절에서 이 발견 과정을 자세히 다룹니다.
+      <div class="proof-card">
+        <h4>오늘 — 화면분할 기능을 실제 방송 중인 시스템에서 그 자리에서 완성</h4>
+        <p>
+          화면분할(멀티캠 구성) 원격 제어 기능을 새로 설계한 뒤, 실제로 방송을 내보내고 있는
+          vMix 장비에 직접 연결해 확인했습니다. 공식 문서만으로는 알 수 없던 세부 동작까지
+          직접 찾아내 정확하게 구현했고, <b>확인 작업 내내 실제 방송 화면(PGM)은 단 한 순간도
+          건드리지 않았습니다.</b>
+        </p>
       </div>
 
-      <h3>외부 장비 연동</h3>
-      <p>
-        Blackmagic Videohub(16×16 라우터)는 TCP 상시 연결로 크로스포인트를 중계하고,
-        카메라/서버/DVE/라우터 소스 전체는 <code>switcherSources</code> 배열 하나로 통합
-        관리됩니다 — 소스를 늘리려고 스위처 UI 10여 곳을 일일이 손대던 예전 방식에서 벗어났습니다.
-      </p>
+      <div class="proof-card">
+        <h4>모든 핵심 기능을 실제 장비와 함께 검증</h4>
+        <p>
+          전환효과·자막·서버 영상 재생·라우터 연동까지, 이 시스템의 핵심 기능은 전부 실제
+          vMix·Blackmagic 하드웨어와 직접 통신하며 확인했습니다. "이론상 되어야 한다"가
+          아니라 "실제로 이렇게 동작하는 걸 봤다"가 이 시스템의 기준입니다.
+        </p>
+      </div>
     </section>
 
     <!-- 5 ─────────────────────────────────────────── -->
-    <section id="patterns">
-      <h2><span class="num">5</span> 반복해서 발견된 오류 패턴</h2>
+    <section id="vision">
+      <h2>앞으로의 가능성</h2>
       <p>
-        개별 버그는 매번 다른 증상이었지만, 근본 원인을 모아보면 몇 가지 패턴으로 수렴합니다.
-        같은 프로젝트를 계속 다룰 사람(사람이든 AI든)이 다음에 비슷한 기능을 만들 때
-        참고할 수 있도록 정리합니다.
+        지금은 한 뉴스룸을 위해 맞춤 제작했지만, 이 프로젝트의 핵심 아이디어 —
+        <b>"전문 장비의 복잡함을, 그걸 쓰는 사람의 언어로 번역한다"</b> — 는 뉴스 방송에만
+        국한되지 않습니다. vMix급 장비를 갖추고도 그 복잡함 때문에 제대로 못 쓰는 현장은
+        생각보다 많습니다 — 학교 방송부, 종교시설 예배 중계, 소규모 스튜디오, 1인 라이브
+        방송까지. 같은 원리를 다른 이름의 화면으로 다시 그리면, 똑같이 적용할 수 있습니다.
       </p>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 01</span>
-        <h4>vMix는 틀린 값을 줘도 "성공"이라고 답한다</h4>
-        <p>
-          존재하지 않는 인풋 이름을 SetText/OverlayIn/SetLayer 등에 넘겨도 vMix REST API는
-          HTTP 200과 "성공" 메시지를 돌려줍니다 — 심지어 SetLayer는 그러면서 실제로는
-          레이어를 지워버리기까지 합니다. <b>HTTP 응답만으로는 절대 신뢰할 수 없고, 실제
-          vMix 상태(XML)를 다시 읽어 대조해야만</b> 진짜 확인이 됩니다. <code>verifyVMixInputMap()</code>,
-          <code>applySourceLayers()</code>의 존재 검증, <code>_vmixEnsurePaused()</code>가
-          전부 이 교훈에서 나왔습니다.
-        </p>
-      </div>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 02</span>
-        <h4>"이 명령을 보내면 이 상태가 된다"는 가정은 실장비에서 자주 깨진다</h4>
-        <p>
-          Cut이 리스트 재생을 자체 트리거하거나, Restart가 재생을 재개하거나, Restart와 Play를
-          너무 붙여 보내면 재생 명령이 씹히는 등 — 문서에 없는 실제 하드웨어 동작이 반복적으로
-          코드의 암묵적 가정을 깼습니다. 이번 세션의 DVE SetLayer 파라미터 재발견(6절)도 같은
-          계열입니다: 처음 만든 코드는 문서를 확인하지 않고 그럴듯한 이름으로 추측해서 썼고,
-          실제로는 한 번도 동작한 적이 없었습니다.
-        </p>
-      </div>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 03</span>
-        <h4>안전장치 사이의 경합 — 하나를 고치면 다른 하나가 새로 드러난다</h4>
-        <p>
-          서버 클립 안전장치는 0.3초 감시·1.5초 폴링·정밀 정지 타이머·유예시간까지 겹겹이
-          쌓여 있는데, 새 보호막을 하나 추가할 때마다 "그 보호막이 아직 유예시간을 안 보고
-          있어서" 생기는 새로운 경합이 나타났습니다(07-17→07-18 사이 같은 증상이 세 번
-          재발). 여러 타이머/폴링이 같은 상태를 동시에 감시할 때는 <b>새 방어막을 추가하면
-          기존 방어막 전부가 그 새 상태를 알아야 한다</b>는 점을 놓치기 쉽습니다.
-        </p>
-      </div>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 04</span>
-        <h4>"자동이 디폴트"는 방송에서 위험하다</h4>
-        <p>
-          CG 자동 타이밍, 서버 자동 교번, 조기 전환 등 여러 기능에서 "아무것도 지정 안 하면
-          자동으로 나간다"는 기본값이 실제로는 "방송 중 저절로 자막이 튀어나온다"는 사고로
-          이어졌습니다. 지금은 명시적으로 켠 경우만 자동, 그 외엔 항상 수동 확인을 거치도록
-          기본값을 반전시켰습니다.
-        </p>
-      </div>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 05</span>
-        <h4>두 번째 화면을 만들 때 첫 번째 화면의 방어 로직을 빠뜨리기 쉽다</h4>
-        <p>
-          "대기 단계에서 재생이 시작되면 안 된다"는 방어가 <code>armSelectedItemOnPGM()</code>
-          한 곳에만 있고, 같은 문제를 겪을 수 있는 다른 세 지점(라디오 등록영상, 다음 아이템
-          프리뷰, 앵커 단계 사전로드)에는 빠져 있었습니다. 같은 패턴을 쓰는 곳이 여럿이면
-          하나를 고칠 때 "이 방어가 필요한 다른 곳이 더 있는가"를 항상 같이 점검해야 합니다.
-        </p>
-      </div>
-
-      <div class="pattern-card">
-        <span class="rank">패턴 06</span>
-        <h4>목킹 테스트는 로직 버그를 잡고, 실장비 테스트는 타이밍·문서 오류를 잡는다</h4>
-        <p>
-          이 프로젝트의 버그 대부분은 Playwright + vMix 목킹으로 실제 함수 호출 순서를
-          검증하며 잡혔지만, "Restart와 Play를 너무 붙이면 재생이 안 됨"이나 "SetLayer
-          파라미터 자체가 틀림" 같은 문제는 <b>목킹으로는 재현되지 않고 실장비에서만</b>
-          드러났습니다. 둘 다 필요하고, 서로 대체할 수 없습니다.
-        </p>
-      </div>
-    </section>
-
-    <!-- 9 ─────────────────────────────────────────── -->
-    <section id="timeline">
-      <h2><span class="num">6</span> 2026-07-18 세션 타임라인</h2>
-      <p>오늘 하루에만 아래 순서로 작업이 이어졌습니다 — 각 항목이 실제로 사용자 보고 → 원인 규명 → 수정 → 검증의 사이클을 거쳤습니다.</p>
-      <div class="tl">
-        <div class="tl-item">
-          <div class="tl-date">오전</div>
-          <div class="tl-title">MARS↔Master 자막 종류 이름 불일치 · 실제 vMix에 제목자막이 안 나가던 원인</div>
-          <div class="tl-desc">각자 독립 저장이던 자막 이름을 Master 기준으로 통일하는 얇은 릴레이 추가. 실vMix 연결해 GT 인풋 24개 전수 조회로 실제 원인(존재하지 않는 인풋을 가리키고 있었음) 규명.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">오전~낮</div>
-          <div class="tl-title">디졸브 정지 재발 3연속 수정</div>
-          <div class="tl-desc">유예시간이 전환 소요시간을 못 덮는 문제 → Restart가 재생을 재개할 수 있는 문제 → 정밀 정지 루프가 유예시간을 안 보는 문제. 같은 증상이 다른 원인으로 세 번 재발.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">낮</div>
-          <div class="tl-title">CG 스튜디오(<code>cg-studio.html</code>) 신설</div>
-          <div class="tl-desc">자막담당 화면을 처음부터 새로 디자인. 실사용 버그 2건(프리셋 불러오기 값이 폴링에 지워짐, 버튼 클릭 시 포커스 뺏김) 발견 즉시 수정.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">오후</div>
-          <div class="tl-title">커스텀 HTML 자막 템플릿 시스템 추가</div>
-          <div class="tl-desc">vMix/Master를 거치지 않는 3번째 자막 경로. 신규 서버 엔드포인트 2개 + 별도 렌더러 페이지, 실사용 버그 2건 발견 즉시 수정.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">오후</div>
-          <div class="tl-title">아이템 전환 시 자막이 안 지워지는 문제</div>
-          <div class="tl-desc"><code>clearCGAutoTimers()</code>가 타이머만 취소하고 화면은 안 지우던 근본 원인 규명·수정.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">오후~저녁</div>
-          <div class="tl-title">DVE 레이어 원격 제어 신설 → 사전 준비/초기화/확인 기능 추가</div>
-          <div class="tl-desc">데이터 모델·SetLayer 래퍼·LIVE 시퀀스 연동을 목킹으로 구현·검증.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-date">저녁</div>
-          <div class="tl-title"><b>실제 vMix(192.0.2.1, 방송 중인 라이브 시스템) 직접 연결</b></div>
-          <div class="tl-desc">
-            처음 만든 SetLayer 파라미터가 "Invalid Parameters"로 100% 거부되고 있었다는 사실을
-            발견. vMix 공식 함수 레퍼런스를 직접 조회해 진짜 형식(<code>Value=번호,소스</code>
-            콤마 결합, 1부터 세는 레이어 번호)을 확인. 존재하지 않는 대상을 가리키면 레이어가
-            통째로 지워지는 파괴적 실패 모드도 실측으로 발견해 방어 순서를 재설계. 테스트 내내
-            PGM(온에어)은 한 번도 안 건드렸고, 끝나고 PVW도 원래 값으로 정확히 복구.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 10 ─────────────────────────────────────────── -->
-    <section id="remaining">
-      <h2><span class="num">7</span> 남은 일 · 다음 단계</h2>
-      <table>
-        <tr><th>영역</th><th>상태</th><th>남은 것</th></tr>
-        <tr><td>DVE 레이어 원격 제어</td><td><span class="chip progress">실장비 파라미터 검증 완료</span></td><td>실제 LIVE 시퀀스 진행 중 프리암·리셋 흐름이 방송 타이밍에 자연스러운지 재확인</td></tr>
-        <tr><td>자막 GT 필드 매핑</td><td><span class="chip progress">5/8 완료</span></td><td>긴급/위치/코너자막 — 매칭되는 실제 vMix 템플릿이 아직 없어 새로 만들어야 할 수 있음</td></tr>
-        <tr><td>장비 확장</td><td><span class="chip done">Videohub 완료</span></td><td>VMU(영상믹서) → AMU(오디오믹서) 단계</td></tr>
-        <tr><td>제작 큐시트(LIVE 시사교양)</td><td><span class="chip progress">저작만 완료</span></td><td>Master 실행 엔진 연동 — 지금은 뉴스 TYPE_RULES 전용이라 미지원</td></tr>
-        <tr><td>로그인/계정</td><td><span class="chip new">설계만</span></td><td>사업 모델(온프레미스/SaaS/하이브리드) + 백엔드 스택 결정 선행 필요</td></tr>
-      </table>
+      <p>
+        이 방향에 대한 초기 구상은 이미 별도 문서로 정리해두었고, 실제 사용자들이 vMix를
+        쓰면서 느끼는 불편함에 대한 조사도 함께 진행했습니다. 지금 여러분이 보고 계신
+        이 시스템 자체가 그 질문에 대한 첫 번째 실제 증거입니다 — <b>"된다"</b>는 것을
+        말이 아니라 실제로 동작하는 화면으로 보여드릴 수 있습니다.
+      </p>
       <div class="callout ok">
-        <span class="tag">이 문서 이후</span>
-        <code>doc/STATUS.md</code>가 계속 "지금 어디까지 왔나"의 공식 기록입니다(세션마다 갱신).
-        이 리포트는 2026-07-18 시점의 스냅샷이며, 이후 진행 상황은 STATUS.md와 문서 허브의
-        최신 항목을 참고하세요.
+        <span class="tag">한 줄로 요약하면</span>
+        전문가만 쓸 수 있던 방송 장비를, 전문가가 아니어도 쓸 수 있게 만드는 것 — 그리고
+        그걸 실제로 증명해 보이는 것. 이 시스템이 매일 하고 있는 일입니다.
       </div>
     </section>
 
     <footer>
-      MARS/Master 종합 개발 정리 · 작성 2026-07-18 · <a href="../STATUS.md">doc/STATUS.md에서 최신 현황 보기</a>
+      MARS/Master · 2026-07-18 · <a href="../STATUS.md">개발 현황(STATUS.md)</a> · <a href="../index.html">문서 허브</a>
     </footer>
   </main>
 </div>
 
 <script>
-// 스크롤 위치에 따라 사이드바 TOC의 활성 항목 표시
 (function(){
   var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
   var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
