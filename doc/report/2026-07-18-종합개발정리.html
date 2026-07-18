@@ -128,6 +128,15 @@
   .chip.progress{ background:var(--live-bg); color:var(--live); }
   .chip.new{ background:var(--plan-bg); color:var(--plan); }
 
+  .vs-table{ width:100%; border-collapse:collapse; font-size:13px; margin:16px 0 22px; }
+  .vs-table th{ text-align:left; padding:9px 12px; font-family:var(--sans); font-size:12.5px; font-weight:800; border-bottom:2px solid var(--line-strong); }
+  .vs-table th.vmix{ color:var(--ink-faint); }
+  .vs-table th.us{ color:var(--accent-ink); }
+  .vs-table td{ padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .vs-table td.item{ font-weight:700; color:var(--ink); white-space:nowrap; }
+  .vs-table td.vmix{ color:var(--ink-faint); }
+  .vs-table td.us{ color:var(--ink); font-weight:600; }
+
   footer{ margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
 
   @media print{
@@ -146,15 +155,12 @@
     <div class="brand-sub">종합 개발 정리 · 2026-07-18</div>
     <nav id="toc">
       <a href="#overview">1. 개요</a>
-      <a href="#architecture">2. 아키텍처 핵심</a>
-      <a href="#cuesheet">3. 큐시트 · 전환효과</a>
-      <a href="#cg">4. 자막(CG) 3계층</a>
-      <a href="#server">5. 서버 클립 재생</a>
-      <a href="#live">6. LIVE 시퀀스 · DVE</a>
-      <a href="#devices">7. 외부 장비 연동</a>
-      <a href="#patterns">8. 반복된 오류 패턴</a>
-      <a href="#timeline">9. 07-18 세션 타임라인</a>
-      <a href="#remaining">10. 남은 일 · 다음 단계</a>
+      <a href="#why">2. 왜 만들었나</a>
+      <a href="#architecture">3. 아키텍처 핵심</a>
+      <a href="#features">4. 핵심 기능 요약</a>
+      <a href="#patterns">5. 반복된 오류 패턴</a>
+      <a href="#timeline">6. 07-18 세션 타임라인</a>
+      <a href="#remaining">7. 남은 일 · 다음 단계</a>
     </nav>
     <a class="back" href="../index.html">← 문서 허브로</a>
   </aside>
@@ -181,11 +187,10 @@
       <h2><span class="num">1</span> 개요</h2>
       <p>
         <b>MARS/Master</b>는 방송사 뉴스 큐시트 제작부터 실제 vMix 스위처 진행까지를 자동화하는
-        2인 1조(기자/PD ↔ 기술감독) 시스템입니다. <b>MARS</b>(<code>nps-news-system.html</code>)가
-        기사 작성·큐시트 제작을 담당하고, <b>Master</b>(<code>news-broadcast-system.html</code>)가
-        그 큐시트를 실제 방송 진행(전환효과·자막·서버클립·라우터·스위처)으로 실행합니다. 둘 다
-        <code>server.py</code> 하나가 서빙하는 순수 HTML/JS 정적 페이지이며, 별도 빌드 과정이나
-        프레임워크 없이 브라우저에서 바로 동작합니다.
+        2인 1조(기자/PD ↔ 기술감독) 시스템입니다. <b>MARS</b>가 기사 작성·큐시트 제작을 담당하고,
+        <b>Master</b>가 그 큐시트를 실제 방송 진행(전환효과·자막·서버클립·라우터·스위처)으로
+        실행합니다. 둘 다 <code>server.py</code> 하나가 서빙하는 순수 HTML/JS 정적 페이지이며,
+        별도 빌드 과정이나 프레임워크 없이 브라우저에서 바로 동작합니다.
       </p>
       <p>
         방송 하드웨어(vMix, Blackmagic Videohub)는 전부 실제 장비와 직접 통신하며 동작을
@@ -195,8 +200,71 @@
     </section>
 
     <!-- 2 ─────────────────────────────────────────── -->
+    <section id="why">
+      <h2><span class="num">2</span> 왜 이 프로그램을 만들었나</h2>
+      <p>
+        vMix는 그 자체로 매우 강력한 방송 소프트웨어입니다. 이 프로젝트는 vMix를 대체하려는
+        것이 아니라, vMix의 REST API를 <b>전부 그대로</b> 사용하면서 그 위에 다른 인터페이스를
+        얹은 것입니다. 왜 굳이 그럴까요 — vMix를 그냥 켜서 바로 방송해도 되는데 말입니다.
+      </p>
+      <p>
+        vMix의 화면과 용어는 <b>범용 방송 소프트웨어의 언어</b>로 돼 있습니다. Input 번호,
+        Overlay 채널, Layers, SelectedIndex 같은 개념을 알아야 하고, 어느 인풋이 어느 카메라인지,
+        지금 어느 서버 슬롯이 비어있는지, 전환마다 얼마나 걸리는지를 운영자가 머릿속으로
+        계속 추적해야 합니다. 뉴스 방송 현장에서 실제로 필요한 건 그런 게 아니라
+        <b>"이 리포트는 컷으로", "이 단신은 디졸브로", "이 자리엔 기자 카메라"</b> 같은,
+        방송 자체의 언어입니다.
+      </p>
+      <p>
+        MARS/Master는 그 번역기입니다. 운영자는 vMix의 존재 자체를 몰라도 되고, 화면 뒤에서는
+        똑같은 vMix REST API가 그대로 호출됩니다 — <b>기능이 줄어드는 게 아니라, 그 기능에
+        접근하는 언어가 이 방송국의 워크플로우에 맞게 바뀔 뿐</b>입니다.
+      </p>
+
+      <table class="vs-table">
+        <tr><th>하고 싶은 일</th><th class="vmix">vMix를 직접 쓴다면</th><th class="us">MARS/Master로 쓴다면</th></tr>
+        <tr>
+          <td class="item">화면분할(DVE) 소스 바꾸기</td>
+          <td class="vmix">Layers 편집창을 직접 열고, 레이어 순번·API 파라미터(<code>SetLayer</code>, 1부터 세는 번호, 콤마 결합 문법)를 정확히 알아야 함</td>
+          <td class="us">설정 탭에서 "이 자리엔 카메라, 이 자리엔 서버" 드롭다운 선택 한 번 — 방송 중 자동 반영</td>
+        </tr>
+        <tr>
+          <td class="item">자막 켜고 끄기</td>
+          <td class="vmix">Overlay 채널 번호·GT 템플릿 필드명을 정확히 알아야 함</td>
+          <td class="us">"제목자막" 카드에 문구 입력 → 전송 버튼 한 번</td>
+        </tr>
+        <tr>
+          <td class="item">다음 아이템으로 넘어갈 때</td>
+          <td class="vmix">이전 자막·화면분할 내용을 운영자가 매번 수동으로 정리</td>
+          <td class="us">자동 정리 — 다음 아이템은 항상 빈 보드에서 시작</td>
+        </tr>
+        <tr>
+          <td class="item">서버 클립이 다음 파일로 넘어가는 사고</td>
+          <td class="vmix">운영자가 타이밍 감으로 직접 컷해서 방지</td>
+          <td class="us">정밀 타이머 + 이중 안전장치로 자동 방지</td>
+        </tr>
+        <tr>
+          <td class="item">이 방송국만의 새 워크플로우가 필요할 때</td>
+          <td class="vmix">vMix 자체 기능 범위 안에서만 가능</td>
+          <td class="us">바이브 코딩으로 당일 추가 가능 — 4절 DVE 레이어 기능이 실제 사례</td>
+        </tr>
+      </table>
+
+      <div class="callout info">
+        <span class="tag">왜 "바이브 코딩"이 이걸 가능하게 했나</span>
+        전통적으로는 이런 방송국 전용 커스텀 제어 레이어를 만들려면 전담 개발팀과 수개월,
+        그리고 실제 방송 하드웨어에 대한 깊은 경험이 필요합니다. 이 프로젝트는 한 사람이
+        평범한 말로 필요한 걸 설명하고, 실제 vMix 장비에 바로 연결해 검증하고, 실사용 중
+        나온 버그를 그날그날 고치는 방식으로 만들어졌습니다 — 오늘 하루 만에 자막 화면
+        하나, 자막 파이프라인 하나, 화면분할 원격 제어 기능 하나가 전부 <b>실장비 검증까지</b>
+        끝난 것이 그 증거입니다(4·6절 참고). "vMix를 몰라도 vMix의 기능을 100% 쓴다"는
+        더 이상 이론이 아니라, 이 시스템이 매일 검증하고 있는 사실입니다.
+      </div>
+    </section>
+
+    <!-- 3 ─────────────────────────────────────────── -->
     <section id="architecture">
-      <h2><span class="num">2</span> 아키텍처 핵심</h2>
+      <h2><span class="num">3</span> 아키텍처 핵심</h2>
       <div class="arch-diagram">
         <div class="arch-box"><div class="t">MARS</div><div class="s">기사·큐시트 제작</div></div>
         <div class="arch-arrow">→</div>
@@ -207,174 +275,73 @@
         <div class="arch-box"><div class="t">vMix / Videohub</div><div class="s">실제 하드웨어</div></div>
       </div>
       <p>
-        MARS가 완성한 큐시트를 <code>POST /api/cuesheet</code>로 저장하면, Master가
-        <code>GET /api/cuesheet</code>로 불러와 진행합니다. 파일 기반 핸드오프라 두 프로그램이
-        같은 네트워크의 다른 PC에서 동작해도 되고, MARS를 여러 번 재전송해도 Master가 이미
-        방송 중 고쳐둔 값(예: LIVE 시퀀스 단계 재정의)은 보존하도록 병합 로직이 따로 있습니다.
+        MARS가 완성한 큐시트를 저장하면 Master가 불러와 진행합니다. 파일 기반 핸드오프라 두
+        프로그램이 같은 네트워크의 다른 PC에서 동작해도 되고, MARS를 재전송해도 Master가 방송
+        중 이미 고쳐둔 값은 보존됩니다. <code>server.py</code>는 정적 파일 서빙, vMix REST API
+        프록시(브라우저의 CORS 제약 우회), 그리고 Videohub·자막 등 여러 화면 사이의 얇은
+        릴레이 큐 역할을 합니다.
       </p>
-      <h3>server.py — 세 가지 역할</h3>
-      <ul>
-        <li><b>정적 파일 서빙</b> — MARS·Master·CG 스튜디오 등 모든 HTML/JS/미디어</li>
-        <li><b>vMix REST API 프록시</b> — 브라우저는 CORS 때문에 vMix를 직접 못 부르므로 <code>/proxy/vmix</code>가 대신 중계</li>
-        <li><b>얇은 릴레이 큐</b> — Videohub(TCP 상시연결), 자막담당 CG 요청, 자막 종류 이름 동기화, 커스텀 자막 상태까지 전부 같은 패턴: "로직은 한 곳(Master)에만 구현하고, 다른 화면은 서버를 거쳐 요청만 넣는다"</li>
-      </ul>
       <div class="callout info">
         <span class="tag">설계 원칙</span>
-        같은 로직(예: vMix GT 필드 매핑, 서버 클립 안전장치)을 두 번째 화면에 다시 구현하지 않습니다.
-        자막담당 페이지도, CG 스튜디오도, 8종 표준 자막을 실제로 내보낼 때는 전부 Master의
-        기존 함수를 그대로 재사용하도록 얇은 큐만 얹었습니다 — 두 구현이 따로 있으면 반드시
-        갈라지기 때문입니다.
+        같은 로직을 두 번째 화면에 다시 구현하지 않습니다. 자막담당 페이지도, CG 스튜디오도
+        결국 Master의 기존 함수를 그대로 재사용하도록 얇은 큐만 얹었습니다 — 두 구현이
+        따로 있으면 반드시 갈라지기 때문입니다.
       </div>
-    </section>
-
-    <!-- 3 ─────────────────────────────────────────── -->
-    <section id="cuesheet">
-      <h2><span class="num">3</span> 뉴스 큐시트 파이프라인 · 전환효과</h2>
-      <p>
-        아이템 타입(타이틀/CM/오프닝/앵커/단신/리포트/브리지/중계/날씨/증권/클로징 등)마다
-        고정 카메라·서버 로테이션·전환효과 규칙이 <code>TYPE_RULES</code> 레지스트리에
-        데이터로 정의돼 있고, 설정 탭에서 직접 추가/수정/삭제할 수 있습니다.
-      </p>
-      <table>
-        <tr><th>타입</th><th>진입 전환</th><th>퇴장 전환</th><th>비고</th></tr>
-        <tr><td>REPORT(리포트)</td><td>Cut</td><td>Cut</td><td>순차형(앵커→영상)</td></tr>
-        <tr><td>ANCHOR(단신)</td><td>Cut</td><td>Mix(디졸브)</td><td>순차형</td></tr>
-        <tr><td>CM</td><td>Mix</td><td>Mix</td><td>비순차형</td></tr>
-        <tr><td>BRIDGE(브리지)</td><td>Cut</td><td>Mix</td><td>비순차형</td></tr>
-      </table>
-      <p>
-        전환효과 프리셋(Cut/Mix/Fade/Wipe/Zoom/Slide/Merge)은 설정 탭에서 직접 편집 가능하지만,
-        Cut/Mix/Fade/Wipe 4종은 MARS가 이름으로 직접 요청하는 <b>필수 기본값</b>이라 삭제를
-        원천 차단하고, 저장된 목록에서 하나라도 빠지면 다음 로드 때 자동으로 복구합니다
-        (자기 치유 — 07-15, 실수로 지워졌던 사고 이후 추가).
-      </p>
     </section>
 
     <!-- 4 ─────────────────────────────────────────── -->
-    <section id="cg">
-      <h2><span class="num">4</span> 자막(CG) 시스템 — 3개의 계층</h2>
+    <section id="features">
+      <h2><span class="num">4</span> 핵심 기능 요약</h2>
       <p>
-        자막 요구사항이 커지면서 서로 다른 목적의 세 파이프라인이 생겼습니다. 셋 다 공존하며,
-        운영 방식에 따라 골라 쓸 수 있습니다.
+        아이템 타입(리포트/단신/CM/브리지/중계 등)마다 전환효과·카메라·서버 규칙이 데이터로
+        정의돼 있어 설정 탭에서 직접 수정할 수 있고, Cut/Mix/Fade/Wipe 4종은 필수 기본값이라
+        삭제해도 자동으로 복구됩니다.
       </p>
-      <h3>① 표준 8종 CG (vMix GT 타이틀)</h3>
-      <p>
-        제목자막·이름자막·긴급자막·티커·하단자막·시간자막·위치자막·코너자막 8종 — 각각
-        vMix GT(.gtzip) 템플릿의 필드명·오버레이 슬롯에 매핑됩니다. 자막 IN/OUT 타이밍을
-        아이템 편집창에서 타임라인 드래그로 지정할 수 있고, 큐시트 진행에 맞춰 자동/수동으로
-        내보낼 수 있습니다. Master의 CG 큐 패널, 별도 PC용 <code>cg-operator.html</code>,
-        그리고 새로 만든 <code>cg-studio.html</code> "입력" 탭까지 세 화면 모두 결국 같은
-        <code>sendCGVMix()</code>를 실행합니다.
-      </p>
-      <h3>② CG 스튜디오 <span class="chip new">신규 07-18</span></h3>
-      <p>
-        기존 <code>cg-operator.html</code>을 대체하는 게 아니라 나란히 존재하는 새 자막담당
-        화면. 8종 카드가 모두 항상 보이고, 큐시트 아이템에 미리 등록된 자막을
-        "즉시전송"(바로 발사)과 "불러오기"(카드에 담아 다듬은 뒤 전송) 두 갈래로 분리했습니다.
-        <code>Alt+1~8</code> 단축 포커스, 이 브라우저 전용 즐겨찾기 문구, 2단계 확인이 걸린
-        "전체 해제" 버튼, 그리고 <code>/api/cg-state</code>를 실시간 폴링해 카드 상태를
-        지금 실제로 켜져 있는 값으로 미리 채워두는 기능까지 포함합니다.
-      </p>
-      <h3>③ 커스텀 HTML 자막 템플릿 <span class="chip new">신규 07-18</span></h3>
-      <p>
-        vMix GT/Master를 <b>아예 거치지 않는</b> 세 번째 경로. 자막담당이 직접 HTML/CSS로
-        자막 템플릿을 만들고(<code>{{필드명}}</code> 자리표시자로 입력 필드 자동 생성), 체크무늬
-        배경의 실시간 미리보기로 확인한 뒤 표시(IN)/내리기(OUT)로 직접 제어합니다. 새 서버
-        엔드포인트 <code>/api/custom-templates</code>(템플릿 정의, 파일 영속화)와
-        <code>/api/custom-cg-state</code>(지금 화면 상태)를 <code>cg-studio.html</code>이
-        직접 호출하고, 별도 렌더러 <code>cg-custom-overlay.html</code>이 그 상태를 폴링해
-        그대로 그립니다 — <b>Master가 꺼져 있어도 동작</b>합니다.
-      </p>
-      <div class="callout warn">
-        <span class="tag">실사용 중 발견된 버그</span>
-        아이템이 끝나도 이전 자막이 화면에 남아 다음 아이템 자막과 잠깐 겹쳐 보이는 문제가
-        있었습니다. 원인은 아이템 전환 시 호출되는 <code>clearCGAutoTimers()</code>가 이름
-        그대로 "예약된 타이머만" 취소했지, 이미 화면에 나가 있는 자막 자체는 꺼주지 않았기
-        때문입니다. 이 함수에 <code>clearAllCGVMix()</code>/<code>clearAllCGBrowser()</code>
-        호출을 추가해 아이템이 바뀌는 모든 지점에서 자막판이 항상 빈 상태로 시작하도록 고쳤습니다.
-      </div>
-    </section>
 
-    <!-- 5 ─────────────────────────────────────────── -->
-    <section id="server">
-      <h2><span class="num">5</span> 서버(SRV) 클립 재생 — 안전장치의 역사</h2>
+      <h3>자막(CG) — 3개의 계층</h3>
       <p>
-        SRV1~3(vMix VideoList 인풋)에서 영상을 재생하는 기능은 이 프로젝트에서 <b>가장 많이
-        재발한 버그 영역</b>입니다. vMix List 인풋은 한 클립이 끝나면 자체적으로 다음 리스트
-        항목으로 넘어가 버리는데, Master는 "지정한 클립까지만" 재생돼야 하므로 여러 겹의
-        안전장치를 쌓아왔습니다.
+        ① <b>표준 8종 CG</b>(제목자막·이름자막·긴급자막·티커 등)는 vMix GT 템플릿에 매핑되고
+        IN/OUT 타이밍을 타임라인으로 지정합니다. ② <b>CG 스튜디오</b><span class="chip new">신규</span>는
+        자막담당을 위해 새로 디자인한 화면 — 8종 카드 상시 표시, 즉시전송/불러오기 분리,
+        단축키까지 갖췄습니다. ③ <b>커스텀 HTML 템플릿</b><span class="chip new">신규</span>은
+        vMix GT를 아예 거치지 않고 자막담당이 직접 HTML/CSS로 만든 템플릿을 표시(IN)/내리기(OUT)로
+        제어하는 완전히 별도 경로입니다 — Master가 꺼져 있어도 동작합니다.
       </p>
-      <ul>
-        <li><b>정밀 정지 타이머</b> — vMix가 보고하는 실측 duration/position으로 클립이 정확히 언제 끝나는지 계산해 선제적으로 Pause</li>
-        <li><b>0.3초 고속 감시 + 1.5초 폴링</b> — 정밀 타이머가 못 미더울 때(재생 직후 duration을 0으로 보고하는 경우 등)의 이중 백업</li>
-        <li><b>디졸브 유예시간</b> — Mix/Fade/Wipe 전환 중에는 안전장치가 "인덱스가 벗어났다"고 오판하지 않도록 전환 소요시간만큼 유예</li>
-        <li><b><code>_vmixEnsurePaused()</code></b> — Pause/Restart 명령을 보낸 뒤 실제 state를 다시 읽어 확인하고, 아직 재생 중이면 재시도(07-18)</li>
-      </ul>
-      <p>
-        이 영역의 버그가 특히 끈질겼던 이유는, "Pause+Restart를 걸면 반드시 정지 상태가 된다"는
-        가정 자체가 실제 vMix 하드웨어에서 항상 보장되지 않았기 때문입니다 — Cut이 리스트
-        재생을 자체 트리거하거나, Restart 자체가 재생을 재개하는 사례가 실측으로 여러 번
-        확인됐습니다. 8절의 반복 패턴 ①이 이 이야기입니다.
-      </p>
-    </section>
 
-    <!-- 6 ─────────────────────────────────────────── -->
-    <section id="live">
-      <h2><span class="num">6</span> LIVE 중계/출연 시퀀스 · DVE 레이어 원격 제어</h2>
+      <h3>서버(SRV) 클립 재생</h3>
       <p>
-        중계(기자 연결)와 출연(스튜디오 게스트)은 "앵커멘트 → [앵커 갈라치기 → 중계/기자 화면 →
-        서버 갈라치기] × 질문 수 → 마무리"라는 가변 길이 시퀀스로 진행됩니다. MARS가 기사의
-        질문 수를 넘기면 Master가 기본 단계 목록을 자동 생성하고, 기술감독이 아이템 편집창에서
-        단계를 개별 추가/삭제/순서변경/소스변경할 수 있습니다 — <b>MARS는 사전 설정, Master가
-        방송 중 최종 결정권</b>을 갖는 구조입니다.
+        vMix List 인풋이 클립 하나가 끝나면 자체적으로 다음 항목으로 넘어가 버리는 것을 막기
+        위해 정밀 정지 타이머·0.3초 고속 감시·1.5초 폴링·디졸브 유예시간까지 여러 겹의
+        안전장치를 쌓았습니다. 이 영역은 프로젝트에서 가장 많이 재발한 버그 영역이기도
+        합니다 — 5절 패턴 ①·②가 이 이야기입니다.
       </p>
-      <h3>DVE 레이어 원격 제어 <span class="chip new">신규 07-18</span></h3>
+
+      <h3>LIVE 중계/출연 시퀀스 · DVE 레이어 원격 제어 <span class="chip new">신규</span></h3>
       <p>
-        "갈라치기" 화면(DVE1/2/3)은 vMix의 <b>Layers</b> 기능으로 미리 구성해둔 화면분할
-        합성 인풋입니다. 기존에는 이 화면 "전체"를 컷 대상으로만 썼는데, 서버(SRV1~3)가
-        방송 중 교번하는 것과 달리 DVE 안의 레이어는 고정이라 실제 온에어 서버와 어긋날 수
-        있는 구조적 공백이 있었습니다. 이제 설정 탭에서 각 DVE의 레이어(순번·이름·기본 소스)를
-        등록해두면, LIVE 시퀀스가 각 단계로 넘어가기 <b>직전에</b> 자동으로 올바른 소스를
-        그 레이어에 채워 넣습니다.
+        중계·출연은 "앵커멘트 → [앵커 갈라치기 → 화면 → 서버 갈라치기] × 질문 수 → 마무리"
+        시퀀스로 진행됩니다. "갈라치기" 화면(DVE)은 vMix의 Layers 기능으로 미리 구성해둔
+        화면분할 합성 인풋인데, 이제 설정 탭에서 각 DVE 레이어에 기본 소스를 등록해두면
+        LIVE 시퀀스가 단계를 넘어가기 직전 자동으로 올바른 소스를 채워 넣습니다.
       </p>
       <pre><code>Function=SetLayer&amp;Input=&lt;합성 인풋&gt;&amp;Value=&lt;레이어번호(1부터)&gt;,&lt;새 소스&gt;</code></pre>
       <div class="callout warn">
         <span class="tag">실장비에서만 드러난 위험</span>
         존재하지 않는 소스 이름을 가리키면 vMix는 "성공"이라고 응답하면서 그 레이어를
-        통째로 지워버립니다(단순 무시가 아니라 파괴적 실패). 그래서 지금은 "먼저 보내고 나중에
-        확인"이 아니라 <b>실제 vMix 인풋 목록과 먼저 대조해 존재할 때만 명령을 보내는</b> 순서로
-        바꿨습니다. 9절에서 이 발견 과정을 자세히 다룹니다.
+        통째로 지워버립니다. 그래서 지금은 실제 vMix 인풋 목록과 먼저 대조해 존재할 때만
+        명령을 보내도록 바꿨습니다 — 6절에서 이 발견 과정을 자세히 다룹니다.
       </div>
+
+      <h3>외부 장비 연동</h3>
       <p>
-        방송 화면 전환 없이 미리 확인할 수 있도록, 다음 단계의 DVE는 온에어로 나가기 전에
-        레이어를 채워 vMix 프리뷰(PVW) 버스에 올려둡니다 — 지금 온에어 중인 DVE는 이 과정에서
-        절대 건드리지 않습니다. 아이템이 끝나면(다음 아이템으로 전환) 그 아이템이 썼던 DVE들의
-        레이어를 기본값으로 되돌려, 특정 질문에서 재정의했던 값이 다른 상황에 남아있지
-        않게 합니다 — 4절의 자막 정리와 같은 원칙입니다.
+        Blackmagic Videohub(16×16 라우터)는 TCP 상시 연결로 크로스포인트를 중계하고,
+        카메라/서버/DVE/라우터 소스 전체는 <code>switcherSources</code> 배열 하나로 통합
+        관리됩니다 — 소스를 늘리려고 스위처 UI 10여 곳을 일일이 손대던 예전 방식에서 벗어났습니다.
       </p>
     </section>
 
-    <!-- 7 ─────────────────────────────────────────── -->
-    <section id="devices">
-      <h2><span class="num">7</span> 외부 장비 연동</h2>
-      <p>
-        <b>Blackmagic Videohub</b>(16×16 라우터)는 server.py가 TCP 9990 상시 연결을 유지하고
-        <code>/api/videohub/*</code>로 상태 폴링·크로스포인트 전환을 중계합니다. 아이템별로
-        <code>item.router={output,input}</code>을 지정해두면 방송 진행에 맞춰 자동으로
-        회선을 전환하고, 아이템 편집창의 TAKE 버튼으로 저장/방송과 무관하게 즉시 전환도
-        가능합니다.
-      </p>
-      <p>
-        <b>스위처</b>(카메라/서버/DVE/라우터 소스 전체)는 <code>switcherSources</code> 배열
-        하나로 통합 관리됩니다 — 예전에는 cam1-4/srv1-3 7개가 스위처 HTML·색상·인풋맵·단축키
-        등 10곳 넘게 개별 하드코딩돼 있어 소스를 늘리려면 그 전부를 손대야 했습니다. 지금은
-        이 배열만 바꾸면 PGM/PVW 버튼·팝업·단축키 표시가 전부 따라갑니다.
-      </p>
-    </section>
-
-    <!-- 8 ─────────────────────────────────────────── -->
+    <!-- 5 ─────────────────────────────────────────── -->
     <section id="patterns">
-      <h2><span class="num">8</span> 반복해서 발견된 오류 패턴</h2>
+      <h2><span class="num">5</span> 반복해서 발견된 오류 패턴</h2>
       <p>
         개별 버그는 매번 다른 증상이었지만, 근본 원인을 모아보면 몇 가지 패턴으로 수렴합니다.
         같은 프로젝트를 계속 다룰 사람(사람이든 AI든)이 다음에 비슷한 기능을 만들 때
@@ -400,7 +367,7 @@
         <p>
           Cut이 리스트 재생을 자체 트리거하거나, Restart가 재생을 재개하거나, Restart와 Play를
           너무 붙여 보내면 재생 명령이 씹히는 등 — 문서에 없는 실제 하드웨어 동작이 반복적으로
-          코드의 암묵적 가정을 깼습니다. 이번 세션의 DVE SetLayer 파라미터 재발견(9절)도 같은
+          코드의 암묵적 가정을 깼습니다. 이번 세션의 DVE SetLayer 파라미터 재발견(6절)도 같은
           계열입니다: 처음 만든 코드는 문서를 확인하지 않고 그럴듯한 이름으로 추측해서 썼고,
           실제로는 한 번도 동작한 적이 없었습니다.
         </p>
@@ -454,7 +421,7 @@
 
     <!-- 9 ─────────────────────────────────────────── -->
     <section id="timeline">
-      <h2><span class="num">9</span> 2026-07-18 세션 타임라인</h2>
+      <h2><span class="num">6</span> 2026-07-18 세션 타임라인</h2>
       <p>오늘 하루에만 아래 순서로 작업이 이어졌습니다 — 각 항목이 실제로 사용자 보고 → 원인 규명 → 수정 → 검증의 사이클을 거쳤습니다.</p>
       <div class="tl">
         <div class="tl-item">
@@ -503,7 +470,7 @@
 
     <!-- 10 ─────────────────────────────────────────── -->
     <section id="remaining">
-      <h2><span class="num">10</span> 남은 일 · 다음 단계</h2>
+      <h2><span class="num">7</span> 남은 일 · 다음 단계</h2>
       <table>
         <tr><th>영역</th><th>상태</th><th>남은 것</th></tr>
         <tr><td>DVE 레이어 원격 제어</td><td><span class="chip progress">실장비 파라미터 검증 완료</span></td><td>실제 LIVE 시퀀스 진행 중 프리암·리셋 흐름이 방송 타이밍에 자연스러운지 재확인</td></tr>
