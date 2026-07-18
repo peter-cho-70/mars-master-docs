@@ -16,10 +16,10 @@
 
 | 항목 | 예시 | 실제 값 |
 |---|---|---|
-| Videohub IP | 192.0.2.3 | |
+| Videohub IP | 192.0.2.4 | |
 | Videohub 모델/입출력 수 | Smart Videohub 20x20 | |
-| 마스터 실행 PC IP | 192.0.2.4 | |
-| 방송망 VLAN/서브넷 | 192.0.2.5/24 | |
+| 마스터 실행 PC IP | 192.0.2.5 | |
+| 방송망 VLAN/서브넷 | 192.0.2.6/24 | |
 | VMU 모델/프로토콜 | (Phase 2에서 확정) | |
 | AMU 모델/프로토콜 | (Phase 2에서 확정) | |
 
@@ -31,12 +31,12 @@
 
 ```bash
 # 1) 프리앰블 캡처 (연결하면 장비가 먼저 말한다)
-nc 192.0.2.3 9990 | tee videohub_preamble.txt
+nc 192.0.2.4 9990 | tee videohub_preamble.txt
 # 몇 초 후 Ctrl+C
 
 # 2) 전환 명령 테스트 — 출력 0번에 입력 1번 연결 (0-base 주의)
 #    빈 줄(엔터 두 번)이 명령 블록의 끝이다
-printf 'VIDEO OUTPUT ROUTING:\n0 1\n\n' | nc 192.0.2.3 9990
+printf 'VIDEO OUTPUT ROUTING:\n0 1\n\n' | nc 192.0.2.4 9990
 ```
 
 프리앰블에서 확인할 것:
@@ -76,7 +76,7 @@ src/devices/
       "id": "main_router",
       "type": "videohub",
       "label": "메인 비디오 라우터",
-      "host": "192.0.2.3",
+      "host": "192.0.2.4",
       "port": 9990,
       "enabled": true
     }

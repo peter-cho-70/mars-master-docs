@@ -92,6 +92,22 @@
     border-radius:8px; padding:10px 14px; margin-bottom:12px;
   }
 
+  /* featured — 허브 맨 위, 지금 가장 먼저 봐야 할 문서 한 장 */
+  a.featured{
+    display:block; text-decoration:none; color:var(--ink); margin:22px 0 8px;
+    padding:20px 22px; border-radius:12px; background:var(--bg-raised);
+    border:1.5px solid var(--accent); box-shadow:0 2px 4px rgba(21,32,29,.08), 0 14px 32px rgba(160,106,18,.12);
+    transition:transform .12s, box-shadow .12s;
+  }
+  a.featured:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(21,32,29,.1), 0 18px 40px rgba(160,106,18,.18); }
+  a.featured .f-eyebrow{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--accent-ink); font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:6px;
+  }
+  a.featured .f-eyebrow::before{ content:"★"; }
+  a.featured .f-title{ font-size:17px; font-weight:800; margin-bottom:5px; }
+  a.featured .f-desc{ font-size:13px; color:var(--ink-dim); max-width:70ch; }
+
   .no-match{ display:none; text-align:center; color:var(--ink-faint); font-size:13.5px; padding:30px 0; }
 
   footer{
@@ -113,6 +129,12 @@
   <p class="lede">뉴스 자동송출 시스템의 기획서·가이드·매뉴얼 통합 인덱스. 문서는 성격별로 <b>spec</b>(기획·설계) / <b>guide</b>(설정·연동) / <b>user-guide</b>(사용자 매뉴얼) / <b>archive</b>(초기 자료)로 나뉩니다.</p>
   <a class="back" href="../index.html">← 앱 런처로 돌아가기</a>
 
+  <a class="featured" href="report/2026-07-18-종합개발정리.html">
+    <span class="f-eyebrow">지금 가장 먼저 읽을 문서 · 2026-07-18</span>
+    <span class="f-title">종합 개발 정리 — 아키텍처 · 기능 · 오류와의 싸움</span>
+    <span class="f-desc">핵심 아키텍처(MARS↔Master↔vMix)와 자막·서버클립·LIVE시퀀스·DVE 등 주요 기능을 정리하고, 개발 과정에서 실제로 무엇이 틀렸고 어떻게 알아냈는지(반복된 오류 패턴 6가지 포함)까지 숨기지 않고 담은 종합 리포트.</span>
+  </a>
+
   <div class="filter-wrap">
     <input id="filter" type="search" placeholder="문서 검색 — 제목·설명·키워드 입력 (예: 로그인, OBS, 자막, 전환)" autocomplete="off">
     <div class="filter-hint" id="count"></div>
@@ -122,6 +144,12 @@
     <h2>🚀 시작하기 · 사용자 매뉴얼 <span class="folder">user-guide/ · 루트</span></h2>
     <p class="section-desc">처음 시스템을 접하는 사람이 읽을 문서와, 기능별 사용법 가이드.</p>
     <div class="doc-list">
+      <a class="doc" href="report/2026-07-18-종합개발정리.html" data-tags="종합 정리 요약 아키텍처 오류 패턴 회고 postmortem 타임라인 dve cg 스튜디오 커스텀 템플릿 전체">
+        <span class="doc-title">종합 개발 정리 <span class="ver">2026-07-18</span></span>
+        <span class="chip live">현행</span>
+        <span class="doc-desc">아키텍처·핵심 기능·반복된 오류 패턴 6가지를 10개 섹션으로 정리한 종합 리포트.</span>
+        <span class="doc-path">doc/report/2026-07-18-종합개발정리.html</span>
+      </a>
       <a class="doc" href="viewer.html?file=../README.md" data-tags="readme 개요 변경이력 changelog 소개">
         <span class="doc-title">README — 프로젝트 개요·변경 이력</span>
         <span class="chip live">현행</span>
@@ -129,7 +157,7 @@
         <span class="doc-path">README.md</span>
       </a>
       <a class="doc" href="viewer.html?file=STATUS.md" data-tags="현황 진행 상태 완료 미착수 로드맵 중간보고 status">
-        <span class="doc-title">개발 현황 (STATUS) <span class="ver">2026-07-11 기준</span></span>
+        <span class="doc-title">개발 현황 (STATUS) <span class="ver">2026-07-18 기준</span></span>
         <span class="chip live">현행</span>
         <span class="doc-desc">지금 어디까지 왔나 — 실장비 검증 완료 / 진행 중 / 미착수 구분과 단기 일정. 큰 기능 변화마다 갱신.</span>
         <span class="doc-path">doc/STATUS.md</span>
@@ -178,9 +206,9 @@
         <span class="doc-path">doc/spec/newsformat.md</span>
       </a>
       <a class="doc" href="spec/개발-히스토리-회고.html" data-tags="회고 히스토리 postmortem 반복 오류 패턴 실수 개선점 타임라인 커밋">
-        <span class="doc-title">개발 히스토리 회고 (Post-mortem)</span>
-        <span class="chip live">현행</span>
-        <span class="doc-desc">9번의 커밋과 30개 세션 메모리 기반 — 반복된 오류 패턴 6가지(폴백, 상태 동기화, mock-vs-실기기 등)와 개선 지점. claude.ai 아티팩트에서 저장소로 이관.</span>
+        <span class="doc-title">개발 히스토리 회고 (Post-mortem) <span class="ver">~07-11 시점</span></span>
+        <span class="chip snap">이전 스냅샷</span>
+        <span class="doc-desc">9번의 커밋과 30개 세션 메모리 기반(~07-11 시점) — 반복된 오류 패턴 6가지(폴백, 상태 동기화, mock-vs-실기기 등)와 개선 지점. 더 최신 버전은 위 "종합 개발 정리"(07-18) 참고.</span>
         <span class="doc-path">doc/spec/개발-히스토리-회고.html</span>
       </a>
       <a class="doc" href="spec/중간보고서-상업화로드맵.html" data-tags="중간보고서 상업화 로드맵 완료 미착수 결정 login 7월17일">

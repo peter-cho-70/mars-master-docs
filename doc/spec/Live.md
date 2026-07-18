@@ -365,7 +365,7 @@ GET /api/?Function=AudioBusOn&Input=Server_VOD&Value=M
 ```javascript
 // node-vmix (TCP) 실시간 제어 예시
 const { ConnectionTCP } = require('node-vmix');
-const vmix = new ConnectionTCP('192.0.2.11'); // :8099
+const vmix = new ConnectionTCP('192.0.2.12'); // :8099
 vmix.on('connect', () => { vmix.send('SUBSCRIBE TALLY'); });
 vmix.on('tally', t => updateConsole(t));
 function nextCue(cmd) { vmix.send({ Function: cmd.function, ...cmd.params }); }

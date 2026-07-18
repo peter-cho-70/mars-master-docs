@@ -73,7 +73,7 @@ DEPLOY_MODE=REMOTE  ← Phase 2·3: 서버 분리
 ```
 [백엔드 서버 PC]          [방송 Mac]            [제작 PC 1~5]
  API + DB + WS Sync  ←→  OBS + NBS 진행앱  ←→  MARS + NPS
- 192.0.2.1:3000       localhost:4455          브라우저
+ 192.0.2.2:3000       localhost:4455          브라우저
 ```
 
 ### 2-2. 전환 방법
@@ -83,8 +83,8 @@ DEPLOY_MODE=REMOTE  ← Phase 2·3: 서버 분리
 ```bash
 # Phase 1 → Phase 2 전환 시 변경 사항
 DEPLOY_MODE=REMOTE
-OBS_HOST=192.0.2.2        # 방송 Mac IP
-SERVER_PUBLIC_URL=http://192.0.2.1:3000
+OBS_HOST=192.0.2.3        # 방송 Mac IP
+SERVER_PUBLIC_URL=http://192.0.2.2:3000
 OBS_AUTO_CONNECT=true
 ```
 
@@ -547,14 +547,14 @@ function parseItems(lines) {
 ```
 [백엔드 서버 — 상시 가동]       [방송 Mac — 방송 시간만]
  Linux / NAS / Mini PC         Mac M2 Pro 이상
- 192.0.2.1                 192.0.2.2
+ 192.0.2.2                 192.0.2.3
  ├── API 서버 :3000             ├── OBS Studio :4455
  ├── DB (PostgreSQL) :5432     └── NBS 방송진행 앱
  ├── 미디어 서버 :9000
  └── WS Sync :3001
 
 [제작 클라이언트 — 사무실 어디서나]
- PC 1~5: http://192.0.2.1:3000
+ PC 1~5: http://192.0.2.2:3000
  MARS + NPS 브라우저 접속
 ```
 

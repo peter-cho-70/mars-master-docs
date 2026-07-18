@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARS/Master 종합 개발 정리 — 아키텍처 · 기능 · 오류와의 싸움</title>
+<style>
+  :root{
+    --bg:#eef1ef; --bg-raised:#ffffff; --bg-sunk:#e4e8e5;
+    --ink:#15201d; --ink-dim:#56635f; --ink-faint:#8b968f;
+    --accent:#a06a12; --accent-ink:#5c3d0a;
+    --live:#c0322c; --live-bg:rgba(192,50,44,.10);
+    --ok:#1f9a56; --ok-bg:rgba(31,154,86,.10);
+    --plan:#a06a12; --plan-bg:rgba(160,106,18,.12);
+    --snap:#4a6fa5; --snap-bg:rgba(74,111,165,.12);
+    --line:rgba(21,32,29,.14); --line-strong:rgba(21,32,29,.28);
+    --shadow: 0 1px 2px rgba(21,32,29,.06), 0 8px 24px rgba(21,32,29,.05);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+    --sidebar-w: 250px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1012; --bg-raised:#141b1e; --bg-sunk:#0a0e10;
+      --ink:#e8ece9; --ink-dim:#9aa6a2; --ink-faint:#5e6a66;
+      --accent:#e2a63d; --accent-ink:#f4c877;
+      --live:#e0453f; --live-bg:rgba(224,69,63,.14);
+      --ok:#3fcf7a; --ok-bg:rgba(63,207,122,.13);
+      --plan:#e2a63d; --plan-bg:rgba(226,166,61,.14);
+      --snap:#7da7dd; --snap-bg:rgba(125,167,221,.14);
+      --line:rgba(232,236,233,.12); --line-strong:rgba(232,236,233,.24);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.68; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent); color:var(--bg-sunk); }
+  a{ color:var(--accent-ink); }
+
+  .layout{ display:flex; align-items:flex-start; max-width:1180px; margin:0 auto; }
+
+  /* ── 사이드바 TOC ── */
+  .sidebar{
+    position:sticky; top:0; width:var(--sidebar-w); flex-shrink:0; height:100vh; overflow-y:auto;
+    padding:26px 16px 40px 22px; border-right:1px solid var(--line);
+  }
+  .sidebar .brand{ font-weight:800; font-size:14px; letter-spacing:-.01em; }
+  .sidebar .brand-sub{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin:2px 0 20px; }
+  .sidebar nav a{
+    display:block; font-size:12.5px; color:var(--ink-dim); text-decoration:none; padding:6px 10px;
+    border-radius:6px; margin-bottom:1px;
+  }
+  .sidebar nav a:hover{ background:var(--bg-sunk); color:var(--ink); }
+  .sidebar nav a.active{ background:var(--accent); color:#fff; }
+  .sidebar .back{ display:block; font-size:11.5px; color:var(--ink-faint); margin-top:18px; padding-top:14px; border-top:1px solid var(--line); text-decoration:none; }
+  .sidebar .back:hover{ color:var(--accent); }
+  @media (max-width:900px){ .sidebar{ display:none; } }
+
+  /* ── 본문 ── */
+  main{ flex:1; min-width:0; padding:48px 40px 120px; max-width:820px; }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink); display:flex; align-items:center; gap:8px; margin:0 0 12px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none; }
+  h1{ font-size:clamp(24px,3.4vw,32px); line-height:1.28; margin:0 0 14px; font-weight:800; letter-spacing:-.015em; }
+  .lede{ color:var(--ink-dim); font-size:15px; max-width:66ch; margin:0 0 28px; }
+
+  .stat-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:40px; }
+  .stat{ background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:12px 16px; box-shadow:var(--shadow); min-width:120px; }
+  .stat .n{ font-family:var(--mono); font-size:20px; font-weight:700; color:var(--accent-ink); }
+  .stat .l{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+
+  section{ margin:56px 0; scroll-margin-top:24px; }
+  section h2{
+    font-size:20px; font-weight:800; margin:0 0 6px; padding-bottom:10px; border-bottom:2px solid var(--line-strong);
+    display:flex; align-items:baseline; gap:10px;
+  }
+  section h2 .num{ font-family:var(--mono); color:var(--ink-faint); font-weight:400; font-size:14px; }
+  section h3{ font-size:15.5px; font-weight:800; margin:26px 0 8px; }
+  section p{ font-size:14.5px; color:var(--ink); margin:0 0 12px; }
+  section ul, section ol{ font-size:14.5px; padding-left:22px; margin:0 0 14px; }
+  section li{ margin-bottom:6px; }
+  code{ font-family:var(--mono); font-size:12.5px; background:var(--bg-sunk); padding:1px 6px; border-radius:4px; color:var(--accent-ink); }
+  pre{
+    font-family:var(--mono); font-size:12.5px; background:var(--bg-sunk); border:1px solid var(--line);
+    border-radius:8px; padding:14px 16px; overflow-x:auto; line-height:1.55; margin:0 0 16px;
+  }
+  pre code{ background:none; padding:0; color:var(--ink); }
+
+  .callout{ border-radius:10px; padding:14px 18px; margin:16px 0; border:1px solid var(--line); font-size:13.5px; }
+  .callout.warn{ background:var(--live-bg); border-color:rgba(192,50,44,.3); }
+  .callout.warn .tag{ color:var(--live); }
+  .callout.ok{ background:var(--ok-bg); border-color:rgba(31,154,86,.3); }
+  .callout.ok .tag{ color:var(--ok); }
+  .callout.info{ background:var(--snap-bg); border-color:rgba(74,111,165,.3); }
+  .callout.info .tag{ color:var(--snap); }
+  .callout .tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px; }
+
+  .arch-diagram{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:20px 0; font-family:var(--mono); font-size:12px;
+  }
+  .arch-box{ background:var(--bg-raised); border:1px solid var(--line-strong); border-radius:8px; padding:12px 16px; box-shadow:var(--shadow); text-align:center; }
+  .arch-box .t{ font-weight:700; font-size:13px; margin-bottom:2px; }
+  .arch-box .s{ color:var(--ink-faint); font-size:10.5px; }
+  .arch-arrow{ padding:0 10px; color:var(--ink-faint); font-size:16px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; margin:14px 0 20px; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); font-weight:600; }
+
+  .tl{ border-left:2px solid var(--line-strong); padding-left:20px; margin:18px 0; }
+  .tl-item{ margin-bottom:22px; position:relative; }
+  .tl-item::before{ content:""; position:absolute; left:-25px; top:5px; width:9px; height:9px; border-radius:50%; background:var(--accent); }
+  .tl-item .tl-date{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); }
+  .tl-item .tl-title{ font-weight:700; font-size:14px; margin:2px 0 4px; }
+  .tl-item .tl-desc{ font-size:13.5px; color:var(--ink-dim); }
+
+  .pattern-card{ background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .pattern-card .rank{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
+  .pattern-card h4{ margin:2px 0 8px; font-size:14.5px; font-weight:800; }
+  .pattern-card p{ margin:0; font-size:13.5px; }
+
+  .chip{ display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:20px; letter-spacing:.03em; }
+  .chip.done{ background:var(--ok-bg); color:var(--ok); }
+  .chip.progress{ background:var(--live-bg); color:var(--live); }
+  .chip.new{ background:var(--plan-bg); color:var(--plan); }
+
+  footer{ margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
+
+  @media print{
+    .sidebar{ display:none; }
+    main{ max-width:none; padding:0; }
+    .layout{ display:block; }
+    section{ page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">MARS/Master</div>
+    <div class="brand-sub">종합 개발 정리 · 2026-07-18</div>
+    <nav id="toc">
+      <a href="#overview">1. 개요</a>
+      <a href="#architecture">2. 아키텍처 핵심</a>
+      <a href="#cuesheet">3. 큐시트 · 전환효과</a>
+      <a href="#cg">4. 자막(CG) 3계층</a>
+      <a href="#server">5. 서버 클립 재생</a>
+      <a href="#live">6. LIVE 시퀀스 · DVE</a>
+      <a href="#devices">7. 외부 장비 연동</a>
+      <a href="#patterns">8. 반복된 오류 패턴</a>
+      <a href="#timeline">9. 07-18 세션 타임라인</a>
+      <a href="#remaining">10. 남은 일 · 다음 단계</a>
+    </nav>
+    <a class="back" href="../index.html">← 문서 허브로</a>
+  </aside>
+
+  <main>
+    <div class="eyebrow">종합 정리 리포트 · 2026-07-18</div>
+    <h1>MARS/Master 뉴스 자동송출 시스템<br>지금까지 무엇을 만들었고, 무엇이 틀렸었나</h1>
+    <p class="lede">
+      기획서 한 줄 없이 시작해 실제 vMix 하드웨어와 씨름하며 자라온 시스템의 현재 스냅샷입니다.
+      핵심 아키텍처와 기능을 정리하고, 특히 <b>실제로 무엇이 틀렸고 어떻게 알아냈는지</b>를
+      숨기지 않고 남깁니다 — 이 시스템의 신뢰도는 "한 번에 맞았다"가 아니라
+      "실장비로 틀린 걸 확인하고 고쳤다"의 누적으로 만들어졌습니다.
+    </p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n">2</div><div class="l">핵심 프로그램(MARS·Master)</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">자막 파이프라인(vMix GT·CG스튜디오·커스텀HTML)</div></div>
+      <div class="stat"><div class="n">6+</div><div class="l">실장비 검증 세션</div></div>
+      <div class="stat"><div class="n">30+</div><div class="l">실사용 중 발견·수정된 버그</div></div>
+    </div>
+
+    <!-- 1 ─────────────────────────────────────────── -->
+    <section id="overview">
+      <h2><span class="num">1</span> 개요</h2>
+      <p>
+        <b>MARS/Master</b>는 방송사 뉴스 큐시트 제작부터 실제 vMix 스위처 진행까지를 자동화하는
+        2인 1조(기자/PD ↔ 기술감독) 시스템입니다. <b>MARS</b>(<code>nps-news-system.html</code>)가
+        기사 작성·큐시트 제작을 담당하고, <b>Master</b>(<code>news-broadcast-system.html</code>)가
+        그 큐시트를 실제 방송 진행(전환효과·자막·서버클립·라우터·스위처)으로 실행합니다. 둘 다
+        <code>server.py</code> 하나가 서빙하는 순수 HTML/JS 정적 페이지이며, 별도 빌드 과정이나
+        프레임워크 없이 브라우저에서 바로 동작합니다.
+      </p>
+      <p>
+        방송 하드웨어(vMix, Blackmagic Videohub)는 전부 실제 장비와 직접 통신하며 동작을
+        검증했습니다 — 이 문서에서 "실장비 검증"이라고 표시된 항목은 목킹이 아니라 진짜 vMix REST
+        API·Videohub TCP 프로토콜로 확인한 것입니다.
+      </p>
+    </section>
+
+    <!-- 2 ─────────────────────────────────────────── -->
+    <section id="architecture">
+      <h2><span class="num">2</span> 아키텍처 핵심</h2>
+      <div class="arch-diagram">
+        <div class="arch-box"><div class="t">MARS</div><div class="s">기사·큐시트 제작</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box"><div class="t">server.py</div><div class="s">파일 저장 + 릴레이</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box"><div class="t">Master</div><div class="s">방송 진행</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box"><div class="t">vMix / Videohub</div><div class="s">실제 하드웨어</div></div>
+      </div>
+      <p>
+        MARS가 완성한 큐시트를 <code>POST /api/cuesheet</code>로 저장하면, Master가
+        <code>GET /api/cuesheet</code>로 불러와 진행합니다. 파일 기반 핸드오프라 두 프로그램이
+        같은 네트워크의 다른 PC에서 동작해도 되고, MARS를 여러 번 재전송해도 Master가 이미
+        방송 중 고쳐둔 값(예: LIVE 시퀀스 단계 재정의)은 보존하도록 병합 로직이 따로 있습니다.
+      </p>
+      <h3>server.py — 세 가지 역할</h3>
+      <ul>
+        <li><b>정적 파일 서빙</b> — MARS·Master·CG 스튜디오 등 모든 HTML/JS/미디어</li>
+        <li><b>vMix REST API 프록시</b> — 브라우저는 CORS 때문에 vMix를 직접 못 부르므로 <code>/proxy/vmix</code>가 대신 중계</li>
+        <li><b>얇은 릴레이 큐</b> — Videohub(TCP 상시연결), 자막담당 CG 요청, 자막 종류 이름 동기화, 커스텀 자막 상태까지 전부 같은 패턴: "로직은 한 곳(Master)에만 구현하고, 다른 화면은 서버를 거쳐 요청만 넣는다"</li>
+      </ul>
+      <div class="callout info">
+        <span class="tag">설계 원칙</span>
+        같은 로직(예: vMix GT 필드 매핑, 서버 클립 안전장치)을 두 번째 화면에 다시 구현하지 않습니다.
+        자막담당 페이지도, CG 스튜디오도, 8종 표준 자막을 실제로 내보낼 때는 전부 Master의
+        기존 함수를 그대로 재사용하도록 얇은 큐만 얹었습니다 — 두 구현이 따로 있으면 반드시
+        갈라지기 때문입니다.
+      </div>
+    </section>
+
+    <!-- 3 ─────────────────────────────────────────── -->
+    <section id="cuesheet">
+      <h2><span class="num">3</span> 뉴스 큐시트 파이프라인 · 전환효과</h2>
+      <p>
+        아이템 타입(타이틀/CM/오프닝/앵커/단신/리포트/브리지/중계/날씨/증권/클로징 등)마다
+        고정 카메라·서버 로테이션·전환효과 규칙이 <code>TYPE_RULES</code> 레지스트리에
+        데이터로 정의돼 있고, 설정 탭에서 직접 추가/수정/삭제할 수 있습니다.
+      </p>
+      <table>
+        <tr><th>타입</th><th>진입 전환</th><th>퇴장 전환</th><th>비고</th></tr>
+        <tr><td>REPORT(리포트)</td><td>Cut</td><td>Cut</td><td>순차형(앵커→영상)</td></tr>
+        <tr><td>ANCHOR(단신)</td><td>Cut</td><td>Mix(디졸브)</td><td>순차형</td></tr>
+        <tr><td>CM</td><td>Mix</td><td>Mix</td><td>비순차형</td></tr>
+        <tr><td>BRIDGE(브리지)</td><td>Cut</td><td>Mix</td><td>비순차형</td></tr>
+      </table>
+      <p>
+        전환효과 프리셋(Cut/Mix/Fade/Wipe/Zoom/Slide/Merge)은 설정 탭에서 직접 편집 가능하지만,
+        Cut/Mix/Fade/Wipe 4종은 MARS가 이름으로 직접 요청하는 <b>필수 기본값</b>이라 삭제를
+        원천 차단하고, 저장된 목록에서 하나라도 빠지면 다음 로드 때 자동으로 복구합니다
+        (자기 치유 — 07-15, 실수로 지워졌던 사고 이후 추가).
+      </p>
+    </section>
+
+    <!-- 4 ─────────────────────────────────────────── -->
+    <section id="cg">
+      <h2><span class="num">4</span> 자막(CG) 시스템 — 3개의 계층</h2>
+      <p>
+        자막 요구사항이 커지면서 서로 다른 목적의 세 파이프라인이 생겼습니다. 셋 다 공존하며,
+        운영 방식에 따라 골라 쓸 수 있습니다.
+      </p>
+      <h3>① 표준 8종 CG (vMix GT 타이틀)</h3>
+      <p>
+        제목자막·이름자막·긴급자막·티커·하단자막·시간자막·위치자막·코너자막 8종 — 각각
+        vMix GT(.gtzip) 템플릿의 필드명·오버레이 슬롯에 매핑됩니다. 자막 IN/OUT 타이밍을
+        아이템 편집창에서 타임라인 드래그로 지정할 수 있고, 큐시트 진행에 맞춰 자동/수동으로
+        내보낼 수 있습니다. Master의 CG 큐 패널, 별도 PC용 <code>cg-operator.html</code>,
+        그리고 새로 만든 <code>cg-studio.html</code> "입력" 탭까지 세 화면 모두 결국 같은
+        <code>sendCGVMix()</code>를 실행합니다.
+      </p>
+      <h3>② CG 스튜디오 <span class="chip new">신규 07-18</span></h3>
+      <p>
+        기존 <code>cg-operator.html</code>을 대체하는 게 아니라 나란히 존재하는 새 자막담당
+        화면. 8종 카드가 모두 항상 보이고, 큐시트 아이템에 미리 등록된 자막을
+        "즉시전송"(바로 발사)과 "불러오기"(카드에 담아 다듬은 뒤 전송) 두 갈래로 분리했습니다.
+        <code>Alt+1~8</code> 단축 포커스, 이 브라우저 전용 즐겨찾기 문구, 2단계 확인이 걸린
+        "전체 해제" 버튼, 그리고 <code>/api/cg-state</code>를 실시간 폴링해 카드 상태를
+        지금 실제로 켜져 있는 값으로 미리 채워두는 기능까지 포함합니다.
+      </p>
+      <h3>③ 커스텀 HTML 자막 템플릿 <span class="chip new">신규 07-18</span></h3>
+      <p>
+        vMix GT/Master를 <b>아예 거치지 않는</b> 세 번째 경로. 자막담당이 직접 HTML/CSS로
+        자막 템플릿을 만들고(<code>{{필드명}}</code> 자리표시자로 입력 필드 자동 생성), 체크무늬
+        배경의 실시간 미리보기로 확인한 뒤 표시(IN)/내리기(OUT)로 직접 제어합니다. 새 서버
+        엔드포인트 <code>/api/custom-templates</code>(템플릿 정의, 파일 영속화)와
+        <code>/api/custom-cg-state</code>(지금 화면 상태)를 <code>cg-studio.html</code>이
+        직접 호출하고, 별도 렌더러 <code>cg-custom-overlay.html</code>이 그 상태를 폴링해
+        그대로 그립니다 — <b>Master가 꺼져 있어도 동작</b>합니다.
+      </p>
+      <div class="callout warn">
+        <span class="tag">실사용 중 발견된 버그</span>
+        아이템이 끝나도 이전 자막이 화면에 남아 다음 아이템 자막과 잠깐 겹쳐 보이는 문제가
+        있었습니다. 원인은 아이템 전환 시 호출되는 <code>clearCGAutoTimers()</code>가 이름
+        그대로 "예약된 타이머만" 취소했지, 이미 화면에 나가 있는 자막 자체는 꺼주지 않았기
+        때문입니다. 이 함수에 <code>clearAllCGVMix()</code>/<code>clearAllCGBrowser()</code>
+        호출을 추가해 아이템이 바뀌는 모든 지점에서 자막판이 항상 빈 상태로 시작하도록 고쳤습니다.
+      </div>
+    </section>
+
+    <!-- 5 ─────────────────────────────────────────── -->
+    <section id="server">
+      <h2><span class="num">5</span> 서버(SRV) 클립 재생 — 안전장치의 역사</h2>
+      <p>
+        SRV1~3(vMix VideoList 인풋)에서 영상을 재생하는 기능은 이 프로젝트에서 <b>가장 많이
+        재발한 버그 영역</b>입니다. vMix List 인풋은 한 클립이 끝나면 자체적으로 다음 리스트
+        항목으로 넘어가 버리는데, Master는 "지정한 클립까지만" 재생돼야 하므로 여러 겹의
+        안전장치를 쌓아왔습니다.
+      </p>
+      <ul>
+        <li><b>정밀 정지 타이머</b> — vMix가 보고하는 실측 duration/position으로 클립이 정확히 언제 끝나는지 계산해 선제적으로 Pause</li>
+        <li><b>0.3초 고속 감시 + 1.5초 폴링</b> — 정밀 타이머가 못 미더울 때(재생 직후 duration을 0으로 보고하는 경우 등)의 이중 백업</li>
+        <li><b>디졸브 유예시간</b> — Mix/Fade/Wipe 전환 중에는 안전장치가 "인덱스가 벗어났다"고 오판하지 않도록 전환 소요시간만큼 유예</li>
+        <li><b><code>_vmixEnsurePaused()</code></b> — Pause/Restart 명령을 보낸 뒤 실제 state를 다시 읽어 확인하고, 아직 재생 중이면 재시도(07-18)</li>
+      </ul>
+      <p>
+        이 영역의 버그가 특히 끈질겼던 이유는, "Pause+Restart를 걸면 반드시 정지 상태가 된다"는
+        가정 자체가 실제 vMix 하드웨어에서 항상 보장되지 않았기 때문입니다 — Cut이 리스트
+        재생을 자체 트리거하거나, Restart 자체가 재생을 재개하는 사례가 실측으로 여러 번
+        확인됐습니다. 8절의 반복 패턴 ①이 이 이야기입니다.
+      </p>
+    </section>
+
+    <!-- 6 ─────────────────────────────────────────── -->
+    <section id="live">
+      <h2><span class="num">6</span> LIVE 중계/출연 시퀀스 · DVE 레이어 원격 제어</h2>
+      <p>
+        중계(기자 연결)와 출연(스튜디오 게스트)은 "앵커멘트 → [앵커 갈라치기 → 중계/기자 화면 →
+        서버 갈라치기] × 질문 수 → 마무리"라는 가변 길이 시퀀스로 진행됩니다. MARS가 기사의
+        질문 수를 넘기면 Master가 기본 단계 목록을 자동 생성하고, 기술감독이 아이템 편집창에서
+        단계를 개별 추가/삭제/순서변경/소스변경할 수 있습니다 — <b>MARS는 사전 설정, Master가
+        방송 중 최종 결정권</b>을 갖는 구조입니다.
+      </p>
+      <h3>DVE 레이어 원격 제어 <span class="chip new">신규 07-18</span></h3>
+      <p>
+        "갈라치기" 화면(DVE1/2/3)은 vMix의 <b>Layers</b> 기능으로 미리 구성해둔 화면분할
+        합성 인풋입니다. 기존에는 이 화면 "전체"를 컷 대상으로만 썼는데, 서버(SRV1~3)가
+        방송 중 교번하는 것과 달리 DVE 안의 레이어는 고정이라 실제 온에어 서버와 어긋날 수
+        있는 구조적 공백이 있었습니다. 이제 설정 탭에서 각 DVE의 레이어(순번·이름·기본 소스)를
+        등록해두면, LIVE 시퀀스가 각 단계로 넘어가기 <b>직전에</b> 자동으로 올바른 소스를
+        그 레이어에 채워 넣습니다.
+      </p>
+      <pre><code>Function=SetLayer&amp;Input=&lt;합성 인풋&gt;&amp;Value=&lt;레이어번호(1부터)&gt;,&lt;새 소스&gt;</code></pre>
+      <div class="callout warn">
+        <span class="tag">실장비에서만 드러난 위험</span>
+        존재하지 않는 소스 이름을 가리키면 vMix는 "성공"이라고 응답하면서 그 레이어를
+        통째로 지워버립니다(단순 무시가 아니라 파괴적 실패). 그래서 지금은 "먼저 보내고 나중에
+        확인"이 아니라 <b>실제 vMix 인풋 목록과 먼저 대조해 존재할 때만 명령을 보내는</b> 순서로
+        바꿨습니다. 9절에서 이 발견 과정을 자세히 다룹니다.
+      </div>
+      <p>
+        방송 화면 전환 없이 미리 확인할 수 있도록, 다음 단계의 DVE는 온에어로 나가기 전에
+        레이어를 채워 vMix 프리뷰(PVW) 버스에 올려둡니다 — 지금 온에어 중인 DVE는 이 과정에서
+        절대 건드리지 않습니다. 아이템이 끝나면(다음 아이템으로 전환) 그 아이템이 썼던 DVE들의
+        레이어를 기본값으로 되돌려, 특정 질문에서 재정의했던 값이 다른 상황에 남아있지
+        않게 합니다 — 4절의 자막 정리와 같은 원칙입니다.
+      </p>
+    </section>
+
+    <!-- 7 ─────────────────────────────────────────── -->
+    <section id="devices">
+      <h2><span class="num">7</span> 외부 장비 연동</h2>
+      <p>
+        <b>Blackmagic Videohub</b>(16×16 라우터)는 server.py가 TCP 9990 상시 연결을 유지하고
+        <code>/api/videohub/*</code>로 상태 폴링·크로스포인트 전환을 중계합니다. 아이템별로
+        <code>item.router={output,input}</code>을 지정해두면 방송 진행에 맞춰 자동으로
+        회선을 전환하고, 아이템 편집창의 TAKE 버튼으로 저장/방송과 무관하게 즉시 전환도
+        가능합니다.
+      </p>
+      <p>
+        <b>스위처</b>(카메라/서버/DVE/라우터 소스 전체)는 <code>switcherSources</code> 배열
+        하나로 통합 관리됩니다 — 예전에는 cam1-4/srv1-3 7개가 스위처 HTML·색상·인풋맵·단축키
+        등 10곳 넘게 개별 하드코딩돼 있어 소스를 늘리려면 그 전부를 손대야 했습니다. 지금은
+        이 배열만 바꾸면 PGM/PVW 버튼·팝업·단축키 표시가 전부 따라갑니다.
+      </p>
+    </section>
+
+    <!-- 8 ─────────────────────────────────────────── -->
+    <section id="patterns">
+      <h2><span class="num">8</span> 반복해서 발견된 오류 패턴</h2>
+      <p>
+        개별 버그는 매번 다른 증상이었지만, 근본 원인을 모아보면 몇 가지 패턴으로 수렴합니다.
+        같은 프로젝트를 계속 다룰 사람(사람이든 AI든)이 다음에 비슷한 기능을 만들 때
+        참고할 수 있도록 정리합니다.
+      </p>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 01</span>
+        <h4>vMix는 틀린 값을 줘도 "성공"이라고 답한다</h4>
+        <p>
+          존재하지 않는 인풋 이름을 SetText/OverlayIn/SetLayer 등에 넘겨도 vMix REST API는
+          HTTP 200과 "성공" 메시지를 돌려줍니다 — 심지어 SetLayer는 그러면서 실제로는
+          레이어를 지워버리기까지 합니다. <b>HTTP 응답만으로는 절대 신뢰할 수 없고, 실제
+          vMix 상태(XML)를 다시 읽어 대조해야만</b> 진짜 확인이 됩니다. <code>verifyVMixInputMap()</code>,
+          <code>applySourceLayers()</code>의 존재 검증, <code>_vmixEnsurePaused()</code>가
+          전부 이 교훈에서 나왔습니다.
+        </p>
+      </div>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 02</span>
+        <h4>"이 명령을 보내면 이 상태가 된다"는 가정은 실장비에서 자주 깨진다</h4>
+        <p>
+          Cut이 리스트 재생을 자체 트리거하거나, Restart가 재생을 재개하거나, Restart와 Play를
+          너무 붙여 보내면 재생 명령이 씹히는 등 — 문서에 없는 실제 하드웨어 동작이 반복적으로
+          코드의 암묵적 가정을 깼습니다. 이번 세션의 DVE SetLayer 파라미터 재발견(9절)도 같은
+          계열입니다: 처음 만든 코드는 문서를 확인하지 않고 그럴듯한 이름으로 추측해서 썼고,
+          실제로는 한 번도 동작한 적이 없었습니다.
+        </p>
+      </div>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 03</span>
+        <h4>안전장치 사이의 경합 — 하나를 고치면 다른 하나가 새로 드러난다</h4>
+        <p>
+          서버 클립 안전장치는 0.3초 감시·1.5초 폴링·정밀 정지 타이머·유예시간까지 겹겹이
+          쌓여 있는데, 새 보호막을 하나 추가할 때마다 "그 보호막이 아직 유예시간을 안 보고
+          있어서" 생기는 새로운 경합이 나타났습니다(07-17→07-18 사이 같은 증상이 세 번
+          재발). 여러 타이머/폴링이 같은 상태를 동시에 감시할 때는 <b>새 방어막을 추가하면
+          기존 방어막 전부가 그 새 상태를 알아야 한다</b>는 점을 놓치기 쉽습니다.
+        </p>
+      </div>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 04</span>
+        <h4>"자동이 디폴트"는 방송에서 위험하다</h4>
+        <p>
+          CG 자동 타이밍, 서버 자동 교번, 조기 전환 등 여러 기능에서 "아무것도 지정 안 하면
+          자동으로 나간다"는 기본값이 실제로는 "방송 중 저절로 자막이 튀어나온다"는 사고로
+          이어졌습니다. 지금은 명시적으로 켠 경우만 자동, 그 외엔 항상 수동 확인을 거치도록
+          기본값을 반전시켰습니다.
+        </p>
+      </div>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 05</span>
+        <h4>두 번째 화면을 만들 때 첫 번째 화면의 방어 로직을 빠뜨리기 쉽다</h4>
+        <p>
+          "대기 단계에서 재생이 시작되면 안 된다"는 방어가 <code>armSelectedItemOnPGM()</code>
+          한 곳에만 있고, 같은 문제를 겪을 수 있는 다른 세 지점(라디오 등록영상, 다음 아이템
+          프리뷰, 앵커 단계 사전로드)에는 빠져 있었습니다. 같은 패턴을 쓰는 곳이 여럿이면
+          하나를 고칠 때 "이 방어가 필요한 다른 곳이 더 있는가"를 항상 같이 점검해야 합니다.
+        </p>
+      </div>
+
+      <div class="pattern-card">
+        <span class="rank">패턴 06</span>
+        <h4>목킹 테스트는 로직 버그를 잡고, 실장비 테스트는 타이밍·문서 오류를 잡는다</h4>
+        <p>
+          이 프로젝트의 버그 대부분은 Playwright + vMix 목킹으로 실제 함수 호출 순서를
+          검증하며 잡혔지만, "Restart와 Play를 너무 붙이면 재생이 안 됨"이나 "SetLayer
+          파라미터 자체가 틀림" 같은 문제는 <b>목킹으로는 재현되지 않고 실장비에서만</b>
+          드러났습니다. 둘 다 필요하고, 서로 대체할 수 없습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 9 ─────────────────────────────────────────── -->
+    <section id="timeline">
+      <h2><span class="num">9</span> 2026-07-18 세션 타임라인</h2>
+      <p>오늘 하루에만 아래 순서로 작업이 이어졌습니다 — 각 항목이 실제로 사용자 보고 → 원인 규명 → 수정 → 검증의 사이클을 거쳤습니다.</p>
+      <div class="tl">
+        <div class="tl-item">
+          <div class="tl-date">오전</div>
+          <div class="tl-title">MARS↔Master 자막 종류 이름 불일치 · 실제 vMix에 제목자막이 안 나가던 원인</div>
+          <div class="tl-desc">각자 독립 저장이던 자막 이름을 Master 기준으로 통일하는 얇은 릴레이 추가. 실vMix 연결해 GT 인풋 24개 전수 조회로 실제 원인(존재하지 않는 인풋을 가리키고 있었음) 규명.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">오전~낮</div>
+          <div class="tl-title">디졸브 정지 재발 3연속 수정</div>
+          <div class="tl-desc">유예시간이 전환 소요시간을 못 덮는 문제 → Restart가 재생을 재개할 수 있는 문제 → 정밀 정지 루프가 유예시간을 안 보는 문제. 같은 증상이 다른 원인으로 세 번 재발.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">낮</div>
+          <div class="tl-title">CG 스튜디오(<code>cg-studio.html</code>) 신설</div>
+          <div class="tl-desc">자막담당 화면을 처음부터 새로 디자인. 실사용 버그 2건(프리셋 불러오기 값이 폴링에 지워짐, 버튼 클릭 시 포커스 뺏김) 발견 즉시 수정.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">오후</div>
+          <div class="tl-title">커스텀 HTML 자막 템플릿 시스템 추가</div>
+          <div class="tl-desc">vMix/Master를 거치지 않는 3번째 자막 경로. 신규 서버 엔드포인트 2개 + 별도 렌더러 페이지, 실사용 버그 2건 발견 즉시 수정.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">오후</div>
+          <div class="tl-title">아이템 전환 시 자막이 안 지워지는 문제</div>
+          <div class="tl-desc"><code>clearCGAutoTimers()</code>가 타이머만 취소하고 화면은 안 지우던 근본 원인 규명·수정.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">오후~저녁</div>
+          <div class="tl-title">DVE 레이어 원격 제어 신설 → 사전 준비/초기화/확인 기능 추가</div>
+          <div class="tl-desc">데이터 모델·SetLayer 래퍼·LIVE 시퀀스 연동을 목킹으로 구현·검증.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">저녁</div>
+          <div class="tl-title"><b>실제 vMix(192.0.2.1, 방송 중인 라이브 시스템) 직접 연결</b></div>
+          <div class="tl-desc">
+            처음 만든 SetLayer 파라미터가 "Invalid Parameters"로 100% 거부되고 있었다는 사실을
+            발견. vMix 공식 함수 레퍼런스를 직접 조회해 진짜 형식(<code>Value=번호,소스</code>
+            콤마 결합, 1부터 세는 레이어 번호)을 확인. 존재하지 않는 대상을 가리키면 레이어가
+            통째로 지워지는 파괴적 실패 모드도 실측으로 발견해 방어 순서를 재설계. 테스트 내내
+            PGM(온에어)은 한 번도 안 건드렸고, 끝나고 PVW도 원래 값으로 정확히 복구.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 ─────────────────────────────────────────── -->
+    <section id="remaining">
+      <h2><span class="num">10</span> 남은 일 · 다음 단계</h2>
+      <table>
+        <tr><th>영역</th><th>상태</th><th>남은 것</th></tr>
+        <tr><td>DVE 레이어 원격 제어</td><td><span class="chip progress">실장비 파라미터 검증 완료</span></td><td>실제 LIVE 시퀀스 진행 중 프리암·리셋 흐름이 방송 타이밍에 자연스러운지 재확인</td></tr>
+        <tr><td>자막 GT 필드 매핑</td><td><span class="chip progress">5/8 완료</span></td><td>긴급/위치/코너자막 — 매칭되는 실제 vMix 템플릿이 아직 없어 새로 만들어야 할 수 있음</td></tr>
+        <tr><td>장비 확장</td><td><span class="chip done">Videohub 완료</span></td><td>VMU(영상믹서) → AMU(오디오믹서) 단계</td></tr>
+        <tr><td>제작 큐시트(LIVE 시사교양)</td><td><span class="chip progress">저작만 완료</span></td><td>Master 실행 엔진 연동 — 지금은 뉴스 TYPE_RULES 전용이라 미지원</td></tr>
+        <tr><td>로그인/계정</td><td><span class="chip new">설계만</span></td><td>사업 모델(온프레미스/SaaS/하이브리드) + 백엔드 스택 결정 선행 필요</td></tr>
+      </table>
+      <div class="callout ok">
+        <span class="tag">이 문서 이후</span>
+        <code>doc/STATUS.md</code>가 계속 "지금 어디까지 왔나"의 공식 기록입니다(세션마다 갱신).
+        이 리포트는 2026-07-18 시점의 스냅샷이며, 이후 진행 상황은 STATUS.md와 문서 허브의
+        최신 항목을 참고하세요.
+      </div>
+    </section>
+
+    <footer>
+      MARS/Master 종합 개발 정리 · 작성 2026-07-18 · <a href="../STATUS.md">doc/STATUS.md에서 최신 현황 보기</a>
+    </footer>
+  </main>
+</div>
+
+<script>
+// 스크롤 위치에 따라 사이드바 TOC의 활성 항목 표시
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  function onScroll(){
+    var pos = window.scrollY + 80;
+    var current = sections[0];
+    sections.forEach(function(s){ if (s.offsetTop <= pos) current = s; });
+    links.forEach(function(a){
+      a.classList.toggle('active', current && a.getAttribute('href') === '#' + current.id);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>
