@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master · 방송 제어 — UI 미리보기</title>
+<style>
+:root { --bg:#0b0d11; --s1:#13161e; --s2:#171b26; --text:#e2e6f0; --t2:#8a90aa; --red:#e8364a; --green:#1fc87a; --amber:#f5a623; --blue:#3d8ef0; --line:#2a3048; }
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { background:var(--bg); }
+body { color:var(--text); font-family:'Apple SD Gothic Neo',sans-serif; line-height:1.6; padding-top:44px; }
+.banner { position:fixed; top:0; left:0; right:0; background:var(--amber); color:#1a1200; text-align:center; font-size:12px; font-weight:700; padding:9px 14px; z-index:999; }
+.wrap { max-width:980px; margin:0 auto; padding:40px 24px 80px; }
+.back { display:inline-block; font-size:12px; color:var(--t2); text-decoration:none; margin-bottom:22px; }
+.back:hover { color:var(--text); }
+.head { display:flex; align-items:baseline; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+h1 { font-size:26px; color:var(--red); letter-spacing:1px; }
+.head .tag { font-size:12px; padding:3px 9px; border-radius:20px; background:rgba(232,54,74,.14); color:var(--red); font-weight:700; }
+.sub { font-size:14px; color:var(--t2); margin-bottom:36px; max-width:64ch; }
+.gallery { display:flex; flex-direction:column; gap:44px; }
+figure { background:var(--s1); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+figure .shot-wrap { background:#000; display:flex; justify-content:center; cursor:zoom-in; }
+figure img { display:block; width:100%; height:auto; }
+figcaption { padding:16px 20px; }
+figcaption .n { font-size:11px; color:var(--amber); font-weight:700; letter-spacing:.06em; margin-bottom:4px; }
+figcaption h2 { font-size:15px; margin-bottom:6px; }
+figcaption p { font-size:12.5px; color:var(--t2); }
+.nav-row { display:flex; gap:10px; margin-top:48px; flex-wrap:wrap; }
+.nav-row a { flex:1; min-width:200px; text-align:center; padding:13px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:700; }
+.nav-row a.primary { background:var(--blue); color:#fff; }
+.nav-row a.ghost { background:var(--s2); color:var(--text); border:1px solid var(--line); }
+.nav-row a:hover { opacity:.9; }
+/* lightbox */
+.lightbox { position:fixed; inset:0; background:rgba(0,0,0,.92); display:none; align-items:center; justify-content:center; z-index:1000; padding:40px; cursor:zoom-out; }
+.lightbox.open { display:flex; }
+.lightbox img { max-width:100%; max-height:100%; border-radius:4px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+.lightbox .close { position:absolute; top:20px; right:26px; color:#fff; font-size:28px; font-weight:300; }
+</style>
+</head>
+<body>
+<div class="banner">🖼️ 실제 화면 캡처로 만든 미리보기 페이지입니다 — 버튼처럼 보여도 클릭해도 동작하지 않습니다 (사내망 vMix·서버 연결이 있어야 실제로 동작).</div>
+
+<div class="wrap">
+  <a class="back" href="app-home.html">← 앱 첫 화면으로</a>
+
+  <div class="head">
+    <h1>Master</h1>
+    <span class="tag">방송 제어 · UI 미리보기</span>
+  </div>
+  <p class="sub">MARS에서 만든 큐시트를 불러와 실제 방송을 진행하는 화면입니다. 아래는 모두 실제 운영 화면을 그대로 캡처한 이미지이며, 이 페이지 자체는 vMix·서버에 연결되어 있지 않아 클릭해도 반응하지 않습니다. 이미지를 클릭하면 크게 볼 수 있습니다.</p>
+
+  <div class="gallery">
+    <figure>
+      <div class="shot-wrap"><img src="user-guide/images/manual-master-news.png" alt="뉴스 프로그램 진행 화면" loading="lazy"></div>
+      <figcaption>
+        <div class="n">01 · 뉴스큐시트 진행</div>
+        <h2>뉴스 프로그램 진행 화면</h2>
+        <p>좌측엔 큐시트, 가운데엔 지금 온에어 중인 소재와 진행 타이머, 우측엔 실시간 스위처와 서버영상 상태가 함께 보입니다. 진행자는 이 화면 하나로 큐시트 진행부터 전환·자막·서버영상까지 전부 제어합니다.</p>
+      </figcaption>
+    </figure>
+
+    <figure>
+      <div class="shot-wrap"><img src="user-guide/images/manual-master-live.png" alt="LIVE 제작 큐시트 진행 화면" loading="lazy"></div>
+      <figcaption>
+        <div class="n">02 · LIVE 제작 큐시트</div>
+        <h2>서버영상·카메라를 직접 스위칭하는 LIVE 진행</h2>
+        <p>우측 스위처에서 PGM/PVW 소스를 직접 골라 CUT·MIX·FADE 등으로 전환합니다. 서버(SRV) 상태 패널은 지금 온에어 중인 클립과 대기 중인 다음 클립을 함께 보여줘, 다음 소재가 준비됐는지 한눈에 확인할 수 있습니다.</p>
+      </figcaption>
+    </figure>
+
+    <figure>
+      <div class="shot-wrap"><img src="user-guide/images/manual-master-radio.png" alt="라디오 생방송 진행 화면" loading="lazy"></div>
+      <figcaption>
+        <div class="n">03 · 라디오 모드</div>
+        <h2>뉴스와 완전히 독립된 라디오 생방송 진행</h2>
+        <p>같은 앱 안에서 모드만 전환하면 라디오 전용 레이아웃이 됩니다 — 카메라 프리셋, 자막 단축키, 오디오 페이더가 뉴스 모드와 별도로 구성되어 서로 영향을 주지 않습니다.</p>
+      </figcaption>
+    </figure>
+
+    <figure>
+      <div class="shot-wrap"><img src="user-guide/images/master-item-editor-filled.png" alt="아이템 편집창" loading="lazy"></div>
+      <figcaption>
+        <div class="n">04 · 아이템 편집</div>
+        <h2>아이템 하나하나의 소스·전환·자막을 세부 조정</h2>
+        <p>큐시트의 아이템을 열면 카메라/서버 소스, 전환효과(In/Out), 자막 타이밍까지 이 창 하나에서 조정합니다. 방송 중에도 다음 아이템을 미리 열어 준비할 수 있습니다.</p>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="nav-row">
+    <a class="primary" href="preview-mars.html">MARS · 큐시트 제작 미리보기 →</a>
+    <a class="ghost" href="doc/report/2026-07-18-종합개발정리.html">소개 페이지로</a>
+    <a class="ghost" href="app-home.html">← 앱 첫 화면</a>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox"><span class="close">✕</span><img id="lightbox-img" src="" alt=""></div>
+<script>
+var lb = document.getElementById('lightbox');
+var lbImg = document.getElementById('lightbox-img');
+document.querySelectorAll('.shot-wrap img').forEach(function(img){
+  img.addEventListener('click', function(){
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add('open');
+  });
+});
+lb.addEventListener('click', function(){ lb.classList.remove('open'); lbImg.src = ''; });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { lb.classList.remove('open'); lbImg.src = ''; } });
+</script>
+</body>
+</html>
