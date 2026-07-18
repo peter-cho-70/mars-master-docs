@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master — 뉴스 방송 시스템</title>
+<style>
+:root { --bg:#0b0d11; --s1:#13161e; --text:#e2e6f0; --t2:#8a90aa; --red:#e8364a; --green:#1fc87a; --amber:#f5a623; --blue:#3d8ef0; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:'Apple SD Gothic Neo',sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.wrap { max-width:520px; width:100%; }
+h1 { font-size:22px; color:var(--red); letter-spacing:2px; margin-bottom:4px; }
+.sub { font-size:13px; color:var(--t2); margin-bottom:28px; }
+.card { background:var(--s1); border:1px solid #2a3048; border-radius:8px; padding:20px; margin-bottom:12px; }
+.card.featured { border:1.5px solid var(--amber); background:linear-gradient(180deg, rgba(245,166,35,.09), rgba(19,22,30,1) 60%); }
+.card.featured .f-eyebrow { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:700; margin-bottom:6px; }
+.card.featured h2 { font-size:16px; margin-bottom:6px; }
+.card.featured p { font-size:12.5px; color:var(--t2); margin-bottom:14px; line-height:1.6; }
+.card.featured a.btn { background:var(--amber); color:#1a1200; font-weight:800; }
+.card h2 { font-size:14px; margin-bottom:12px; }
+.step { font-size:12px; color:var(--t2); line-height:1.8; margin-bottom:16px; }
+.step code { background:#1a1e2a; padding:2px 6px; border-radius:3px; font-size:11px; color:var(--amber); }
+.btns { display:flex; flex-direction:column; gap:8px; }
+a.btn { display:block; text-align:center; padding:12px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600; }
+a.primary { background:var(--red); color:#fff; }
+a.secondary { background:var(--blue); color:#fff; }
+a.ghost { background:#1a1e2a; color:var(--text); border:1px solid #2a3048; }
+a:hover { opacity:.9; }
+</style>
+</head>
+<body>
+<div style="position:fixed;top:0;left:0;right:0;background:#f5a623;color:#1a1200;text-align:center;font-size:12px;font-weight:700;padding:9px 14px;z-index:999;">📸 실제 운영 화면의 스냅샷입니다 — 아래 버튼들은 사내망 전용 서버에 연결돼 있어 외부에서는 동작하지 않습니다.</div>
+
+<div class="wrap">
+  <h1>Master</h1>
+  <p class="sub">장비 연동 방송 제어 — 큐시트를 불러와 OBS(추후 vMix·VMU·AMU·송출서버·자막기) 운영</p>
+
+  <div class="card featured">
+    <div class="f-eyebrow">★ 소개 자료</div>
+    <h2>vMix를 몰라도, vMix의 모든 능력을 씁니다</h2>
+    <p>이 시스템을 왜 만들었는지, 지금 뭐가 되는지 정리한 소개 페이지.</p>
+    <a class="btn" href="doc/report/2026-07-18-종합개발정리.html">소개 페이지 보기</a>
+  </div>
+
+  <div class="card">
+    <h2>빠른 시작 (처음 1회)</h2>
+    <div class="step">
+      1. 터미널에서 OBS 템플릿 설치<br>
+      <code>./obs/obs-template/setup.sh</code><br><br>
+      2. OBS + Master 실행<br>
+      <code>./obs/open-obs.sh</code><br><br>
+      3. OBS에서 씬 컬렉션 <b>NEWS_BROADCAST</b> 선택<br>
+      4. Master에서 OBS 연결 → <b>OBS 자동 설정</b> → MARS에서 만든 큐시트 불러오기 → 방송 진행
+    </div>
+    <div class="btns">
+      <a class="btn primary" href="news-broadcast-system.html">방송 제어 (Master · vMix)</a>
+      <a class="btn secondary" href="obs/news-broadcast-system-obs.html">방송 제어 (Master · OBS, 개발중)</a>
+      <a class="btn secondary" href="nps-news-system.html">큐시트 제작 (MARS)</a>
+      <a class="btn secondary" href="https://newstimekeeper.vercel.app" target="_blank" rel="noopener noreferrer">MBCNewsTimeKeeper</a>
+      <a class="btn secondary" href="https://mbcnewscontrol-production.up.railway.app" target="_blank" rel="noopener noreferrer">보도기술팀 공지사항</a>
+      <a class="btn secondary" href="cg-operator.html">📝 자막 담당 (CG Operator)</a>
+      <a class="btn secondary" href="doc/index.html">📚 문서 모음 (통합 인덱스)</a>
+      <a class="btn secondary" href="doc/guide/OBS_SETUP_GUIDE.html">OBS 설정 가이드</a>
+      <a class="btn ghost" href="obs/obs-news-control.html">OBS 제어 테스트(구버전)</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>네트워크 모드 — MARS·Master 분리 운영</h2>
+    <div class="step">
+      MARS(기자 PC)와 Master(제어 PC)가 다른 컴퓨터일 때<br>
+      Master PC에서 서버를 먼저 실행하고, 두 앱을 브라우저에서 연다.<br><br>
+      1. Master PC 터미널에서 서버 시작<br>
+      <code>python3 server.py</code><br><br>
+      2. MARS PC에서 아래 주소 접속 (예: Master IP가 192.0.2.1이면)<br>
+      <code>http://192.0.2.1:8080/nps-news-system.html</code><br><br>
+      3. Master PC에서<br>
+      <code>http://192.0.2.1:8080/news-broadcast-system.html</code><br><br>
+      4. MARS에서 큐시트 완성 후 <b>📡 서버 전송</b> 클릭<br>
+      5. Master에서 <b>📡 서버 불러오기</b> 클릭
+    </div>
+  </div>
+</div>
+</body>
+</html>
