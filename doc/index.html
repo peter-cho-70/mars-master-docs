@@ -86,7 +86,7 @@
   .chip.plan{ background:var(--plan-bg); color:var(--plan); }
   .chip.snap{ background:var(--snap-bg); color:var(--snap); }
   .chip.arch{ background:var(--bg-sunk); color:var(--ink-faint); }
-  /* New 배지 — 데이터(실제 git 커밋일) 기준 최근 3일 이내 갱신된 문서. 다른 chip과 같은 자리에
+  /* New 배지 — 데이터(실제 git 커밋일) 기준 최근 7일(일주일) 이내 갱신된 문서. 다른 chip과 같은 자리에
      같이 못 들어가므로(하나의 grid 슬롯) 문서 제목 옆 별도 배지로 붙인다 — chip과는 다른 자리. */
   .doc-title .new-badge{
     display:inline-block; font-family:var(--mono); font-size:9.5px; font-weight:800; letter-spacing:.03em;
@@ -409,7 +409,7 @@
 // 배포됐는지"만 반영해(실측 확인 — 배포 한 번으로 안 바뀐 파일까지 전부 같은 시각을 반환) 이
 // 용도로 쓸 수 없었다.
 (function(){
-  var NEW_DAYS = 3;
+  var NEW_DAYS = 7;
   var todayMs = Date.now();
   var sections = Array.prototype.slice.call(document.querySelectorAll('[data-sec]'));
 
