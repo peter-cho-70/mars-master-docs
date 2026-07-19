@@ -86,6 +86,23 @@
   .chip.plan{ background:var(--plan-bg); color:var(--plan); }
   .chip.snap{ background:var(--snap-bg); color:var(--snap); }
   .chip.arch{ background:var(--bg-sunk); color:var(--ink-faint); }
+  /* New 배지 — 데이터(실제 git 커밋일) 기준 최근 3일 이내 갱신된 문서. 다른 chip과 같은 자리에
+     같이 못 들어가므로(하나의 grid 슬롯) 문서 제목 옆 별도 배지로 붙인다 — chip과는 다른 자리. */
+  .doc-title .new-badge{
+    display:inline-block; font-family:var(--mono); font-size:9.5px; font-weight:800; letter-spacing:.03em;
+    color:#fff; background:var(--live); border-radius:5px; padding:1px 6px; margin-left:6px; vertical-align:middle;
+  }
+
+  /* 섹션별 "최신 문서순" 정렬 토글 버튼 */
+  .sec-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 4px; }
+  .sec-head h2{ margin:0; }
+  .sort-btn{
+    font-family:var(--mono); font-size:11px; color:var(--ink-dim); background:var(--bg-raised);
+    border:1px solid var(--line-strong); border-radius:20px; padding:5px 12px; cursor:pointer;
+    white-space:nowrap; transition:border-color .12s, color .12s;
+  }
+  .sort-btn:hover{ border-color:var(--accent); color:var(--accent-ink); }
+  .sort-btn.active{ border-color:var(--accent); color:var(--accent-ink); background:var(--plan-bg); font-weight:700; }
 
   .archive-note{
     font-size:12.5px; color:var(--ink-faint); border:1px dashed var(--line-strong);
@@ -135,52 +152,55 @@
     <span class="f-desc">왜 vMix를 직접 안 쓰고 이걸 만들었는지(vMix를 몰라도 vMix의 기능을 100% 쓴다) — 핵심 아키텍처·기능 요약, 그리고 개발 과정에서 실제로 무엇이 틀렸고 어떻게 알아냈는지(반복된 오류 패턴 6가지 포함)까지 숨기지 않고 담은 종합 리포트.</span>
   </a>
 
+  <a class="featured" href="../app-home.html">
+    <span class="f-eyebrow">🎬 시연 동영상 + 실제 화면</span>
+    <span class="f-title">실제 앱 첫 화면 스냅샷 — 시연 동영상 포함</span>
+    <span class="f-desc">MARS/Master를 실제로 켰을 때 보이는 첫 화면 그대로, 그리고 실제 방송 진행 시연 동영상. 사내망 전용 서버에 연결하는 버튼이라 여기서는 눌러도 동작하지 않지만, 실제 UI와 실제 동작 모습을 그대로 볼 수 있습니다.</span>
+  </a>
+
   <div class="filter-wrap">
     <input id="filter" type="search" placeholder="문서 검색 — 제목·설명·키워드 입력 (예: 로그인, OBS, 자막, 전환)" autocomplete="off">
     <div class="filter-hint" id="count"></div>
   </div>
 
   <section data-sec>
-    <h2>🚀 시작하기 · 사용자 매뉴얼 <span class="folder">user-guide/ · 루트</span></h2>
+    <div class="sec-head">
+      <h2>🚀 시작하기 · 사용자 매뉴얼 <span class="folder">user-guide/ · 루트</span></h2>
+      <button class="sort-btn" type="button" data-sort-btn>최신 문서순</button>
+    </div>
     <p class="section-desc">처음 시스템을 접하는 사람이 읽을 문서와, 기능별 사용법 가이드.</p>
     <div class="doc-list">
-      <a class="doc" href="report/2026-07-18-종합개발정리.html" data-tags="종합 정리 요약 아키텍처 오류 패턴 회고 postmortem 타임라인 dve cg 스튜디오 커스텀 템플릿 전체 바이브코딩 왜 만든 이유">
+      <a class="doc" href="report/2026-07-18-종합개발정리.html" data-date="2026-07-19" data-tags="종합 정리 요약 아키텍처 오류 패턴 회고 postmortem 타임라인 dve cg 스튜디오 커스텀 템플릿 전체 바이브코딩 왜 만든 이유">
         <span class="doc-title">종합 개발 정리 <span class="ver">2026-07-18</span></span>
         <span class="chip live">현행</span>
         <span class="doc-desc">왜 vMix를 직접 안 쓰고 이걸 만들었는지, 핵심 기능 요약, 반복된 오류 패턴 6가지를 7개 섹션으로 정리한 종합 리포트.</span>
         <span class="doc-path">doc/report/2026-07-18-종합개발정리.html</span>
       </a>
-      <a class="doc" href="../app-home.html" data-tags="런처 첫화면 실제 화면 스냅샷 앱 홈 app home launcher">
-        <span class="doc-title">실제 앱 첫 화면 스냅샷 <span class="ver">app-home</span></span>
-        <span class="chip live">현행</span>
-        <span class="doc-desc">MARS/Master를 실제로 켰을 때 보이는 첫 화면 그대로. 사내망 전용 서버에 연결하는 버튼이라 여기서는 눌러도 동작하지 않지만, 실제 UI 그대로를 볼 수 있는 스냅샷.</span>
-        <span class="doc-path">index.html (로컬 앱 런처)</span>
-      </a>
-      <a class="doc" href="viewer.html?file=../README.md" data-tags="readme 개요 변경이력 changelog 소개">
+      <a class="doc" href="viewer.html?file=../README.md" data-date="2026-07-16" data-tags="readme 개요 변경이력 changelog 소개">
         <span class="doc-title">README — 프로젝트 개요·변경 이력</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">저장소 최상위 소개 문서. 시스템 구성, 실행 방법, 날짜별 변경 이력.</span>
         <span class="doc-path">README.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=STATUS.md" data-tags="현황 진행 상태 완료 미착수 로드맵 중간보고 status">
+      <a class="doc" href="viewer.html?file=STATUS.md" data-date="2026-07-19" data-tags="현황 진행 상태 완료 미착수 로드맵 중간보고 status">
         <span class="doc-title">개발 현황 (STATUS) <span class="ver">2026-07-19 기준</span></span>
         <span class="chip live">현행</span>
         <span class="doc-desc">지금 어디까지 왔나 — 실장비 검증 완료 / 진행 중 / 미착수 구분과 단기 일정. 큰 기능 변화마다 갱신.</span>
         <span class="doc-path">doc/STATUS.md</span>
       </a>
-      <a class="doc" href="../user-guide/getting-started-manual.html" data-tags="입문 매뉴얼 시작 전체 개요 튜토리얼 처음">
+      <a class="doc" href="../user-guide/getting-started-manual.html" data-date="2026-07-19" data-tags="입문 매뉴얼 시작 전체 개요 튜토리얼 처음">
         <span class="doc-title">전체 시스템 입문 매뉴얼</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">약 20페이지 분량의 전체 시스템 개요 — MARS 큐시트 제작부터 Master 방송 진행까지. 실제 화면 캡처 포함, PDF 내보내기 가능.</span>
         <span class="doc-path">user-guide/getting-started-manual.html</span>
       </a>
-      <a class="doc" href="../user-guide/subtitle-in-out-guide.html" data-tags="자막 인아웃 타이밍 subtitle cg 타임라인">
+      <a class="doc" href="../user-guide/subtitle-in-out-guide.html" data-date="2026-07-06" data-tags="자막 인아웃 타이밍 subtitle cg 타임라인">
         <span class="doc-title">자막 IN/OUT 타이밍 사용 가이드</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">자막별 등장/퇴장 시점 설정 기능 — 타임라인 드래그 트림, 아이템 편집 연동 사용법.</span>
         <span class="doc-path">user-guide/subtitle-in-out-guide.html</span>
       </a>
-      <a class="doc" href="guide/전환 효과 설정 가이드.html" data-tags="전환 효과 트랜지션 cut mix fade wipe 디졸브">
+      <a class="doc" href="guide/전환 효과 설정 가이드.html" data-date="2026-07-11" data-tags="전환 효과 트랜지션 cut mix fade wipe 디졸브">
         <span class="doc-title">전환 효과 설정 가이드</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">아이템 간 전환(전환In/Out)과 타입별 기본 효과(REPORT=Cut, ANCHOR=Cut/Mix, CM=Mix/Mix 등) 설정 방법.</span>
@@ -190,70 +210,73 @@
   </section>
 
   <section data-sec>
-    <h2>📐 기획 · 설계 <span class="folder">doc/spec/</span></h2>
+    <div class="sec-head">
+      <h2>📐 기획 · 설계 <span class="folder">doc/spec/</span></h2>
+      <button class="sort-btn" type="button" data-sort-btn>최신 문서순</button>
+    </div>
     <p class="section-desc">제품이 무엇이고 어디로 가는지를 정의하는 문서 — PRD, 아키텍처, 데이터 모델.</p>
     <div class="doc-list">
-      <a class="doc" href="viewer.html?file=spec/NEWS_BROADCAST_PRD.md" data-tags="prd 기획 최초 phase 로드맵 권한 nbs 요구사항">
+      <a class="doc" href="viewer.html?file=spec/NEWS_BROADCAST_PRD.md" data-date="2026-07-10" data-tags="prd 기획 최초 phase 로드맵 권한 nbs 요구사항">
         <span class="doc-title">뉴스 방송 제작 시스템 PRD <span class="ver">v1.0 · 2026-06-23</span></span>
         <span class="chip live">기준 문서</span>
         <span class="doc-desc">최초 제품 기획서. Phase 1(MVP)~3(멀티유저) 로드맵, 사용자 권한 체계, OBS 연동 규칙, 데이터 모델의 원본 정의.</span>
         <span class="doc-path">doc/spec/NEWS_BROADCAST_PRD.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/system-architecture.md" data-tags="아키텍처 구조 mars master 역할 백엔드 json 핸드오프">
+      <a class="doc" href="viewer.html?file=spec/system-architecture.md" data-date="2026-07-10" data-tags="아키텍처 구조 mars master 역할 백엔드 json 핸드오프">
         <span class="doc-title">전체 아키텍처 설계서 <span class="ver">v1.1 · 2026-06-24</span></span>
         <span class="chip live">기준 문서</span>
         <span class="doc-desc">MARS(제작)/Master(진행) 역할 분리, 파일 기반 핸드오프 흐름, Phase 2 백엔드(Node.js+PostgreSQL) 계획.</span>
         <span class="doc-path">doc/spec/system-architecture.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/newsformat.md" data-tags="뉴스 형식 mos protocol nrcs inews enps 데이터모델 리포트 단신 중계">
+      <a class="doc" href="viewer.html?file=spec/newsformat.md" data-date="2026-07-10" data-tags="뉴스 형식 mos protocol nrcs inews enps 데이터모델 리포트 단신 중계">
         <span class="doc-title">뉴스 아이템 형식 정의서 <span class="ver">v0.2 · 2026-07-10</span></span>
         <span class="chip plan">설계 단계</span>
         <span class="doc-desc">리포트/단신/중계 등 뉴스 형식을 기본형+변형 시퀀스로 표준화하고, MOS Protocol·NRCS(iNEWS/ENPS 등) 연동 데이터 모델로 매핑.</span>
         <span class="doc-path">doc/spec/newsformat.md</span>
       </a>
-      <a class="doc" href="spec/개발-히스토리-회고.html" data-tags="회고 히스토리 postmortem 반복 오류 패턴 실수 개선점 타임라인 커밋">
+      <a class="doc" href="spec/개발-히스토리-회고.html" data-date="2026-07-10" data-tags="회고 히스토리 postmortem 반복 오류 패턴 실수 개선점 타임라인 커밋">
         <span class="doc-title">개발 히스토리 회고 (Post-mortem) <span class="ver">~07-11 시점</span></span>
         <span class="chip snap">이전 스냅샷</span>
         <span class="doc-desc">9번의 커밋과 30개 세션 메모리 기반(~07-11 시점) — 반복된 오류 패턴 6가지(폴백, 상태 동기화, mock-vs-실기기 등)와 개선 지점. 더 최신 버전은 위 "종합 개발 정리"(07-18) 참고.</span>
         <span class="doc-path">doc/spec/개발-히스토리-회고.html</span>
       </a>
-      <a class="doc" href="spec/중간보고서-상업화로드맵.html" data-tags="중간보고서 상업화 로드맵 완료 미착수 결정 login 7월17일">
+      <a class="doc" href="spec/중간보고서-상업화로드맵.html" data-date="2026-07-10" data-tags="중간보고서 상업화 로드맵 완료 미착수 결정 login 7월17일">
         <span class="doc-title">중간보고서 — 상업화 로드맵</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">완료/미착수 현황, login.md 아키텍처 결정 사항(온프레미스 vs SaaS vs 하이브리드), 상업화 로드맵 A~F, 7/17까지 할 일. claude.ai 아티팩트에서 저장소로 이관.</span>
         <span class="doc-path">doc/spec/중간보고서-상업화로드맵.html</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/OnAir_Connect_초기구상.md" data-tags="onair connect 초기구상 대화록 상업화 아이디어 교회 학생 유튜버 원격 보안 라이선스 구독">
+      <a class="doc" href="viewer.html?file=spec/OnAir_Connect_초기구상.md" data-date="2026-07-10" data-tags="onair connect 초기구상 대화록 상업화 아이디어 교회 학생 유튜버 원격 보안 라이선스 구독">
         <span class="doc-title">OnAir Connect — 초기 구상 대화록</span>
         <span class="chip snap">기원 문서</span>
         <span class="doc-desc">상업화 방향을 처음 논의한 원본 대화 — 타겟(학생/교회/유튜버) 아이디어, vMix 웹 컨트롤러 불편 포인트, 원격 통신 취약점, 구독/라이선스 모델. 아래 리포트·제안서·login.md의 출발점.</span>
         <span class="doc-path">doc/spec/OnAir_Connect_초기구상.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md" data-tags="vmix 시장조사 리서치 불편사항 리뷰 상업화 기획 사용자">
+      <a class="doc" href="viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md" data-date="2026-07-10" data-tags="vmix 시장조사 리서치 불편사항 리뷰 상업화 기획 사용자">
         <span class="doc-title">vMix 사용자 불편사항 분석 리포트 <span class="ver">2026-07-04</span></span>
         <span class="chip snap">리서치</span>
         <span class="doc-desc">리뷰·포럼 정성 분석 기반 vMix 사용자 불편사항 조사 — 서드파티 웹 컨트롤 서비스(상업화) 기획의 근거 자료.</span>
         <span class="doc-path">doc/spec/vMix_사용자_불편사항_분석_리포트.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/login.md" data-tags="로그인 계정 인증 supabase 소셜 구글 카카오 네이버 oauth">
+      <a class="doc" href="viewer.html?file=spec/login.md" data-date="2026-07-10" data-tags="로그인 계정 인증 supabase 소셜 구글 카카오 네이버 oauth">
         <span class="doc-title">로그인 기능 구현 가이드 <span class="ver">v0.1 · 2026-07-10</span></span>
         <span class="chip plan">설계 단계</span>
         <span class="doc-desc">로컬 계정 → 구글·카카오·네이버 소셜 로그인 순차 구현 계획 (Next.js+Supabase 전제). 구현 착수 전 — 백엔드 스택 결정 선행 필요.</span>
         <span class="doc-path">doc/spec/login.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/Expansion_PRD.md" data-tags="확장 장비 videohub vmu amu 라우터 blackmagic">
+      <a class="doc" href="viewer.html?file=spec/Expansion_PRD.md" data-date="2026-07-10" data-tags="확장 장비 videohub vmu amu 라우터 blackmagic">
         <span class="doc-title">외부 장비 제어 확장 PRD <span class="ver">v1.0 · 2026-07-10</span></span>
         <span class="chip progress">진행 중</span>
         <span class="doc-desc">Videohub → VMU(영상믹서) → AMU(오디오믹서) 순차 확장 계획. Phase 1(Videohub 크로스포인트)은 실장비 검증 완료.</span>
         <span class="doc-path">doc/spec/Expansion_PRD.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/Live.md" data-tags="lpp 라이브 시사교양 제작 큐시트 기획">
+      <a class="doc" href="viewer.html?file=spec/Live.md" data-date="2026-07-10" data-tags="lpp 라이브 시사교양 제작 큐시트 기획">
         <span class="doc-title">Live Production Planner 기획서 <span class="ver">v0.1 · 2026-07-01</span></span>
         <span class="chip live">부분 구현</span>
         <span class="doc-desc">시사교양 라이브 제작 큐시트 기획. MARS의 "제작 큐시트" 탭(저작+화면 리허설)의 근거 문서 — Master 실행 엔진 연동은 미구현.</span>
         <span class="doc-path">doc/spec/Live.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=spec/Cuesheet-UI.md" data-tags="큐시트 ui ux 3패널 소스팔레트 라이브 에디터">
+      <a class="doc" href="viewer.html?file=spec/Cuesheet-UI.md" data-date="2026-07-10" data-tags="큐시트 ui ux 3패널 소스팔레트 라이브 에디터">
         <span class="doc-title">제작 큐시트 UI 설계서 <span class="ver">2026-07-01</span></span>
         <span class="chip live">부분 구현</span>
         <span class="doc-desc">Live.md의 하위 문서 — 제작 큐시트 화면의 3패널 레이아웃(소스팔레트|큐 리스트|속성패널) UI/UX 설계.</span>
@@ -263,34 +286,37 @@
   </section>
 
   <section data-sec>
-    <h2>🔧 설정 · 연동 가이드 <span class="folder">doc/guide/</span></h2>
+    <div class="sec-head">
+      <h2>🔧 설정 · 연동 가이드 <span class="folder">doc/guide/</span></h2>
+      <button class="sort-btn" type="button" data-sort-btn>최신 문서순</button>
+    </div>
     <p class="section-desc">장비를 연결하고 설정하는 절차 문서 — 작업 순서서와 환경 스냅샷.</p>
     <div class="doc-list">
-      <a class="doc" href="viewer.html?file=guide/troubleshooting.md" data-tags="문제해결 트러블슈팅 장애 증상 오류 에러 안나옴 안됨 깨짐 디졸브 자막 srv pgm pvw">
+      <a class="doc" href="viewer.html?file=guide/troubleshooting.md" data-date="2026-07-19" data-tags="문제해결 트러블슈팅 장애 증상 오류 에러 안나옴 안됨 깨짐 디졸브 자막 srv pgm pvw">
         <span class="doc-title">🚨 실전 문제해결 가이드</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">실제 방송·실장비에서 발생했던 문제와 검증된 해결책 — "디졸브가 컷으로 나감", "자막이 안 바뀌는데 로그는 성공" 등 증상별 진단 순서.</span>
         <span class="doc-path">doc/guide/troubleshooting.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=guide/Integration_Guide.md" data-tags="연동 장비 videohub vmu amu 단계 절차 tcp">
+      <a class="doc" href="viewer.html?file=guide/Integration_Guide.md" data-date="2026-07-10" data-tags="연동 장비 videohub vmu amu 단계 절차 tcp">
         <span class="doc-title">장비 연동 단계별 작업 순서서 <span class="ver">v1.0 · 2026-07-10</span></span>
         <span class="chip progress">진행 중</span>
         <span class="doc-desc">Expansion_PRD의 실행 문서 — Videohub→VMU→AMU를 단계별 "완료 조건" 방식으로 진행. Part A~Videohub까지 완료.</span>
         <span class="doc-path">doc/guide/Integration_Guide.md</span>
       </a>
-      <a class="doc" href="viewer.html?file=guide/OBS 씬 구조.md" data-tags="obs 씬 소스 구조 스냅샷 cam srv 매핑">
+      <a class="doc" href="viewer.html?file=guide/OBS 씬 구조.md" data-date="2026-07-10" data-tags="obs 씬 소스 구조 스냅샷 cam srv 매핑">
         <span class="doc-title">OBS 씬 구조 문서 <span class="ver">2026-07-09 기준</span></span>
         <span class="chip snap">스냅샷</span>
         <span class="doc-desc">실제 OBS 인스턴스의 씬 20개·소스 19개 구조와 스위처 소스 추천 매핑. 씬이 바뀌면 갱신 필요한 시점 기록물.</span>
         <span class="doc-path">doc/guide/OBS 씬 구조.md</span>
       </a>
-      <a class="doc" href="guide/OBS_SETUP_GUIDE.html" data-tags="obs 설정 설치 초기 websocket">
+      <a class="doc" href="guide/OBS_SETUP_GUIDE.html" data-date="2026-07-11" data-tags="obs 설정 설치 초기 websocket">
         <span class="doc-title">OBS 초기 설정 가이드 <span class="ver">2026-06-23</span></span>
         <span class="chip snap">초기 버전</span>
         <span class="doc-desc">프로젝트 최초 시점의 OBS 설치·websocket 설정 안내. 최신 씬 구조는 위의 "OBS 씬 구조" 문서를 우선 참조.</span>
         <span class="doc-path">doc/guide/OBS_SETUP_GUIDE.html</span>
       </a>
-      <a class="doc" href="guide/네트워크 구성도.html" data-tags="네트워크 구성도 ip 포트 vmix videohub 블랙매직 스위치 허브 topology 토폴로지">
+      <a class="doc" href="guide/네트워크 구성도.html" data-date="2026-07-17" data-tags="네트워크 구성도 ip 포트 vmix videohub 블랙매직 스위치 허브 topology 토폴로지">
         <span class="doc-title">실장비 네트워크 구성도 <span class="ver">2026-07-16 기준</span></span>
         <span class="chip snap">스냅샷</span>
         <span class="doc-desc">vMix 단말·Master 운영 단말·Blackmagic Videohub의 실제 IP·포트와 연결 관계 도식. server-config.json 기준 실측치.</span>
@@ -300,22 +326,25 @@
   </section>
 
   <section data-sec>
-    <h2>🎓 바이브 코딩 교재 <span class="folder">doc/textbook/</span></h2>
+    <div class="sec-head">
+      <h2>🎓 바이브 코딩 교재 <span class="folder">doc/textbook/</span></h2>
+      <button class="sort-btn" type="button" data-sort-btn>최신 문서순</button>
+    </div>
     <p class="section-desc">이 프로젝트를 진행하며 만든 바이브 코딩 학습 교재 — 비기너/중급자 두 트랙으로 분권.</p>
     <div class="doc-list">
-      <a class="doc" href="textbook/index.html" data-tags="교재 커리큘럼 트랙 비기너 중급자 학습 강의">
+      <a class="doc" href="textbook/index.html" data-date="2026-07-10" data-tags="교재 커리큘럼 트랙 비기너 중급자 학습 강의">
         <span class="doc-title">교재 트랙 안내 (시작점)</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">비기너/중급자 트랙 선택 가이드 — 어느 교재부터 읽을지 질문 하나로 고르는 안내 페이지.</span>
         <span class="doc-path">doc/textbook/index.html</span>
       </a>
-      <a class="doc" href="textbook/beginner/바이브코딩-비기너-교재-6단계.html" data-tags="교재 비기너 초보 왕초보 입문 6단계 배포 git prd">
+      <a class="doc" href="textbook/beginner/바이브코딩-비기너-교재-6단계.html" data-date="2026-07-11" data-tags="교재 비기너 초보 왕초보 입문 6단계 배포 git prd">
         <span class="doc-title">비기너 교재 — 아이디어에서 배포까지 6단계</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">환경 구축 → PRD·코딩·테스트 → Git → 배포 → DB → 중급 로드맵. 코드를 몰라도 따라가는 첫 프로그램.</span>
         <span class="doc-path">doc/textbook/beginner/</span>
       </a>
-      <a class="doc" href="textbook/intermediate/바이브코딩-중급자-교재.html" data-tags="교재 중급자 스킬 하드닝 상용화 에이전트 사례 검증">
+      <a class="doc" href="textbook/intermediate/바이브코딩-중급자-교재.html" data-date="2026-07-10" data-tags="교재 중급자 스킬 하드닝 상용화 에이전트 사례 검증">
         <span class="doc-title">중급자 교재 — "만들 수 있다"에서 "팔 수 있다"로</span>
         <span class="chip live">현행</span>
         <span class="doc-desc">모델 운용 → 클로드 200% → ★실전 사례 연구(이 저장소의 3주 기록) → 프로덕션 하드닝 → 에이전트 스택. 딸림 문서 2권 포함.</span>
@@ -325,35 +354,38 @@
   </section>
 
   <section data-sec>
-    <h2>🗄 아카이브 <span class="folder">doc/archive/</span></h2>
+    <div class="sec-head">
+      <h2>🗄 아카이브 <span class="folder">doc/archive/</span></h2>
+      <button class="sort-btn" type="button" data-sort-btn>최신 문서순</button>
+    </div>
     <p class="section-desc">초기 프로토타입과 원본 자료 — 현재 시스템에서는 사용하지 않지만 이력 보존용으로 유지.</p>
     <div class="archive-note">이 폴더의 파일은 참고용입니다. 같은 내용의 최신 버전이 spec/guide에 있으면 그쪽이 항상 우선입니다.</div>
     <div class="doc-list">
-      <a class="doc" href="archive/NEWS_BROADCAST_PRD.html" data-tags="prd html 렌더 아카이브">
+      <a class="doc" href="archive/NEWS_BROADCAST_PRD.html" data-date="2026-07-10" data-tags="prd html 렌더 아카이브">
         <span class="doc-title">PRD HTML 렌더 버전</span>
         <span class="chip arch">아카이브</span>
         <span class="doc-desc">NEWS_BROADCAST_PRD.md의 HTML 변환본 — 내용 중복. 원본 md가 기준.</span>
         <span class="doc-path">doc/archive/NEWS_BROADCAST_PRD.html</span>
       </a>
-      <a class="doc" href="archive/news-cuesheet-app.html" data-tags="프로토타입 초기 큐시트 앱">
+      <a class="doc" href="archive/news-cuesheet-app.html" data-date="2026-07-10" data-tags="프로토타입 초기 큐시트 앱">
         <span class="doc-title">초기 큐시트 앱 프로토타입 (2종)</span>
         <span class="chip arch">아카이브</span>
         <span class="doc-desc">2026-06-23 최초 실험 버전 — 현재의 MARS/Master로 발전하기 전 단일 화면 프로토타입.</span>
         <span class="doc-path">doc/archive/news-cuesheet-app.html · news-cuesheet-app2.html</span>
       </a>
-      <a class="doc" href="archive/cuesheet_parser.py" data-tags="pdf 파서 파이썬 프로토타입">
+      <a class="doc" href="archive/cuesheet_parser.py" data-date="2026-07-10" data-tags="pdf 파서 파이썬 프로토타입">
         <span class="doc-title">PDF 큐시트 파서 (Python 초기판)</span>
         <span class="chip arch">아카이브</span>
         <span class="doc-desc">독립 실행 PDF 파서 프로토타입 — 현재는 Master 내장 브라우저 파서가 이 역할을 대체.</span>
         <span class="doc-path">doc/archive/cuesheet_parser.py</span>
       </a>
-      <a class="doc" href="archive/document_pdf.pdf" data-tags="원본 큐시트 pdf 샘플">
+      <a class="doc" href="archive/document_pdf.pdf" data-date="2026-07-10" data-tags="원본 큐시트 pdf 샘플">
         <span class="doc-title">원본 큐시트 PDF 샘플 (3종)</span>
         <span class="chip arch">아카이브</span>
         <span class="doc-desc">파서 개발에 쓰인 실제 방송 큐시트 PDF 원본.</span>
         <span class="doc-path">doc/archive/document_pdf.pdf · (1) · (2)</span>
       </a>
-      <a class="doc" href="archive/news_broadcast_system_architecture.png" data-tags="다이어그램 설계 이미지 아키텍처 워크플로우">
+      <a class="doc" href="archive/news_broadcast_system_architecture.png" data-date="2026-07-10" data-tags="다이어그램 설계 이미지 아키텍처 워크플로우">
         <span class="doc-title">초기 설계 다이어그램 (PNG 5종)</span>
         <span class="chip arch">아카이브</span>
         <span class="doc-desc">시스템 아키텍처·워크플로우·큐시트 비교 분석 등 2026-06-23 기획 단계 다이어그램.</span>
@@ -370,6 +402,109 @@
 
 </div>
 <script>
+// ── "New" 배지 + 섹션별 기본 정렬(New는 최신순, 나머지는 오래된 순) + "최신 문서순" 토글 ──
+// data-date는 publish-docs.sh가 발행할 때마다 그 문서의 실제 소스 파일 git 커밋일로 다시 채워
+// 넣는다(하드코딩 아님 — 파일이 실제로 바뀔 때만 날짜도 같이 바뀐다). GitHub Pages의 HTTP
+// Last-Modified는 "그 파일이 실제로 언제 바뀌었는지"가 아니라 "사이트가 마지막으로 언제
+// 배포됐는지"만 반영해(실측 확인 — 배포 한 번으로 안 바뀐 파일까지 전부 같은 시각을 반환) 이
+// 용도로 쓸 수 없었다.
+(function(){
+  var NEW_DAYS = 3;
+  var todayMs = Date.now();
+  var sections = Array.prototype.slice.call(document.querySelectorAll('[data-sec]'));
+
+  function parseDate(s){
+    if (!s) return null;
+    var d = new Date(s + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function isNew(dateStr){
+    var d = parseDate(dateStr);
+    if (!d) return false;
+    return (todayMs - d.getTime()) / 86400000 <= NEW_DAYS;
+  }
+  function docDateVal(a){
+    var d = parseDate(a.getAttribute('data-date'));
+    return d ? d.getTime() : 0;
+  }
+
+  document.querySelectorAll('a.doc').forEach(function(a){
+    if (isNew(a.getAttribute('data-date'))) {
+      a.setAttribute('data-new', '1');
+      var title = a.querySelector('.doc-title');
+      if (title) {
+        var b = document.createElement('span');
+        b.className = 'new-badge';
+        b.textContent = 'NEW';
+        title.appendChild(b);
+      }
+    }
+  });
+
+  // 기본 정렬: New 그룹(최신이 맨 위)이 먼저, 그다음 나머지(오래된 문서가 맨 위 — 자연스러운
+  // 기획 문서 읽기 순서를 유지).
+  function defaultOrder(list){
+    var news = list.filter(function(a){ return a.getAttribute('data-new') === '1'; });
+    var olds = list.filter(function(a){ return a.getAttribute('data-new') !== '1'; });
+    news.sort(function(a,b){ return docDateVal(b) - docDateVal(a); });
+    olds.sort(function(a,b){ return docDateVal(a) - docDateVal(b); });
+    return news.concat(olds);
+  }
+  function newestFirstOrder(list){
+    return list.slice().sort(function(a,b){ return docDateVal(b) - docDateVal(a); });
+  }
+
+  // FLIP(First-Last-Invert-Play) 재배치 애니메이션 — 순서가 실제로 바뀌는 걸 눈으로 보여줘야
+  // "정렬이 바뀌었으니 다시 위부터 훑어보자"고 인지할 수 있다. 순간적으로 뒤바뀌면 뭐가 어디로
+  // 갔는지 모른 채 원하는 문서를 처음부터 다시 찾아야 한다.
+  function reorderWithFlip(wrap, newOrder){
+    var oldOrder = Array.prototype.slice.call(wrap.children);
+    var firstRects = oldOrder.map(function(el){ return el.getBoundingClientRect(); });
+    newOrder.forEach(function(el){ wrap.appendChild(el); });
+    newOrder.forEach(function(el){
+      var firstRect = firstRects[oldOrder.indexOf(el)];
+      var lastRect = el.getBoundingClientRect();
+      var dx = firstRect.left - lastRect.left, dy = firstRect.top - lastRect.top;
+      if (!dx && !dy) return;
+      el.style.transition = 'none';
+      el.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      el.getBoundingClientRect(); // 강제 리플로우 — transform이 실제로 적용된 뒤에 아래 애니메이션이 걸리게
+      requestAnimationFrame(function(){
+        el.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+        el.style.transform = '';
+      });
+    });
+  }
+
+  sections.forEach(function(sec){
+    var wrap = sec.querySelector('.doc-list');
+    var btn = sec.querySelector('[data-sort-btn]');
+    if (!wrap) return;
+
+    // 첫 로드 시 기본 정렬 적용(애니메이션 없이 바로 배치 — 화면에 뭔가 보이기 전이므로 무의미).
+    defaultOrder(Array.prototype.slice.call(wrap.querySelectorAll('a.doc'))).forEach(function(el){ wrap.appendChild(el); });
+    if (!btn) return;
+
+    var newestMode = false;
+    btn.addEventListener('click', function(){
+      // 지금 이 섹션이 화면(뷰포트) 안에서 보이던 위치를 기록해뒀다가, 재정렬 뒤에도 같은 자리에
+      // 계속 보이도록 스크롤을 보정한다 — 다른 섹션들 순서/개수는 안 바뀌므로 페이지 전체 높이가
+      // 거의 그대로지만, 혹시 모를 미세한 흔들림까지 방지해 "방금 보던 곳에서 그대로 다시 훑어볼
+      // 수 있게" 한다.
+      var beforeTop = sec.getBoundingClientRect().top;
+      newestMode = !newestMode;
+      var list = Array.prototype.slice.call(wrap.querySelectorAll('a.doc'));
+      reorderWithFlip(wrap, newestMode ? newestFirstOrder(list) : defaultOrder(list));
+      btn.textContent = newestMode ? '기본 순서로' : '최신 문서순';
+      btn.classList.toggle('active', newestMode);
+      requestAnimationFrame(function(){
+        var delta = sec.getBoundingClientRect().top - beforeTop;
+        if (delta) window.scrollBy(0, delta);
+      });
+    });
+  });
+})();
+
 (function(){
   var input = document.getElementById('filter');
   var docs = Array.prototype.slice.call(document.querySelectorAll('a.doc'));
