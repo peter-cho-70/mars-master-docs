@@ -125,6 +125,17 @@
   a.featured .f-title{ font-size:17px; font-weight:800; margin-bottom:5px; }
   a.featured .f-desc{ font-size:13px; color:var(--ink-dim); max-width:70ch; }
 
+  /* 정렬 규칙 안내 — 페이지 상단에서 New 배지 기준과 기본/토글 정렬 규칙을 미리 설명 */
+  .sort-rule{
+    font-size:12px; color:var(--ink-dim); border:1px dashed var(--line-strong); border-radius:8px;
+    padding:10px 14px; margin:18px 0 4px; line-height:1.7;
+  }
+  .sort-rule b{ color:var(--ink); }
+  .sort-rule .new-badge-sample{
+    display:inline-block; font-family:var(--mono); font-size:9.5px; font-weight:800; letter-spacing:.03em;
+    color:#fff; background:var(--live); border-radius:5px; padding:1px 6px; vertical-align:middle;
+  }
+
   .no-match{ display:none; text-align:center; color:var(--ink-faint); font-size:13.5px; padding:30px 0; }
 
   footer{
@@ -157,6 +168,12 @@
     <span class="f-title">실제 앱 첫 화면 스냅샷 — 시연 동영상 포함</span>
     <span class="f-desc">MARS/Master를 실제로 켰을 때 보이는 첫 화면 그대로, 그리고 실제 방송 진행 시연 동영상. 사내망 전용 서버에 연결하는 버튼이라 여기서는 눌러도 동작하지 않지만, 실제 UI와 실제 동작 모습을 그대로 볼 수 있습니다.</span>
   </a>
+
+  <div class="sort-rule">
+    <span class="new-badge-sample">NEW</span> 배지는 실제 마지막 수정일(git 커밋일) 기준 <b>7일 이내</b>에 바뀐 문서에 붙습니다.
+    각 섹션은 기본적으로 <b>New 문서(최신순)</b>가 먼저 오고 그 아래 <b>나머지 문서(오래된 순)</b>가 이어지며,
+    섹션 제목 옆의 <b>"최신 문서순"</b> 버튼을 누르면 그 섹션 전체를 최신 수정일 순으로 다시 정렬합니다(다시 누르면 기본 순서로 복귀).
+  </div>
 
   <div class="filter-wrap">
     <input id="filter" type="search" placeholder="문서 검색 — 제목·설명·키워드 입력 (예: 로그인, OBS, 자막, 전환)" autocomplete="off">
