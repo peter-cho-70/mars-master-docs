@@ -1,5 +1,0 @@
-faster-whisper
-soundfile
-sounddevice
-rapidfuzz
-numpy

@@ -45,7 +45,7 @@
 | [Cuesheet-UI.md](spec/Cuesheet-UI.md) | 07-01 | 부분 구현 | 제작 큐시트 3패널 UI/UX 설계 (Live.md 하위 문서) |
 | [vMix 자동 샷전환 PRD](spec/vMix_자동샷전환_PRD.md) | Draft v0.1 · 07-22 | 기획 단계 | 마이크 레벨 기반 자동/반자동 카메라 컷 전환 — 시사 토크쇼(4캠 갈라치기) 적용 사례 포함, [통합 로드맵](report/2026-07-23-vmix-integration-direction.html)에서 P4로 배치 |
 | [오디오 기사 하이라이트 PRD](spec/오디오_기사_하이라이트_PRD.md) | Draft v0.1 · 07-22 | 기획 단계 | 실시간 STT로 진행자 낭독 위치를 원문 기사에서 추정·하이라이트 — STT 엔진 비교(Vosk/RTZR/클로바) 포함, [통합 로드맵](report/2026-07-23-vmix-integration-direction.html)에서 P5로 배치 |
-| [Whisper 기반 오디오 하이라이트 PoC](spec/Whisper/README.md) | 07-23 | 프로토타입 | 위 PRD §7-3-3 경로(faster-whisper)를 그대로 구현한 CLI 프로토타입 — 판정 로직 구현 완료, 실장비(마이크·인터넷) 검증 대기 |
+| [Whisper 기반 오디오 하이라이트 독립 도구](../audio-highlight/README.md) | 07-23 | 실사용 검증 중 | 위 PRD §7-3-3 경로(faster-whisper)를 마이크+웹 하이라이트 UI까지 갖춘 독립 실행 도구로 구현 — 저장소 루트 `audio-highlight/`(소스 저장소 전용, 이 링크는 로컬에서만 열림) |
 
 ## 🔧 설정 · 연동 가이드 (`doc/guide/`)
 

@@ -224,7 +224,7 @@
 - Vosk보다 인식 품질이 높은 편이나, 청크 분할 방식 특성상 약간의 지연(수백 ms ~ 1~2초)이 발생 → 6장의 "지연 보정" 값에 반영 필요
 - 정확도가 부족하면 `medium`으로 상향 검토 가능하나, 이 경우 GPU가 있으면 더 안정적(7-1의 온프레미스 GPU 섹션 참고)
 
-**프로토타입 구현 완료**: 이 경로(faster-whisper 기반)로 CLI 프로토타입이 이미 작성되어 있다 — `doc/spec/Whisper/`(`main.py`/`stt_stream.py`/`matcher.py`). `matcher.py`가 6.3절의 "현재 위치 근처 문장만 탐색(forward_window) + 유사도 임계값 미만이면 이전 위치 유지(fallback)" 판정 로직을 그대로 구현한다. Vosk PoC를 거치지 않고 바로 이 경로로 착수된 상태이며, 다음 단계는 실제 PC(인터넷+마이크 필요, 샌드박스에서는 모델 다운로드·마이크 접근 불가)에서 `--wav`(녹음 검증) → `--mic`(실시간)로 지연·정확도를 실측하는 것이다.
+**프로토타입 구현 완료 → 독립 테스트 도구로 승격**: 이 경로(faster-whisper 기반)로 CLI 프로토타입이 먼저 작성됐고(`main.py`/`stt_stream.py`/`matcher.py`), 이후 마이크 입력 + 웹 하이라이트 UI를 갖춘 독립 실행 도구로 확장돼 저장소 루트의 [`audio-highlight/`](../../audio-highlight/README.md)(문서 폴더 밖 — 실제 실행 코드이므로 소스 저장소에만 존재, 공개 문서 사이트에는 배포되지 않음)에 있다. `matcher.py`가 6.3절의 "현재 위치 근처 문장만 탐색(forward_window) + 유사도 임계값 미만이면 이전 위치 유지(fallback)" 판정 로직을 그대로 구현한다. Vosk PoC를 거치지 않고 바로 이 경로로 착수된 상태이며, `python server.py` 실행 후 브라우저(`localhost:8787`)에서 마이크로 직접 낭독하며 실시간 하이라이트를 확인할 수 있다 — 실행 방법은 `audio-highlight/README.md` 참고.
 
 ### 7-3-4. 인프라 및 비용
 - 서버: 기존 사무용 PC 또는 미니 서버(8코어 CPU, RAM 16GB 내외)로 충분 — 별도 GPU, 클라우드 API 계약 불필요

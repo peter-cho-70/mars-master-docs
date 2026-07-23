@@ -177,7 +177,7 @@
         <article class="signal">
           <div class="num">03 · 신규 PRD (사내 전용)</div>
           <h3><a href="../viewer.html?file=spec/오디오_기사_하이라이트_PRD.md">오디오 기사 하이라이트 PRD ↗</a></h3>
-          <p>뉴스 큐시트·기사 원문·프롬프터에 직결된 기능이라 처음부터 Track 1 전용이다. 교회/학교/유튜버 대상 Track 2와는 접점이 거의 없다 — 굳이 잇는다면 "설교·발표 원고 트래킹" 정도의 먼 응용에 그친다. 실제 STT 파이프라인 PoC(Whisper 기반)도 <a href="../viewer.html?file=spec/Whisper/README.md">이미 작성돼 있다 ↗</a>.</p>
+          <p>뉴스 큐시트·기사 원문·프롬프터에 직결된 기능이라 처음부터 Track 1 전용이다. 교회/학교/유튜버 대상 Track 2와는 접점이 거의 없다 — 굳이 잇는다면 "설교·발표 원고 트래킹" 정도의 먼 응용에 그친다. 마이크+웹 하이라이트 UI를 갖춘 독립 실행 도구(Whisper 기반)가 <code>audio-highlight/</code>에 이미 만들어져 실사용 검증 단계에 들어갔다.</p>
         </article>
         <article class="signal">
           <div class="num">04 · 이미 있던 로드맵</div>
@@ -279,15 +279,16 @@
 
         <article class="phase p6">
           <div class="phase-head">
-            <h3>P5. 오디오 기사 하이라이트 — PoC 실장비 검증부터</h3>
-            <span class="when">P3.5와 독립 병행 가능 · PoC 코드 이미 존재</span>
+            <h3>P5. 오디오 기사 하이라이트 — 독립 UI 실사용 검증부터</h3>
+            <span class="when">P3.5와 독립 병행 가능 · 마이크+웹 UI 도구 이미 존재</span>
           </div>
-          <p>vMix 폴링 코어와 무관한 별도 파이프라인(STT+텍스트매칭)이라 P4와 동시 진행 가능. PRD §7-3의 3단계 전환 전략 중 <b>1단계가 이미 코드로 구현되어 있다</b> — <code>doc/spec/Whisper/</code>(faster-whisper 기반 CLI PoC). Vosk를 거치지 않고 §7-3-3 Whisper 경로로 바로 착수된 상태이며, "PoC 제작"이 아니라 "PoC 실장비 검증"이 다음 순서다.</p>
+          <p>vMix 폴링 코어와 무관한 별도 파이프라인(STT+텍스트매칭)이라 P4와 동시 진행 가능. PRD §7-3의 3단계 전환 전략 중 <b>1단계가 CLI를 넘어 마이크+웹 하이라이트 UI가 붙은 독립 도구로 구현되어 있다</b> — 저장소 루트 <code>audio-highlight/</code>(faster-whisper 기반, MARS/Master 본체와 별개 프로세스). Vosk를 거치지 않고 §7-3-3 Whisper 경로로 바로 착수된 상태이며, "도구 제작"이 아니라 "실제 뉴스 원고로 반복 실사용 검증"이 다음 순서다.</p>
           <ul>
             <li>0단계(완료): <code>matcher.py</code>가 forward-window 탐색 + 유사도 임계값 미달 시 이전 위치 유지(fallback)를 이미 구현 — PRD §6.3 판정 로직과 1:1 대응</li>
-            <li>1단계: 실제 PC(인터넷+마이크 필요 — 샌드박스는 모델 다운로드·마이크 접근 불가)에서 <code>--wav</code> 녹음 검증 → <code>--mic</code> 실시간 순으로 지연·정확도 실측, <code>--delay-comp</code>/<code>--min-score</code> 튜닝</li>
+            <li>0단계(완료): <code>server.py</code>가 마이크 캡처를 백그라운드 스레드로 돌리며 <code>/api/status</code>를 폴링 API로 노출, <code>index.html</code>이 250ms 주기로 폴링해 문장을 하이라이트 — PRD §6.5(매칭 실패 표시 포함) 그대로 구현</li>
+            <li>1단계: <code>cd audio-highlight && python server.py</code> 실행 후 브라우저(<code>localhost:8787</code>)에서 실제 목소리로 낭독하며 지연·정확도 체감, <code>--min-score</code>/<code>--forward-window</code> 튜닝</li>
             <li>2단계: CPU 실시간 여유(RTF)가 부족하면 <code>tiny</code>/<code>base</code>로 하향하거나 Vosk로 교체 검토 — 반대로 정확도가 부족하면 RTZR STT(월 10시간 무료)로 승급 검토</li>
-            <li>3단계: 큐시트 연동(README "다음 단계" 1~3) — <code>--article</code> 텍스트 파일을 MARS 기사매칭(<code>matchArticle</code>) 결과로 교체, 마이크 소스를 방송 믹서 출력으로 교체, 하이라이트 출력을 문서 화면 웹소켓으로 연동</li>
+            <li>3단계: 큐시트 연동(README "다음 단계" 3~4) — <code>article.txt</code> 대신 MARS 기사매칭(<code>matchArticle</code>) 결과를 실시간으로 받아오도록 교체, 마이크 소스를 방송 믹서 출력으로 교체</li>
           </ul>
           <div class="gate"><b>통과 조건</b> — 실제 뉴스 원고 낭독 샘플에서 매칭 실패율·평균 오차(문장 수 기준)가 목표치 이하로 실측 확인.</div>
         </article>
@@ -364,7 +365,7 @@
         <div class="check">P0-P3 로드맵의 현재 진행률을 STATUS.md에서 다시 확인 — P4 착수 가능 시점 판단.</div>
         <div class="check">real-vmix-environment 문서 기준으로 카메라별 마이크 Input 매핑 여부를 실장비에서 한 번 확인(이 표의 "하드웨어" 리스크 해소).</div>
         <div class="check">기존 스위처 폴링(<code>_vmixPollTick</code>) 1곳을 P3.5 코어 모듈 설계의 첫 이전 대상으로 지목하고 리팩터링 범위를 가늠.</div>
-        <div class="check"><code>doc/spec/Whisper/</code> PoC를 인터넷·마이크가 되는 실제 PC로 옮겨 <code>pip install -r requirements.txt</code> 후 <code>--wav</code> 검증부터 실행 — 지연·정확도 실측이 P5의 유일한 다음 액션이다(추가 개발 불필요).</div>
+        <div class="check">저장소 루트 <code>audio-highlight/</code>에서 <code>pip install -r requirements.txt && python server.py</code> 실행 후 <code>localhost:8787</code>에서 실제 목소리로 낭독 검증 — 지연·정확도 실측이 P5의 유일한 다음 액션이다(추가 개발 불필요).</div>
       </div>
     </section>
 
@@ -374,7 +375,7 @@
         <a class="src" href="../viewer.html?file=spec/vMix_트렌드_및_사용자이슈_분석.md"><b>vMix 최신 트렌드 및 사용자 이슈 분석</b><span>doc/spec/vMix_트렌드_및_사용자이슈_분석.md · 2026-07-22</span></a>
         <a class="src" href="../viewer.html?file=spec/vMix_자동샷전환_PRD.md"><b>PRD: vMix 마이크 레벨 기반 자동 샷 전환</b><span>doc/spec/vMix_자동샷전환_PRD.md · 2026-07-22 · Draft v0.1</span></a>
         <a class="src" href="../viewer.html?file=spec/오디오_기사_하이라이트_PRD.md"><b>실시간 오디오 인식 기반 기사 하이라이트 PRD</b><span>doc/spec/오디오_기사_하이라이트_PRD.md · 2026-07-22 · Draft v0.1</span></a>
-        <a class="src" href="../viewer.html?file=spec/Whisper/README.md"><b>오디오 하이라이트 PoC (Whisper 기반)</b><span>doc/spec/Whisper/README.md · faster-whisper + fuzzy matcher, CLI 프로토타입 — 실장비 검증 대기</span></a>
+        <a class="src" href="../viewer.html?file=../audio-highlight/README.md"><b>오디오 하이라이트 독립 도구 (Whisper 기반)</b><span>audio-highlight/README.md · faster-whisper + fuzzy matcher + 마이크·웹 하이라이트 UI — 소스 저장소 전용 링크(로컬에서만 열림, 공개 문서 사이트에는 미배포)</span></a>
         <a class="src" href="../report/2026-07-19-cursor-ai-next-plan.html"><b>Cursor AI가 본 다음 일정</b><span>doc/report/2026-07-19-cursor-ai-next-plan.html · P0-P3 안정화 로드맵</span></a>
         <a class="src" href="../viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md"><b>vMix 사용자 불편사항 분석 리포트</b><span>doc/spec/vMix_사용자_불편사항_분석_리포트.md · 2026-07-04</span></a>
         <a class="src" href="../viewer.html?file=spec/OnAir_Connect_초기구상.md"><b>OnAir Connect — 초기 구상 대화록</b><span>doc/spec/OnAir_Connect_초기구상.md</span></a>
