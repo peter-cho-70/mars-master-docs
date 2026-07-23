@@ -76,6 +76,8 @@
   .signal{border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:18px 20px;box-shadow:var(--shadow)}
   .signal .num{font:800 11px/1 var(--mono);color:var(--faint);margin-bottom:9px}
   .signal h3{font-size:15px;margin:0 0 6px}
+  .signal h3 a{text-decoration:none}
+  .signal h3 a:hover{text-decoration:underline}
   .signal p{font-size:13px;color:var(--dim);margin:0}
   .callout{border:1px solid var(--line);border-radius:12px;padding:18px 21px;margin:20px 0;font-size:14px}
   .callout.warn{background:var(--red-bg);border-color:rgba(192,50,44,.28)}
@@ -164,22 +166,22 @@
       <div class="signal-grid">
         <article class="signal">
           <div class="num">01 · 상황 인식</div>
-          <h3>vMix 트렌드·이슈 분석</h3>
+          <h3><a href="../viewer.html?file=spec/vMix_트렌드_및_사용자이슈_분석.md">vMix 트렌드·이슈 분석 ↗</a></h3>
           <p><a href="../viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md">2026-07-04 리포트</a>의 후속판. vMix 27→29 버전 흐름과 국내 사용처를 보강했지만, 새로운 불편사항 발견보다는 "07-04 리포트의 가설이 아직 유효한가"를 재확인하는 성격이 강하다. 문서 스스로도 포럼 로그인 제약으로 조사가 제한적이었다고 밝힌다.</p>
         </article>
         <article class="signal">
           <div class="num">02 · 신규 PRD (사내 우선)</div>
-          <h3>자동 샷전환 PRD</h3>
+          <h3><a href="../viewer.html?file=spec/vMix_자동샷전환_PRD.md">자동 샷전환 PRD ↗</a></h3>
           <p>일반적인 외부 컨트롤러로 문서 서두를 열지만, 9절의 실제 적용 사례가 "경제·시사 토크쇼(진행자+출연자2, 갈라치기)"다. 이건 정확히 MARS/Master가 이미 다루는 시사 프로그램 포맷이다 — Track 2(상업화) 아이디어에서 출발했지만 가장 먼저 쓸 곳은 Track 1(사내)이다.</p>
         </article>
         <article class="signal">
           <div class="num">03 · 신규 PRD (사내 전용)</div>
-          <h3>오디오 기사 하이라이트 PRD</h3>
-          <p>뉴스 큐시트·기사 원문·프롬프터에 직결된 기능이라 처음부터 Track 1 전용이다. 교회/학교/유튜버 대상 Track 2와는 접점이 거의 없다 — 굳이 잇는다면 "설교·발표 원고 트래킹" 정도의 먼 응용에 그친다.</p>
+          <h3><a href="../viewer.html?file=spec/오디오_기사_하이라이트_PRD.md">오디오 기사 하이라이트 PRD ↗</a></h3>
+          <p>뉴스 큐시트·기사 원문·프롬프터에 직결된 기능이라 처음부터 Track 1 전용이다. 교회/학교/유튜버 대상 Track 2와는 접점이 거의 없다 — 굳이 잇는다면 "설교·발표 원고 트래킹" 정도의 먼 응용에 그친다. 실제 STT 파이프라인 PoC(Whisper 기반)도 <a href="../viewer.html?file=spec/Whisper/README.md">이미 작성돼 있다 ↗</a>.</p>
         </article>
         <article class="signal">
           <div class="num">04 · 이미 있던 로드맵</div>
-          <h3>Cursor AI 다음 일정 (07-19)</h3>
+          <h3><a href="../report/2026-07-19-cursor-ai-next-plan.html">Cursor AI 다음 일정 (07-19) ↗</a></h3>
           <p>"새 기능을 더 얹기 전에 이미 되는 방송 경로를 반복 증명"이 결론이었다. 이번 3개 문서는 정확히 그 "더 얹을 새 기능" 후보군이다 — 그 로드맵의 P0-P3 통과 조건과 무관하게 착수하면 같은 문제(가짜 성공, 설정 드리프트)가 새 기능에도 반복된다.</p>
         </article>
       </div>
