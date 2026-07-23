@@ -18,6 +18,7 @@
 
 | 문서 | 상태 | 설명 |
 |---|---|---|
+| [vMix 연동 프로그램, 다음 방향](report/2026-07-23-vmix-integration-direction.html) | 방향성 통합 | 신규 기획 3종(트렌드 분석·자동 샷전환 PRD·오디오 기사 하이라이트 PRD)을 기존 P0-P3 로드맵과 상업화 트랙 위에 겹쳐 정리한 P3.5~P5 통합 로드맵 |
 | [Cursor AI가 본 다음 일정](report/2026-07-19-cursor-ai-next-plan.html) | 실행 계획 | 전체 문서·코드 교차 검토 기반 4주 로드맵 — 즉시 복구, 회귀 테스트, 실장비 내구 검증, 확장 준비 |
 | [README](../README.md) | 현행 | 프로젝트 개요, 실행 방법, 날짜별 변경 이력 |
 | [개발 현황 (STATUS)](STATUS.md) | 현행 | 완료(실장비 검증)/진행 중/미착수 구분과 단기 일정 — 2026-07-19 기준 |
@@ -37,10 +38,14 @@
 | [중간보고서 — 상업화 로드맵](spec/중간보고서-상업화로드맵.html) | 07-10 | 현행 | 완료/미착수 현황, login.md 아키텍처 결정 사항, 상업화 로드맵, 7/17까지 할 일 (claude.ai 아티팩트 이관) |
 | [OnAir Connect — 초기 구상 대화록](spec/OnAir_Connect_초기구상.md) | 07-04 이전 | 기원 문서 | 상업화 방향을 처음 논의한 원본 대화 — 아래 리포트·제안서·login.md의 출발점 |
 | [vMix 사용자 불편사항 분석](spec/vMix_사용자_불편사항_분석_리포트.md) | 07-04 | 리서치 | 리뷰·포럼 정성 분석 — 상업화 기획 근거 자료 |
+| [vMix 최신 트렌드 및 사용자 이슈 분석](spec/vMix_트렌드_및_사용자이슈_분석.md) | 07-22 | 리서치 | 07-04 리포트 후속판 — vMix 27→29 버전 트렌드, 국내 사용처·총판 현황 보강 조사 |
 | OnAir_Connect_제안서.pptx | 07-10 | 제안서 | 상업화 제품(OnAir Connect) 제안 덱 — `doc/spec/` (바이너리, 파워포인트로 열기) |
 | [Expansion_PRD.md](spec/Expansion_PRD.md) | v1.0 · 07-10 | 진행 중 | Videohub→VMU→AMU 장비 확장 — Phase 1 실장비 검증 완료 |
 | [Live.md](spec/Live.md) | v0.1 · 07-01 | 부분 구현 | 시사교양 라이브 제작 큐시트 기획 (MARS 제작 큐시트 탭의 근거) |
 | [Cuesheet-UI.md](spec/Cuesheet-UI.md) | 07-01 | 부분 구현 | 제작 큐시트 3패널 UI/UX 설계 (Live.md 하위 문서) |
+| [vMix 자동 샷전환 PRD](spec/vMix_자동샷전환_PRD.md) | Draft v0.1 · 07-22 | 기획 단계 | 마이크 레벨 기반 자동/반자동 카메라 컷 전환 — 시사 토크쇼(4캠 갈라치기) 적용 사례 포함, [통합 로드맵](report/2026-07-23-vmix-integration-direction.html)에서 P4로 배치 |
+| [오디오 기사 하이라이트 PRD](spec/오디오_기사_하이라이트_PRD.md) | Draft v0.1 · 07-22 | 기획 단계 | 실시간 STT로 진행자 낭독 위치를 원문 기사에서 추정·하이라이트 — STT 엔진 비교(Vosk/RTZR/클로바) 포함, [통합 로드맵](report/2026-07-23-vmix-integration-direction.html)에서 P5로 배치 |
+| [Whisper 기반 오디오 하이라이트 PoC](spec/Whisper/README.md) | 07-23 | 프로토타입 | 위 PRD §7-3-3 경로(faster-whisper)를 그대로 구현한 CLI 프로토타입 — 판정 로직 구현 완료, 실장비(마이크·인터넷) 검증 대기 |
 
 ## 🔧 설정 · 연동 가이드 (`doc/guide/`)
 
