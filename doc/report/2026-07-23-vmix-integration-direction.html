@@ -108,8 +108,9 @@
   .check{position:relative;padding:13px 16px 13px 47px;border:1px solid var(--line);border-radius:9px;background:var(--paper);font-size:13.5px}
   .check:before{counter-increment:item;content:counter(item);position:absolute;left:14px;top:12px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);font:800 10px/1 var(--mono);color:var(--amber-ink)}
   .src-list{display:grid;gap:8px;margin:18px 0}
-  .src{padding:11px 15px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:var(--paper)}
-  .src b{display:block;font-size:13.5px;margin-bottom:2px}
+  .src{display:block;padding:11px 15px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:var(--paper);text-decoration:none;color:inherit;transition:border-color .12s,transform .12s}
+  .src:hover{border-color:var(--amber);transform:translateX(2px)}
+  .src b{display:block;font-size:13.5px;margin-bottom:2px;color:var(--amber-ink)}
   .src span{color:var(--faint);font:11px/1.4 var(--mono)}
   footer{margin-top:76px;padding-top:22px;border-top:1px solid var(--line);font:11px/1.7 var(--mono);color:var(--faint)}
   @media(max-width:900px){.sidebar{display:none}main{margin:auto;padding:48px 23px 90px}}
@@ -142,7 +143,7 @@
     <p class="lede">
       최근 <code>doc/</code>에 들어온 3개 문서 — vMix 최신 트렌드·이슈 분석, 마이크 레벨 기반 자동 샷전환 PRD,
       오디오 인식 기반 기사 하이라이트 PRD — 를 <a href="../report/2026-07-19-cursor-ai-next-plan.html">기존 안정화 로드맵</a>과
-      <a href="../spec/OnAir_Connect_초기구상.md">상업화 기획</a> 위에 겹쳐 놓고, 이 프로젝트의
+      <a href="../viewer.html?file=spec/OnAir_Connect_초기구상.md">상업화 기획</a> 위에 겹쳐 놓고, 이 프로젝트의
       "vMix 연동 프로그램"이 실제로 어느 방향을 향해야 하는지 정리한 문서다.
     </p>
 
@@ -164,7 +165,7 @@
         <article class="signal">
           <div class="num">01 · 상황 인식</div>
           <h3>vMix 트렌드·이슈 분석</h3>
-          <p><a href="../spec/vMix_사용자_불편사항_분석_리포트.md">2026-07-04 리포트</a>의 후속판. vMix 27→29 버전 흐름과 국내 사용처를 보강했지만, 새로운 불편사항 발견보다는 "07-04 리포트의 가설이 아직 유효한가"를 재확인하는 성격이 강하다. 문서 스스로도 포럼 로그인 제약으로 조사가 제한적이었다고 밝힌다.</p>
+          <p><a href="../viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md">2026-07-04 리포트</a>의 후속판. vMix 27→29 버전 흐름과 국내 사용처를 보강했지만, 새로운 불편사항 발견보다는 "07-04 리포트의 가설이 아직 유효한가"를 재확인하는 성격이 강하다. 문서 스스로도 포럼 로그인 제약으로 조사가 제한적이었다고 밝힌다.</p>
         </article>
         <article class="signal">
           <div class="num">02 · 신규 PRD (사내 우선)</div>
@@ -191,7 +192,7 @@
     <section id="tracks">
       <h2>두 갈래로 갈라지는 지점</h2>
       <p>
-        <a href="../spec/OnAir_Connect_초기구상.md">OnAir Connect 초기 구상</a>이 이미 정확히 짚었다 —
+        <a href="../viewer.html?file=spec/OnAir_Connect_초기구상.md">OnAir Connect 초기 구상</a>이 이미 정확히 짚었다 —
         "지금 개발 중인 코어 엔진(vMix API 연동부)에 타겟별 프리셋/UI 레이어만 얹으면 하나의 코드베이스로 여러 시장을 커버할 수 있다."
         이 프로젝트는 실제로 <b>하나의 코어</b>와 <b>두 개의 소비처</b>로 이루어져 있다.
       </p>
@@ -205,7 +206,7 @@
         <article class="track">
           <span class="who">TRACK 2 · 상업화 (OnAir Connect)</span>
           <h3>교회·학교·유튜버 대상 제품</h3>
-          <p>원격 접속 간소화·설정 없는 자동 컨트롤 패널이 핵심 차별화. <a href="../spec/중간보고서-상업화로드맵.html">중간보고서</a>·<a href="../spec/login.md">login.md</a>가 이미 별도 로드맵을 갖고 있다.</p>
+          <p>원격 접속 간소화·설정 없는 자동 컨트롤 패널이 핵심 차별화. <a href="../spec/중간보고서-상업화로드맵.html">중간보고서</a>·<a href="../viewer.html?file=spec/login.md">login.md</a>가 이미 별도 로드맵을 갖고 있다.</p>
           <p><b>이번 3문서 중 이 트랙 소관</b>: vMix 트렌드·이슈 분석(포지셔닝 갱신), 자동 샷전환의 "개인 유튜버용 저가 버전" 원안.</p>
         </article>
       </div>
@@ -300,7 +301,7 @@
       <h2>Track 2(상업화)와의 관계 — 대체가 아니라 병행</h2>
       <p>
         P4~P5는 전부 Track 1(사내) 소관이다. Track 2(OnAir Connect) 상업화는 이미 <a href="../spec/중간보고서-상업화로드맵.html">별도 로드맵 A~F</a>와
-        <a href="../spec/login.md">login.md</a>의 백엔드 스택 결정을 축으로 진행 중이며, 이 문서가 그 순서를 바꾸지 않는다.
+        <a href="../viewer.html?file=spec/login.md">login.md</a>의 백엔드 스택 결정을 축으로 진행 중이며, 이 문서가 그 순서를 바꾸지 않는다.
       </p>
       <p>이번 트렌드·이슈 분석 문서가 Track 2에 실제로 기여하는 것은 두 가지뿐이다.</p>
       <ul>
@@ -309,7 +310,7 @@
       </ul>
       <div class="callout buy">
         <span class="tag">자동 샷전환의 Track 2 이식 여지</span>
-        PRD 원안이 "개인 유튜버용 저가 자동 스위칭"에서 출발했으므로(<a href="../spec/OnAir_Connect_초기구상.md">초기 구상 대화록</a> 참고), P4에서 Track 1용으로 구현할 때 카메라-마이크 매핑과 판정 로직을 <b>MARS 아이템 편집창 UI와 분리 가능한 형태</b>로 짜두면, Track 2 착수 시점에 같은 판정 엔진을 재사용해 UI 레이어만 새로 씌울 수 있다. 지금 단계에서 Track 2를 동시에 만들 필요는 없다 — 재사용 가능한 경계만 지켜두면 된다.
+        PRD 원안이 "개인 유튜버용 저가 자동 스위칭"에서 출발했으므로(<a href="../viewer.html?file=spec/OnAir_Connect_초기구상.md">초기 구상 대화록</a> 참고), P4에서 Track 1용으로 구현할 때 카메라-마이크 매핑과 판정 로직을 <b>MARS 아이템 편집창 UI와 분리 가능한 형태</b>로 짜두면, Track 2 착수 시점에 같은 판정 엔진을 재사용해 UI 레이어만 새로 씌울 수 있다. 지금 단계에서 Track 2를 동시에 만들 필요는 없다 — 재사용 가능한 경계만 지켜두면 된다.
       </div>
     </section>
 
@@ -368,20 +369,20 @@
     <section id="sources">
       <h2>근거 문서</h2>
       <div class="src-list">
-        <div class="src"><b>vMix 최신 트렌드 및 사용자 이슈 분석</b><span>doc/spec/vMix_트렌드_및_사용자이슈_분석.md · 2026-07-22</span></div>
-        <div class="src"><b>PRD: vMix 마이크 레벨 기반 자동 샷 전환</b><span>doc/spec/vMix_자동샷전환_PRD.md · 2026-07-22 · Draft v0.1</span></div>
-        <div class="src"><b>실시간 오디오 인식 기반 기사 하이라이트 PRD</b><span>doc/spec/오디오_기사_하이라이트_PRD.md · 2026-07-22 · Draft v0.1</span></div>
-        <div class="src"><b>오디오 하이라이트 PoC (Whisper 기반)</b><span>doc/spec/Whisper/ · faster-whisper + fuzzy matcher, CLI 프로토타입 — 실장비 검증 대기</span></div>
-        <div class="src"><b>Cursor AI가 본 다음 일정</b><span>doc/report/2026-07-19-cursor-ai-next-plan.html · P0-P3 안정화 로드맵</span></div>
-        <div class="src"><b>vMix 사용자 불편사항 분석 리포트</b><span>doc/spec/vMix_사용자_불편사항_분석_리포트.md · 2026-07-04</span></div>
-        <div class="src"><b>OnAir Connect — 초기 구상 대화록</b><span>doc/spec/OnAir_Connect_초기구상.md</span></div>
-        <div class="src"><b>중간보고서 — 상업화 로드맵</b><span>doc/spec/중간보고서-상업화로드맵.html</span></div>
+        <a class="src" href="../viewer.html?file=spec/vMix_트렌드_및_사용자이슈_분석.md"><b>vMix 최신 트렌드 및 사용자 이슈 분석</b><span>doc/spec/vMix_트렌드_및_사용자이슈_분석.md · 2026-07-22</span></a>
+        <a class="src" href="../viewer.html?file=spec/vMix_자동샷전환_PRD.md"><b>PRD: vMix 마이크 레벨 기반 자동 샷 전환</b><span>doc/spec/vMix_자동샷전환_PRD.md · 2026-07-22 · Draft v0.1</span></a>
+        <a class="src" href="../viewer.html?file=spec/오디오_기사_하이라이트_PRD.md"><b>실시간 오디오 인식 기반 기사 하이라이트 PRD</b><span>doc/spec/오디오_기사_하이라이트_PRD.md · 2026-07-22 · Draft v0.1</span></a>
+        <a class="src" href="../viewer.html?file=spec/Whisper/README.md"><b>오디오 하이라이트 PoC (Whisper 기반)</b><span>doc/spec/Whisper/README.md · faster-whisper + fuzzy matcher, CLI 프로토타입 — 실장비 검증 대기</span></a>
+        <a class="src" href="../report/2026-07-19-cursor-ai-next-plan.html"><b>Cursor AI가 본 다음 일정</b><span>doc/report/2026-07-19-cursor-ai-next-plan.html · P0-P3 안정화 로드맵</span></a>
+        <a class="src" href="../viewer.html?file=spec/vMix_사용자_불편사항_분석_리포트.md"><b>vMix 사용자 불편사항 분석 리포트</b><span>doc/spec/vMix_사용자_불편사항_분석_리포트.md · 2026-07-04</span></a>
+        <a class="src" href="../viewer.html?file=spec/OnAir_Connect_초기구상.md"><b>OnAir Connect — 초기 구상 대화록</b><span>doc/spec/OnAir_Connect_초기구상.md</span></a>
+        <a class="src" href="../spec/중간보고서-상업화로드맵.html"><b>중간보고서 — 상업화 로드맵</b><span>doc/spec/중간보고서-상업화로드맵.html</span></a>
       </div>
     </section>
 
     <footer>
       신규 기획 3종 + 기존 로드맵 교차 분석 · 2026-07-23<br>
-      <a href="../STATUS.md">개발 현황</a> · <a href="../README.md">문서 인덱스</a> · <a href="../index.html">문서 허브</a>
+      <a href="../viewer.html?file=STATUS.md">개발 현황</a> · <a href="../viewer.html?file=README.md">문서 인덱스</a> · <a href="../index.html">문서 허브</a>
     </footer>
   </main>
 </div>
